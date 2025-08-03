@@ -242,7 +242,8 @@
             border: 1px solid var(--cor-destaque);
             margin-bottom: 15px;
             position: relative;
-            background-color: var(--cor-secundaria);
+            background-color: var(--cor-principal);
+            color: var(--cor-secundaria);
             border-radius: 10px;
             box-shadow: 0 0 15px rgba(0,0,0,0.1);
         }
@@ -260,7 +261,7 @@
         }
 
         .recibo-header h3 {
-            color: var(--cor-principal);
+            color: var(--cor-secundaria);
             text-transform: uppercase;
             letter-spacing: 1px;
             font-size: 1.2em;
@@ -269,7 +270,7 @@
         /* Novo estilo para o corpo do recibo com caixas */
         .recibo-body {
             padding: 15px;
-            border-bottom: 1px dashed #ccc;
+            border-bottom: 1px dashed #555;
             margin-bottom: 15px;
         }
         
@@ -280,22 +281,22 @@
         }
         
         .recibo-info-box {
-            border: 1px solid #ccc;
+            border: 1px solid #555;
             padding: 8px 12px;
             border-radius: 5px;
-            background-color: #f9f9f9;
+            background-color: rgba(255, 255, 255, 0.1);
         }
         
         .recibo-info-box h4 {
             font-size: 0.8em;
-            color: #555;
+            color: #aaa;
             margin-bottom: 3px;
         }
         
         .recibo-info-box p {
             font-size: 0.9em;
             font-weight: bold;
-            color: var(--cor-principal);
+            color: var(--cor-secundaria);
         }
         
         .recibo-assinatura {
@@ -313,13 +314,13 @@
         
         .recibo-assinatura p {
             font-size: 0.9em;
-            color: var(--cor-principal);
+            color: var(--cor-secundaria);
             margin-top: 5px;
         }
 
         /* Estilo do rodapé do recibo */
         .recibo-footer {
-            background-color: var(--cor-principal);
+            background-color: #111;
             color: var(--cor-secundaria);
             padding: 10px;
             border-radius: 0 0 10px 10px;
@@ -361,24 +362,31 @@
                 position: absolute;
                 left: 0;
                 top: 0;
+                width: 100%;
+                height: 100%;
+                background-color: white;
             }
             #modal-view-recibo .modal-content {
                 width: 21cm;
                 margin: 0;
                 padding: 1cm;
                 box-shadow: none;
-                background-color: #fff;
+                background-color: var(--cor-principal);
+                color: var(--cor-secundaria);
             }
             #btn-download-pdf, .close-btn {
                 display: none;
             }
             .recibo-footer {
-                background-color: var(--cor-principal) !important;
+                background-color: #111 !important;
                 -webkit-print-color-adjust: exact;
                 color-adjust: exact;
             }
             #recibo-content {
-                background-color: #fff !important;
+                background-color: var(--cor-principal) !important;
+                color: var(--cor-secundaria) !important;
+                border: none;
+                box-shadow: none;
             }
             #recibo-content img[src] {
                 -webkit-print-color-adjust: exact;
@@ -872,8 +880,8 @@
             }
             
             const conteudo = `
-                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;">
-                    ${empresaConfig.background ? `<img src="${empresaConfig.background}" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.1;"/>` : ''}
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background-color: #000;">
+                    ${empresaConfig.background ? `<img src="${empresaConfig.background}" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.2;"/>` : ''}
                 </div>
                 <div class="recibo-header">
                     ${empresaConfig.logo ? `<img src="${empresaConfig.logo}" alt="Logo da Empresa">` : ''}
@@ -938,7 +946,8 @@
                 scale: 2,
                 logging: false,
                 useCORS: true,
-                allowTaint: true
+                allowTaint: true,
+                backgroundColor: '#000'
             }).then((canvas) => {
                 const imgData = canvas.toDataURL('image/png');
                 const imgWidth = doc.internal.pageSize.getWidth() - 40;
