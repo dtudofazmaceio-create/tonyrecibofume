@@ -242,8 +242,7 @@
             border: 1px solid var(--cor-destaque);
             margin-bottom: 15px;
             position: relative;
-            background-color: var(--cor-principal);
-            color: var(--cor-secundaria);
+            background-color: var(--cor-secundaria);
             border-radius: 10px;
             box-shadow: 0 0 15px rgba(0,0,0,0.1);
         }
@@ -261,7 +260,7 @@
         }
 
         .recibo-header h3 {
-            color: var(--cor-secundaria);
+            color: var(--cor-principal);
             text-transform: uppercase;
             letter-spacing: 1px;
             font-size: 1.2em;
@@ -270,7 +269,7 @@
         /* Novo estilo para o corpo do recibo com caixas */
         .recibo-body {
             padding: 15px;
-            border-bottom: 1px dashed #555;
+            border-bottom: 1px dashed #ccc;
             margin-bottom: 15px;
         }
         
@@ -281,22 +280,22 @@
         }
         
         .recibo-info-box {
-            border: 1px solid #555;
+            border: 1px solid #ccc;
             padding: 8px 12px;
             border-radius: 5px;
-            background-color: rgba(255, 255, 255, 0.1);
+            background-color: #f9f9f9;
         }
         
         .recibo-info-box h4 {
             font-size: 0.8em;
-            color: #aaa;
+            color: #555;
             margin-bottom: 3px;
         }
         
         .recibo-info-box p {
             font-size: 0.9em;
             font-weight: bold;
-            color: var(--cor-secundaria);
+            color: var(--cor-principal);
         }
         
         .recibo-assinatura {
@@ -314,13 +313,13 @@
         
         .recibo-assinatura p {
             font-size: 0.9em;
-            color: var(--cor-secundaria);
+            color: var(--cor-principal);
             margin-top: 5px;
         }
 
         /* Estilo do rodapé do recibo */
         .recibo-footer {
-            background-color: #111;
+            background-color: var(--cor-principal);
             color: var(--cor-secundaria);
             padding: 10px;
             border-radius: 0 0 10px 10px;
@@ -362,31 +361,24 @@
                 position: absolute;
                 left: 0;
                 top: 0;
-                width: 100%;
-                height: 100%;
-                background-color: white;
             }
             #modal-view-recibo .modal-content {
                 width: 21cm;
                 margin: 0;
                 padding: 1cm;
                 box-shadow: none;
-                background-color: var(--cor-principal);
-                color: var(--cor-secundaria);
+                background-color: #fff;
             }
             #btn-download-pdf, .close-btn {
                 display: none;
             }
             .recibo-footer {
-                background-color: #111 !important;
+                background-color: var(--cor-principal) !important;
                 -webkit-print-color-adjust: exact;
                 color-adjust: exact;
             }
             #recibo-content {
-                background-color: var(--cor-principal) !important;
-                color: var(--cor-secundaria) !important;
-                border: none;
-                box-shadow: none;
+                background-color: #fff !important;
             }
             #recibo-content img[src] {
                 -webkit-print-color-adjust: exact;
@@ -567,13 +559,13 @@
     </div>
     
     <footer>
-        <p>Desenvolvendor - Alex Pixoto - (82)99662-2036</p>
+        <p>Desenvolvedor - Alex Peixoto - (82)99662-2036</p>
     </footer>
 
+    <script src="https://unpkg.com/@danielgatis/rembg-browser"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script>
-        // Variáveis globais
         const btnConfig = document.getElementById('btn-config');
         const btnAddRecibo = document.getElementById('btn-add-recibo');
         const btnAddCliente = document.getElementById('btn-add-cliente');
@@ -594,9 +586,15 @@
         const tabelaClientesBody = document.querySelector('#tabela-clientes tbody');
         const reciboContent = document.getElementById('recibo-content');
         const loadingMessage = document.getElementById('loading-message');
-        const logoElement = document.getElementById('logo');
 
-        // Dados iniciais
+        let rembgInstance = null;
+        async function loadRembg() {
+            loadingMessage.textContent = 'Carregando removedor de fundo...';
+            loadingMessage.style.display = 'block';
+            rembgInstance = await rembg.load();
+            loadingMessage.style.display = 'none';
+        }
+
         let empresaConfig = JSON.parse(localStorage.getItem('empresaConfig')) || {
             cnpj: '13.949.583/0001-32',
             instagram: '@tonyfume',
@@ -611,7 +609,6 @@
         let proximoReciboId = recibos.length > 0 ? Math.max(...recibos.map(r => r.id)) + 1 : 1;
         let proximoClienteId = clientes.length > 0 ? Math.max(...clientes.map(c => c.id)) + 1 : 1;
         
-        // Funções auxiliares
         function abrirModal(modal) {
             modal.style.display = 'block';
         }
@@ -636,18 +633,13 @@
             return parseFloat(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
 
-        function formatarData(dataString) {
-            const data = new Date(dataString);
-            return data.toLocaleDateString('pt-BR');
-        }
-
-        // Funções de configuração
         function carregarConfiguracoes() {
             document.getElementById('config-cnpj').value = empresaConfig.cnpj || '';
             document.getElementById('config-instagram').value = empresaConfig.instagram || '';
             document.getElementById('config-endereco').value = empresaConfig.endereco || '';
             document.getElementById('config-whatsapp').value = empresaConfig.whatsapp || '';
 
+            const logoElement = document.getElementById('logo');
             if (empresaConfig.logo) {
                 logoElement.src = empresaConfig.logo;
                 logoElement.style.display = 'block';
@@ -667,82 +659,52 @@
             fecharModal(modalConfig);
         }
 
-        function processarImagem(file, callback) {
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const img = new Image();
-                img.onload = function() {
-                    // Redimensionar a imagem se for muito grande
-                    const MAX_WIDTH = 800;
-                    const MAX_HEIGHT = 800;
-                    let width = img.width;
-                    let height = img.height;
+        formConfig.addEventListener('submit', (e) => {
+            e.preventDefault();
+            salvarConfiguracoes();
+        });
 
-                    if (width > height) {
-                        if (width > MAX_WIDTH) {
-                            height *= MAX_WIDTH / width;
-                            width = MAX_WIDTH;
-                        }
-                    } else {
-                        if (height > MAX_HEIGHT) {
-                            width *= MAX_HEIGHT / height;
-                            height = MAX_HEIGHT;
-                        }
-                    }
-
-                    const canvas = document.createElement('canvas');
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-
-                    // Converter para base64
-                    const base64String = canvas.toDataURL('image/png');
-                    callback(base64String);
-                };
-                img.src = event.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-
-        // Event listeners para upload de imagens
-        document.getElementById('config-logo').addEventListener('change', function(e) {
+        document.getElementById('config-logo').addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (file) {
-                loadingMessage.textContent = 'Processando logo...';
+                loadingMessage.textContent = 'Removendo o fundo da imagem...';
                 loadingMessage.style.display = 'block';
                 
-                processarImagem(file, function(base64String) {
-                    empresaConfig.logo = base64String;
-                    loadingMessage.style.display = 'none';
-                    salvarConfiguracoes();
-                });
+                const reader = new FileReader();
+                reader.onload = async (event) => {
+                    const img = new Image();
+                    img.onload = async () => {
+                        if (!rembgInstance) {
+                            await loadRembg();
+                        }
+                        const output = await rembgInstance.remove(img);
+                        empresaConfig.logo = output.toDataURL('image/png');
+                        loadingMessage.style.display = 'none';
+                        salvarConfiguracoes();
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
             }
         });
 
-        document.getElementById('config-background').addEventListener('change', function(e) {
+        document.getElementById('config-background').addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
-                loadingMessage.textContent = 'Processando plano de fundo...';
-                loadingMessage.style.display = 'block';
-                
-                processarImagem(file, function(base64String) {
-                    empresaConfig.background = base64String;
-                    loadingMessage.style.display = 'none';
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    empresaConfig.background = event.target.result;
                     salvarConfiguracoes();
-                });
+                };
+                reader.readAsDataURL(file);
             }
         });
         
-        // Funções para recibos
         function renderizarRecibos() {
             tabelaRecibosBody.innerHTML = '';
             let valorTotal = 0;
             
-            // Ordenar recibos por data (do mais recente para o mais antigo)
-            const recibosOrdenados = [...recibos].sort((a, b) => new Date(b.data) - new Date(a.data));
-            
-            recibosOrdenados.forEach(recibo => {
+            recibos.forEach(recibo => {
                 const cliente = clientes.find(c => c.id === recibo.clienteId);
                 if (!cliente) return;
                 
@@ -753,7 +715,7 @@
                     <td>${recibo.id}</td>
                     <td>${cliente.nome}</td>
                     <td>${formatarMoeda(recibo.valor)}</td>
-                    <td>${formatarData(recibo.data)}</td>
+                    <td>${recibo.data}</td>
                     <td>
                         <button class="btn-acao" onclick="visualizarRecibo(${recibo.id})"><i class="fas fa-eye"></i></button>
                         <button class="btn-acao" onclick="editarRecibo(${recibo.id})"><i class="fas fa-edit"></i></button>
@@ -767,43 +729,6 @@
             document.getElementById('valor-total').textContent = formatarMoeda(valorTotal);
         }
 
-        function salvarRecibo(recibo) {
-            const index = recibos.findIndex(r => r.id === recibo.id);
-            if (index > -1) {
-                recibos[index] = recibo;
-            } else {
-                recibo.id = proximoReciboId++;
-                recibos.push(recibo);
-            }
-            localStorage.setItem('recibos', JSON.stringify(recibos));
-            renderizarRecibos();
-            return recibo.id;
-        }
-
-        function editarRecibo(id) {
-            const recibo = recibos.find(r => r.id === id);
-            if (!recibo) return;
-            
-            document.getElementById('modal-recibo-titulo').textContent = 'Editar Recibo';
-            document.getElementById('recibo-id-edicao').value = recibo.id;
-            document.getElementById('recibo-cliente').value = recibo.clienteId;
-            document.getElementById('recibo-servico').value = recibo.servico;
-            document.getElementById('recibo-valor').value = recibo.valor;
-            document.getElementById('recibo-data').value = recibo.data;
-            document.getElementById('btn-salvar-recibo').textContent = 'Atualizar Recibo';
-            
-            abrirModal(modalRecibo);
-        }
-        
-        function excluirRecibo(id) {
-            if (confirm('Tem certeza que deseja excluir este recibo?')) {
-                recibos = recibos.filter(r => r.id !== id);
-                localStorage.setItem('recibos', JSON.stringify(recibos));
-                renderizarRecibos();
-            }
-        }
-
-        // Funções para clientes
         function renderizarClientes() {
             tabelaClientesBody.innerHTML = '';
             const selectClienteRecibo = document.getElementById('recibo-cliente');
@@ -827,6 +752,19 @@
                 selectClienteRecibo.appendChild(option);
             });
         }
+        
+        function salvarRecibo(recibo) {
+            const index = recibos.findIndex(r => r.id === recibo.id);
+            if (index > -1) {
+                recibos[index] = recibo;
+            } else {
+                recibo.id = proximoReciboId++;
+                recibos.push(recibo);
+            }
+            localStorage.setItem('recibos', JSON.stringify(recibos));
+            renderizarRecibos();
+            return recibo.id;
+        }
 
         function salvarCliente(cliente) {
             const index = clientes.findIndex(c => c.id === cliente.id);
@@ -841,47 +779,133 @@
             fecharModal(modalCliente);
         }
         
+        formRecibo.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const recibo = {
+                id: document.getElementById('recibo-id-edicao').value ? parseInt(document.getElementById('recibo-id-edicao').value) : null,
+                clienteId: parseInt(document.getElementById('recibo-cliente').value),
+                servico: document.getElementById('recibo-servico').value,
+                valor: parseFloat(document.getElementById('recibo-valor').value),
+                data: document.getElementById('recibo-data').value,
+            };
+            const novoId = salvarRecibo(recibo);
+            e.target.reset();
+            fecharModal(modalRecibo);
+            
+            if (novoId) {
+                visualizarRecibo(novoId, true);
+            }
+        });
+
+        function baixarReciboPdf() {
+            window.jsPDF = window.jspdf.jsPDF;
+            const doc = new jsPDF('p', 'pt', 'a4');
+            const element = document.getElementById('recibo-content');
+            
+            html2canvas(element, { scale: 2 }).then((canvas) => {
+                const imgData = canvas.toDataURL('image/png');
+                const imgWidth = 595.28;
+                const pageHeight = 841.89;
+                const margin = 20;
+                
+                const imgHeight = (canvas.height * (imgWidth - (2 * margin))) / canvas.width;
+                
+                doc.addImage(imgData, 'PNG', margin, margin, imgWidth - (2 * margin), imgHeight);
+
+                doc.save('recibo.pdf');
+                fecharModal(modalViewRecibo);
+            });
+        }
+        
+        formCliente.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const cliente = {
+                id: document.getElementById('cliente-id-edicao').value ? parseInt(document.getElementById('cliente-id-edicao').value) : null,
+                nome: document.getElementById('cliente-nome').value,
+                telefone: document.getElementById('cliente-telefone').value,
+            };
+            salvarCliente(cliente);
+            e.target.reset();
+        });
+
+        function editarRecibo(id) {
+            const recibo = recibos.find(r => r.id === id);
+            if (!recibo) return;
+            document.getElementById('modal-recibo-titulo').textContent = 'Editar Recibo';
+            document.getElementById('recibo-id-edicao').value = recibo.id;
+            document.getElementById('recibo-cliente').value = recibo.clienteId;
+            document.getElementById('recibo-servico').value = recibo.servico;
+            document.getElementById('recibo-valor').value = recibo.valor;
+            document.getElementById('recibo-data').value = recibo.data;
+            document.getElementById('btn-salvar-recibo').textContent = 'Salvar Recibo';
+            const formReciboSubmitHandler = (e) => {
+                e.preventDefault();
+                const reciboEditado = {
+                    id: parseInt(document.getElementById('recibo-id-edicao').value),
+                    clienteId: parseInt(document.getElementById('recibo-cliente').value),
+                    servico: document.getElementById('recibo-servico').value,
+                    valor: parseFloat(document.getElementById('recibo-valor').value),
+                    data: document.getElementById('recibo-data').value,
+                };
+                salvarRecibo(reciboEditado);
+                fecharModal(modalRecibo);
+                formRecibo.removeEventListener('submit', formReciboSubmitHandler);
+                formRecibo.addEventListener('submit', formReciboDefaultHandler);
+            };
+            const formReciboDefaultHandler = (e) => {
+                e.preventDefault();
+                const recibo = {
+                    id: document.getElementById('recibo-id-edicao').value ? parseInt(document.getElementById('recibo-id-edicao').value) : null,
+                    clienteId: parseInt(document.getElementById('recibo-cliente').value),
+                    servico: document.getElementById('recibo-servico').value,
+                    valor: parseFloat(document.getElementById('recibo-valor').value),
+                    data: document.getElementById('recibo-data').value,
+                };
+                const novoId = salvarRecibo(recibo);
+                e.target.reset();
+                fecharModal(modalRecibo);
+                if (novoId) {
+                    visualizarRecibo(novoId, true);
+                }
+            };
+            formRecibo.removeEventListener('submit', formReciboDefaultHandler);
+            formRecibo.addEventListener('submit', formReciboSubmitHandler);
+            abrirModal(modalRecibo);
+        }
+        
+        function excluirRecibo(id) {
+            if (confirm('Tem certeza que deseja excluir este recibo?')) {
+                recibos = recibos.filter(r => r.id !== id);
+                localStorage.setItem('recibos', JSON.stringify(recibos));
+                renderizarRecibos();
+            }
+        }
+        
         function editarCliente(id) {
             const cliente = clientes.find(c => c.id === id);
             if (!cliente) return;
-            
             document.getElementById('modal-cliente-titulo').textContent = 'Editar Cliente';
             document.getElementById('cliente-id-edicao').value = cliente.id;
             document.getElementById('cliente-nome').value = cliente.nome;
             document.getElementById('cliente-telefone').value = cliente.telefone;
-            
             abrirModal(modalCliente);
         }
         
         function excluirCliente(id) {
             if (confirm('Tem certeza que deseja excluir este cliente?')) {
-                // Verificar se o cliente está associado a algum recibo
-                const reciboAssociado = recibos.some(r => r.clienteId === id);
-                
-                if (reciboAssociado) {
-                    alert('Este cliente possui recibos associados e não pode ser excluído.');
-                    return;
-                }
-                
                 clientes = clientes.filter(c => c.id !== id);
                 localStorage.setItem('clientes', JSON.stringify(clientes));
                 renderizarClientes();
             }
         }
 
-        // Visualização e download de recibos
         function visualizarRecibo(id, baixarAutomaticamente = false) {
             const recibo = recibos.find(r => r.id === id);
             const cliente = clientes.find(c => c.id === recibo.clienteId);
             
-            if (!recibo || !cliente) {
-                alert('Recibo ou cliente não encontrado!');
-                return;
-            }
-            
             const conteudo = `
-                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background-color: #000;">
-                    ${empresaConfig.background ? `<img src="${empresaConfig.background}" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.2;"/>` : ''}
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;">
+                    ${empresaConfig.background ? `<img src="${empresaConfig.background}" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.1;"/>` : ''}
                 </div>
                 <div class="recibo-header">
                     ${empresaConfig.logo ? `<img src="${empresaConfig.logo}" alt="Logo da Empresa">` : ''}
@@ -903,7 +927,7 @@
                         </div>
                         <div class="recibo-info-box">
                             <h4>Data:</h4>
-                            <p>${formatarData(recibo.data)}</p>
+                            <p>${new Date(recibo.data).toLocaleDateString('pt-BR')}</p>
                         </div>
                     </div>
                     
@@ -928,7 +952,6 @@
                     <p>${empresaConfig.endereco}</p>
                 </div>
             `;
-            
             reciboContent.innerHTML = conteudo;
             abrirModal(modalViewRecibo);
 
@@ -937,124 +960,35 @@
             }
         }
 
-        function baixarReciboPdf() {
-            window.jsPDF = window.jspdf.jsPDF;
-            const doc = new jsPDF('p', 'pt', 'a4');
-            const element = document.getElementById('recibo-content');
-            
-            html2canvas(element, { 
-                scale: 2,
-                logging: false,
-                useCORS: true,
-                allowTaint: true,
-                backgroundColor: '#000'
-            }).then((canvas) => {
-                const imgData = canvas.toDataURL('image/png');
-                const imgWidth = doc.internal.pageSize.getWidth() - 40;
-                const pageHeight = doc.internal.pageSize.getHeight();
-                const margin = 20;
-                
-                const imgHeight = (canvas.height * imgWidth) / canvas.width;
-                
-                let heightLeft = imgHeight;
-                let position = margin;
-                
-                doc.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
-                heightLeft -= pageHeight;
-                
-                // Se a imagem for muito alta, adicionar novas páginas
-                while (heightLeft >= 0) {
-                    position = heightLeft - imgHeight;
-                    doc.addPage();
-                    doc.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
-                    heightLeft -= pageHeight;
-                }
-                
-                doc.save(`recibo-${new Date().toISOString().slice(0,10)}.pdf`);
-                fecharModal(modalViewRecibo);
-            }).catch(err => {
-                console.error('Erro ao gerar PDF:', err);
-                alert('Ocorreu um erro ao gerar o PDF. Por favor, tente novamente.');
-            });
-        }
+        btnDownloadPdf.onclick = baixarReciboPdf;
 
-        // Event listeners principais
-        formConfig.addEventListener('submit', function(e) {
-            e.preventDefault();
-            salvarConfiguracoes();
-        });
-
-        formRecibo.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const recibo = {
-                id: document.getElementById('recibo-id-edicao').value ? parseInt(document.getElementById('recibo-id-edicao').value) : null,
-                clienteId: parseInt(document.getElementById('recibo-cliente').value),
-                servico: document.getElementById('recibo-servico').value,
-                valor: parseFloat(document.getElementById('recibo-valor').value),
-                data: document.getElementById('recibo-data').value,
-            };
-            
-            const novoId = salvarRecibo(recibo);
-            formRecibo.reset();
-            fecharModal(modalRecibo);
-            
-            if (novoId) {
-                visualizarRecibo(novoId, true);
+        btnConfig.addEventListener('click', () => {
+            abrirModal(modalConfig);
+            if (!rembgInstance) {
+                loadRembg();
             }
         });
 
-        formCliente.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const cliente = {
-                id: document.getElementById('cliente-id-edicao').value ? parseInt(document.getElementById('cliente-id-edicao').value) : null,
-                nome: document.getElementById('cliente-nome').value,
-                telefone: document.getElementById('cliente-telefone').value,
-            };
-            
-            salvarCliente(cliente);
-            formCliente.reset();
-        });
-
-        btnConfig.addEventListener('click', function() {
-            abrirModal(modalConfig);
-        });
-
-        btnAddRecibo.addEventListener('click', function() {
+        btnAddRecibo.addEventListener('click', () => {
             document.getElementById('modal-recibo-titulo').textContent = 'Criar Novo Recibo';
             document.getElementById('recibo-id-edicao').value = '';
             document.getElementById('btn-salvar-recibo').textContent = 'Baixar Recibo';
             formRecibo.reset();
             abrirModal(modalRecibo);
         });
-
-        btnAddCliente.addEventListener('click', function() {
+        btnAddCliente.addEventListener('click', () => {
             document.getElementById('modal-cliente-titulo').textContent = 'Cadastrar Novo Cliente';
             document.getElementById('cliente-id-edicao').value = '';
             formCliente.reset();
             abrirModal(modalCliente);
         });
-
-        btnDownloadPdf.addEventListener('click', baixarReciboPdf);
-
-        // Inicialização
-        document.addEventListener('DOMContentLoaded', function() {
+        
+        document.addEventListener('DOMContentLoaded', () => {
             carregarConfiguracoes();
             renderizarClientes();
             renderizarRecibos();
-            
-            // Definir data padrão para o recibo como hoje
-            const hoje = new Date().toISOString().split('T')[0];
-            document.getElementById('recibo-data').value = hoje;
         });
 
-        // Tornar funções disponíveis globalmente para os botões na tabela
-        window.visualizarRecibo = visualizarRecibo;
-        window.editarRecibo = editarRecibo;
-        window.excluirRecibo = excluirRecibo;
-        window.editarCliente = editarCliente;
-        window.excluirCliente = excluirCliente;
     </script>
 </body>
 </html>
