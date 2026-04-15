@@ -1,994 +1,1980 @@
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tony Fumê - Sistema de Recibos</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>Tony Fumê - Sistema de Recibos & Orçamentos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --cor-principal: #000;
-            --cor-secundaria: #fff;
-            --cor-destaque: #e70000;
-            --fonte: 'Arial', sans-serif;
+            --red: #e70000;
+            --red-dark: #b50000;
+            --red-light: #fff0f0;
+            --black: #0a0a0a;
+            --dark: #111;
+            --white: #fff;
+            --gray-50: #f8f8f8;
+            --gray-100: #f0f0f0;
+            --gray-200: #e0e0e0;
+            --gray-400: #aaa;
+            --gray-600: #666;
+            --gray-800: #333;
+            --blue: #1a3a6b;
+            --blue-dark: #0d2145;
+            --blue-light: #e8f0fb;
+            --green: #0a6640;
+            --green-dark: #074d30;
+            --green-light: #e8f5ee;
+            --orange: #c97d00;
+            --orange-light: #fff9ef;
         }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: #0f0f0f; color: var(--black); line-height: 1.6; }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: var(--fonte);
-            background-color: var(--cor-secundaria);
-            color: var(--cor-principal);
-            line-height: 1.6;
-        }
-
+        /* ─── HEADER ─── */
         header {
-            background-color: var(--cor-principal);
-            color: var(--cor-secundaria);
-            padding: 20px;
-            text-align: center;
+            background: var(--dark);
+            color: var(--white);
+            padding: 18px 24px;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            border-bottom: 5px solid var(--cor-destaque);
-        }
-
-        .logo-container {
-            margin-bottom: 10px;
-        }
-
-        #logo {
-            max-width: 200px;
-            height: auto;
-        }
-        
-        h1 {
-            font-size: 2em;
-            font-weight: bold;
-            color: var(--cor-destaque);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        .header-buttons {
-            margin-top: 15px;
-            display: flex;
-            gap: 10px;
+            justify-content: space-between;
+            gap: 20px;
+            border-bottom: 3px solid var(--red);
+            position: relative;
+            overflow: hidden;
             flex-wrap: wrap;
-            justify-content: center;
         }
-
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--red), transparent);
+        }
+        #header-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover; opacity: 0.05; pointer-events: none; z-index: 0;
+        }
+        .header-left { display: flex; align-items: center; gap: 16px; position: relative; z-index: 1; }
+        #logo { max-height: 52px; max-width: 140px; object-fit: contain; display: none; }
+        .header-title { display: flex; flex-direction: column; }
+        .header-title h1 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.9em; font-weight: 700; color: var(--red);
+            text-transform: uppercase; letter-spacing: 3px; line-height: 1;
+        }
+        .header-title span { font-size: 0.7em; color: var(--gray-400); letter-spacing: 2px; text-transform: uppercase; }
+        .header-buttons {
+            display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;
+            position: relative; z-index: 1;
+        }
         .header-buttons button {
-            background-color: var(--cor-destaque);
-            color: var(--cor-secundaria);
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.3s ease;
+            display: flex; align-items: center; gap: 7px;
+            padding: 9px 16px; border: none; border-radius: 6px;
+            font-family: 'Inter', sans-serif; font-size: 0.82em; font-weight: 600;
+            cursor: pointer; transition: all 0.2s; white-space: nowrap;
         }
+        .btn-config { background: #1e1e1e; color: var(--gray-400); border: 1px solid #333 !important; }
+        .btn-config:hover { background: #2a2a2a; color: var(--white); }
+        .btn-recibo { background: var(--red); color: var(--white); }
+        .btn-recibo:hover { background: var(--red-dark); }
+        .btn-cliente { background: #1e1e1e; color: var(--white); border: 1px solid #444 !important; }
+        .btn-cliente:hover { background: #2a2a2a; }
+        .btn-orcamento { background: var(--blue); color: var(--white); }
+        .btn-orcamento:hover { background: var(--blue-dark); }
+        .btn-financeiro { background: var(--green); color: var(--white); }
+        .btn-financeiro:hover { background: var(--green-dark); }
 
-        .header-buttons button:hover {
-            background-color: #d10000;
-        }
+        /* ─── CONTAINER ─── */
+        .container { max-width: 1280px; margin: 20px auto; padding: 0 20px; }
 
-        .container {
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 0 20px;
-        }
-
+        /* ─── SECTION ─── */
         section {
-            background-color: var(--cor-secundaria);
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background: var(--white);
+            border-radius: 12px;
+            margin-bottom: 18px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            overflow: hidden;
         }
-        
-        h2 {
-            font-size: 1.5em;
-            margin-bottom: 15px;
-            color: var(--cor-destaque);
-            border-bottom: 2px solid var(--cor-destaque);
-            padding-bottom: 5px;
+        .section-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--gray-100);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
         }
+        .section-header h2 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.2em; font-weight: 700; color: var(--black);
+            text-transform: uppercase; letter-spacing: 1px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .section-header h2 i { color: var(--red); font-size: 0.9em; }
+        .section-body { padding: 20px 24px; }
 
+        /* ─── CARD GRID ─── */
         .card-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
         }
-
         .card {
-            background-color: var(--cor-principal);
-            color: var(--cor-secundaria);
-            padding: 20px;
-            border-radius: 8px;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background: var(--dark);
+            color: var(--white);
+            padding: 18px 20px;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
         }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 4px; height: 100%;
+            background: var(--red);
+        }
+        .card.card-orcamento::before { background: var(--blue); }
+        .card.card-financeiro::before { background: var(--green); }
+        .card.card-financeiro { cursor: pointer; }
+        .card.card-financeiro:hover { opacity: 0.9; }
+        .card h3 { font-size: 0.75em; text-transform: uppercase; letter-spacing: 1px; color: var(--gray-400); margin-bottom: 8px; }
+        .card p { font-family: 'Rajdhani', sans-serif; font-size: 1.7em; font-weight: 700; color: var(--white); }
+        .card small { font-size: 0.65em; color: var(--gray-400); display: block; margin-top: 4px; }
 
-        .card h3 {
-            font-size: 1.2em;
-            margin-bottom: 10px;
+        /* ─── TABS ─── */
+        .tabs {
+            display: flex; gap: 0;
+            border-bottom: 2px solid var(--gray-100);
+            padding: 0 24px;
         }
-        .card p {
-            font-size: 2em;
-            font-weight: bold;
+        .tab-btn {
+            padding: 14px 22px; border: none; background: transparent;
+            cursor: pointer; font-family: 'Inter', sans-serif;
+            font-size: 0.88em; font-weight: 600; color: var(--gray-600);
+            border-bottom: 3px solid transparent; margin-bottom: -2px;
+            transition: all 0.2s; display: flex; align-items: center; gap: 7px;
         }
+        .tab-btn:hover { color: var(--black); }
+        .tab-btn.active { color: var(--red); border-bottom-color: var(--red); }
+        .tab-btn.active-blue { color: var(--blue); border-bottom-color: var(--blue); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-            text-align: left;
+        /* ─── BADGE ─── */
+        .badge {
+            background: var(--blue); color: var(--white);
+            border-radius: 20px; font-size: 0.72em;
+            padding: 1px 8px; font-weight: 700;
         }
+        .badge.badge-red { background: var(--red); }
 
-        th, td {
-            padding: 12px;
-            border-bottom: 1px solid #ddd;
+        /* ─── TABLE ─── */
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.88em; }
+        th {
+            padding: 11px 14px; text-align: left;
+            background: var(--gray-50); color: var(--gray-800);
+            font-weight: 600; font-size: 0.85em;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--gray-200);
+            white-space: nowrap;
         }
-
-        thead tr {
-            background-color: #f2f2f2;
-            color: var(--cor-principal);
-        }
-        
-        tbody tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-
+        td { padding: 11px 14px; border-bottom: 1px solid var(--gray-100); color: var(--gray-800); }
+        tbody tr:hover { background: var(--gray-50); }
         .btn-acao {
-            background-color: transparent;
-            border: none;
-            cursor: pointer;
-            font-size: 1.2em;
-            color: var(--cor-principal);
-            margin-right: 10px;
+            background: transparent; border: none; cursor: pointer;
+            font-size: 1em; color: var(--gray-400); margin-right: 4px;
+            padding: 4px; border-radius: 4px; transition: all 0.15s;
         }
-        .btn-acao:hover {
-            color: var(--cor-destaque);
-        }
+        .btn-acao:hover { color: var(--red); background: var(--red-light); }
+        .btn-acao.view:hover { color: var(--blue); background: var(--blue-light); }
+        .btn-acao.hist:hover { color: var(--green); background: var(--green-light); }
 
+        /* ─── MODAL ─── */
         .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.4);
+            display: none; position: fixed; z-index: 1000;
+            left: 0; top: 0; width: 100%; height: 100%;
+            overflow-y: auto; background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(2px);
         }
-
         .modal-content {
-            background-color: var(--cor-secundaria);
-            margin: 10% auto;
-            padding: 30px;
-            border-radius: 10px;
-            width: 90%;
-            max-width: 600px;
-            position: relative;
-            animation-name: animatetop;
-            animation-duration: 0.4s;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            background: var(--white); margin: 4% auto;
+            padding: 28px 32px; border-radius: 14px;
+            width: 92%; max-width: 600px;
+            position: relative; animation: slideDown 0.25s ease;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.35);
         }
-        
+        .modal-content.modal-wide { max-width: 920px; }
+        .modal-content.modal-financeiro { max-width: 1000px; }
+        .modal-content.modal-hist { max-width: 720px; }
+        @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         .close-btn {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
+            position: absolute; right: 20px; top: 16px;
+            font-size: 26px; cursor: pointer; color: var(--gray-400);
+            line-height: 1; font-weight: 300; transition: color 0.15s;
+        }
+        .close-btn:hover { color: var(--red); }
+        .modal-title {
+            font-family: 'Rajdhani', sans-serif; font-size: 1.4em; font-weight: 700;
+            color: var(--black); margin-bottom: 20px; padding-bottom: 14px;
+            border-bottom: 2px solid var(--gray-100);
+            display: flex; align-items: center; gap: 10px;
+        }
+        .modal-title i { color: var(--red); }
+        .modal-title.blue i { color: var(--blue); }
+        .modal-title.green i { color: var(--green); }
+
+        /* ─── FORM ─── */
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; font-weight: 600; font-size: 0.82em; color: var(--gray-800); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.4px; }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%; padding: 10px 13px;
+            border: 1.5px solid var(--gray-200); border-radius: 7px;
+            font-family: 'Inter', sans-serif; font-size: 0.92em; color: var(--black);
+            transition: border 0.15s; background: var(--white);
+        }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline: none; border-color: var(--red);
+        }
+        .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+        .form-full { grid-column: 1 / -1; }
+
+        .btn-primary {
+            background: var(--red); color: var(--white); border: none;
+            padding: 11px 22px; border-radius: 7px; font-family: 'Inter', sans-serif;
+            font-weight: 600; font-size: 0.9em; cursor: pointer;
+            transition: background 0.2s; display: flex; align-items: center; gap: 8px;
+        }
+        .btn-primary:hover { background: var(--red-dark); }
+        .btn-primary.blue { background: var(--blue); }
+        .btn-primary.blue:hover { background: var(--blue-dark); }
+        .btn-primary.green { background: var(--green); }
+        .btn-primary.green:hover { background: var(--green-dark); }
+        .btn-secondary {
+            background: var(--gray-100); color: var(--gray-800); border: none;
+            padding: 11px 22px; border-radius: 7px; font-family: 'Inter', sans-serif;
+            font-weight: 600; font-size: 0.9em; cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-secondary:hover { background: var(--gray-200); }
+        .btn-row { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+
+        /* ─── VEÍCULOS WIDGET ─── */
+        .veiculos-container { border: 1.5px solid var(--gray-200); border-radius: 8px; padding: 12px; margin-top: 6px; }
+        .veiculo-row {
+            display: grid; grid-template-columns: 1fr 1fr 1fr 36px; gap: 8px;
+            align-items: end; margin-bottom: 8px; padding-bottom: 8px;
+            border-bottom: 1px solid var(--gray-100);
+        }
+        .veiculo-row:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+        .btn-add-small {
+            background: var(--green); color: var(--white); border: none;
+            padding: 7px 14px; border-radius: 6px; font-size: 0.82em;
+            font-weight: 600; cursor: pointer; margin-top: 8px;
+            display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s;
+        }
+        .btn-add-small:hover { background: var(--green-dark); }
+        .btn-rm-veiculo {
+            background: var(--red); color: var(--white); border: none;
+            border-radius: 6px; width: 32px; height: 32px; cursor: pointer;
+            font-size: 0.9em; display: flex; align-items: center; justify-content: center;
+            align-self: flex-end;
         }
 
-        .close-btn:hover,
-        .close-btn:focus {
-            color: var(--cor-destaque);
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        @keyframes animatetop {
-            from {top:-300px; opacity:0}
-            to {top:0; opacity:1}
-        }
-        
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        form label {
-            font-weight: bold;
-            color: var(--cor-principal);
-        }
-
-        form input, form textarea, form select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 1em;
-            outline-color: var(--cor-destaque);
-        }
-
-        form button {
-            background-color: var(--cor-destaque);
-            color: var(--cor-secundaria);
-            border: none;
-            padding: 12px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.3s ease;
-        }
-
-        form button:hover {
-            background-color: #d10000;
-        }
-        
-        /* Estilo do recibo */
+        /* ─── RECIBO STYLES ─── */
         #recibo-content {
-            padding: 15px;
-            border: 1px solid var(--cor-destaque);
-            margin-bottom: 15px;
+            padding: 20px; border: 1px solid #ddd;
+            background: var(--white); border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.08); overflow: hidden;
             position: relative;
-            background-color: var(--cor-secundaria);
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
         }
-        
-        .recibo-header {
-            text-align: center;
-            margin-bottom: 15px;
-            padding: 20px 0 5px 0;
+        .recibo-bg-img {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover; opacity: 0.06; z-index: 0; pointer-events: none;
         }
-
-        .recibo-header img {
-            margin-top: -10px;
-            max-width: 120px;
-            margin-bottom: 5px;
-        }
-
+        .recibo-inner { position: relative; z-index: 1; }
+        .recibo-header { text-align: center; margin-bottom: 16px; padding: 16px 0 8px; }
+        .recibo-header img { max-width: 110px; margin-bottom: 6px; }
         .recibo-header h3 {
-            color: var(--cor-principal);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 1.2em;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.3em; text-transform: uppercase; letter-spacing: 2px; color: var(--black);
         }
-        
-        /* Novo estilo para o corpo do recibo com caixas */
-        .recibo-body {
-            padding: 15px;
-            border-bottom: 1px dashed #ccc;
-            margin-bottom: 15px;
-        }
-        
-        .recibo-info-grid {
-            display: grid;
-            gap: 10px;
-            grid-template-columns: 1fr;
-        }
-        
-        .recibo-info-box {
-            border: 1px solid #ccc;
-            padding: 8px 12px;
-            border-radius: 5px;
-            background-color: #f9f9f9;
-        }
-        
-        .recibo-info-box h4 {
-            font-size: 0.8em;
-            color: #555;
-            margin-bottom: 3px;
-        }
-        
-        .recibo-info-box p {
-            font-size: 0.9em;
-            font-weight: bold;
-            color: var(--cor-principal);
-        }
-        
-        .recibo-assinatura {
-            text-align: center;
-            margin-top: 20px;
-            padding-top: 10px;
-        }
-        
-        .recibo-assinatura .linha-assinatura {
-            border-top: 1px solid var(--cor-destaque);
-            display: inline-block;
-            width: 250px;
-            margin-bottom: 5px;
-        }
-        
-        .recibo-assinatura p {
-            font-size: 0.9em;
-            color: var(--cor-principal);
-            margin-top: 5px;
-        }
-
-        /* Estilo do rodapé do recibo */
+        .recibo-divider { height: 3px; background: linear-gradient(90deg, var(--red), transparent); margin: 8px 0; }
+        .recibo-body { padding: 14px 0; }
+        .recibo-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+        .recibo-info-box { background: var(--gray-50); border: 1px solid var(--gray-200); padding: 10px 14px; border-radius: 7px; }
+        .recibo-info-box h4 { font-size: 0.72em; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+        .recibo-info-box p { font-weight: 600; color: var(--black); font-size: 0.92em; }
+        .recibo-assinatura { text-align: center; margin-top: 24px; }
+        .recibo-assinatura .linha { border-top: 1px solid var(--red); width: 240px; display: inline-block; margin-bottom: 6px; }
+        .recibo-assinatura p { font-size: 0.85em; color: var(--gray-600); }
         .recibo-footer {
-            background-color: var(--cor-principal);
-            color: var(--cor-secundaria);
-            padding: 10px;
-            border-radius: 0 0 10px 10px;
-            text-align: center;
-            margin-top: 15px;
+            background: var(--dark); color: var(--white);
+            padding: 12px 16px; border-radius: 0 0 10px 10px;
+            text-align: center; margin-top: 18px;
         }
-        
-        .recibo-footer p {
-            margin: 3px 0;
-            font-size: 0.8em;
-        }
-        
-        .recibo-footer .contato-container {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 5px;
-        }
-        
-        .recibo-footer .contato-item {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        .recibo-footer .contato-item i {
-            font-size: 0.9em;
-        }
+        .recibo-footer p { font-size: 0.78em; margin: 2px 0; }
+        .recibo-contatos { display: flex; justify-content: center; gap: 16px; margin-top: 6px; flex-wrap: wrap; }
+        .recibo-contato { display: flex; align-items: center; gap: 5px; font-size: 0.78em; }
 
-        @media print {
-            body * {
-                visibility: hidden;
-            }
-            #modal-view-recibo, #modal-view-recibo * {
-                visibility: visible;
-                display: block;
-            }
-            #modal-view-recibo {
-                position: absolute;
-                left: 0;
-                top: 0;
-            }
-            #modal-view-recibo .modal-content {
-                width: 21cm;
-                margin: 0;
-                padding: 1cm;
-                box-shadow: none;
-                background-color: #fff;
-            }
-            #btn-download-pdf, .close-btn {
-                display: none;
-            }
-            .recibo-footer {
-                background-color: var(--cor-principal) !important;
-                -webkit-print-color-adjust: exact;
-                color-adjust: exact;
-            }
-            #recibo-content {
-                background-color: #fff !important;
-            }
-            #recibo-content img[src] {
-                -webkit-print-color-adjust: exact;
-                color-adjust: exact;
-            }
+        /* ─── ORÇAMENTO STYLES ─── */
+        #orcamento-preview {
+            background: #fff; font-family: 'Inter', sans-serif;
+            font-size: 12.5px; color: #222;
+            max-width: 780px; margin: 0 auto;
+            padding: 32px 36px; position: relative; overflow: hidden;
         }
-        
+        .orc-bg-img {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover; opacity: 0.04; z-index: 0; pointer-events: none;
+        }
+        .orc-inner { position: relative; z-index: 1; }
+        .orc-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+        .orc-logo-area img { max-height: 70px; max-width: 180px; }
+        .orc-empresa-nome { text-align: right; }
+        .orc-empresa-nome .nome-grande { font-family: 'Rajdhani', sans-serif; font-size: 30px; font-weight: 700; color: var(--blue); letter-spacing: 1px; line-height: 1; }
+        .orc-intro { text-align: justify; margin-bottom: 16px; font-size: 12.5px; line-height: 1.7; }
+        .orc-solicitante { margin-bottom: 14px; font-size: 12.5px; background: #f5f7fc; border-left: 3px solid var(--blue); padding: 10px 14px; border-radius: 0 6px 6px 0; }
+        .orc-solicitante p { margin: 2px 0; }
+        .orc-table-wrapper { border: 1px solid #ccc; margin-bottom: 14px; border-radius: 4px; overflow: hidden; }
+        .orc-table-title { background: var(--blue); color: #fff; text-align: center; font-weight: 700; font-size: 13px; letter-spacing: 2px; padding: 10px; }
+        .orc-table { width: 100%; border-collapse: collapse; }
+        .orc-table th { border: 1px solid #ddd; padding: 9px 12px; font-size: 11.5px; font-weight: 700; color: #333; text-align: left; background: #f8f8f8; }
+        .orc-table td { border: 1px solid #e8e8e8; padding: 10px 12px; vertical-align: middle; font-size: 12px; }
+        .orc-table td.col-img { text-align: center; width: 70px; }
+        .orc-table td.col-img img { max-width: 55px; max-height: 48px; object-fit: contain; }
+        .orc-table td.col-garantia { text-align: center; width: 90px; }
+        .orc-table td.col-valor { text-align: right; font-weight: 700; width: 120px; }
+        .orc-table .row-total td { background: #e8f0fb; font-weight: 700; text-align: center; font-size: 13px; border-top: 2px solid var(--blue); padding: 10px; color: var(--blue); }
+        .orc-veiculo-info { background: #f0f4ff; border-left: 3px solid var(--blue); padding: 8px 14px; border-radius: 0 6px 6px 0; margin-bottom: 14px; font-size: 12.5px; }
+        .orc-veiculo-info p { margin: 2px 0; }
+        .orc-obs { font-size: 12.5px; margin-bottom: 12px; line-height: 1.6; background: #fffbf0; border-left: 3px solid var(--orange); padding: 8px 14px; border-radius: 0 6px 6px 0; }
+        .orc-pagamento { font-size: 12.5px; margin-bottom: 20px; line-height: 1.8; }
+        .orc-footer-loc { text-align: right; font-size: 12px; margin-bottom: 30px; color: #555; }
+        .orc-assinatura .linha-ass { border-top: 1px solid #333; width: 250px; margin: 30px 0 5px 0; }
+        .orc-assinatura p { font-size: 12px; margin: 2px 0; }
+
+        /* ─── ITEM ORCAMENTO FORM ─── */
+        .item-orc-row {
+            display: grid; grid-template-columns: 70px 1fr 100px 120px 34px;
+            gap: 8px; align-items: start;
+            background: var(--gray-50); border: 1px solid var(--gray-200);
+            border-radius: 8px; padding: 10px; margin-bottom: 8px;
+        }
+        .item-orc-row textarea { resize: vertical; min-height: 58px; font-size: 0.88em; }
+        .item-orc-row input[type=text] { font-size: 0.88em; }
+        .img-upload-label {
+            display: block; font-size: 0.72em; color: var(--gray-600); cursor: pointer;
+            text-align: center; padding: 6px; background: var(--white);
+            border-radius: 6px; border: 1.5px dashed var(--gray-200);
+        }
+        .img-upload-label:hover { border-color: var(--blue); }
+        .item-img-preview { width: 55px; height: 48px; object-fit: contain; border: 1px solid var(--gray-200); border-radius: 4px; margin-top: 4px; display: none; }
+        .btn-rm-item { background: var(--red); color: var(--white); border: none; border-radius: 6px; cursor: pointer; width: 32px; height: 32px; font-size: 0.9em; align-self: flex-start; display: flex; align-items: center; justify-content: center; }
+        .btn-rm-item:hover { background: var(--red-dark); }
+
+        /* ─── STATUS BADGE ─── */
+        .status-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 3px 10px; border-radius: 20px; font-size: 0.75em; font-weight: 700;
+        }
+        .status-pendente { background: #fff4e5; color: var(--orange); border: 1px solid #f5c67b; }
+        .status-aceito { background: var(--green-light); color: var(--green); border: 1px solid #b2dfca; }
+        .status-recusado { background: #fdeaea; color: #b03020; border: 1px solid #f5b3b3; }
+
+        /* ─── PAINEL FINANCEIRO ─── */
+        .fin-section { margin: 20px 0 10px; }
+        .fin-section h3 {
+            font-family: 'Rajdhani', sans-serif; font-size: 1.05em; font-weight: 700;
+            color: var(--green); border-bottom: 2px solid var(--green);
+            padding-bottom: 6px; text-transform: uppercase; letter-spacing: 1px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .fin-cards {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px; margin-top: 12px;
+        }
+        .fin-card {
+            padding: 14px 16px; border-radius: 10px; text-align: center;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.06); border: 1px solid transparent;
+        }
+        .fin-card.verde { background: var(--green-light); border-color: #b2dfca; }
+        .fin-card.azul { background: var(--blue-light); border-color: #b3c7f0; }
+        .fin-card.laranja { background: var(--orange-light); border-color: #f5c67b; }
+        .fin-card-icon { font-size: 1.4em; margin-bottom: 5px; }
+        .fin-card-label { font-size: 0.72em; color: var(--gray-600); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+        .fin-card-value { font-family: 'Rajdhani', sans-serif; font-size: 1.5em; font-weight: 700; color: #222; }
+        .fin-projecao {
+            background: linear-gradient(135deg, var(--green), #1a7c50);
+            color: #fff; border-radius: 12px; padding: 18px 20px; margin: 14px 0;
+        }
+        .fin-projecao h3 { color: rgba(255,255,255,0.85); border-color: rgba(255,255,255,0.3); font-size: 0.9em; }
+        .fin-proj-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 12px; }
+        .fin-proj-item { text-align: center; }
+        .fin-proj-item .val { font-family: 'Rajdhani', sans-serif; font-size: 1.5em; font-weight: 700; }
+        .fin-proj-item .lab { font-size: 0.7em; opacity: 0.8; }
+        .fin-alerta {
+            display: flex; align-items: flex-start; gap: 10px;
+            border-radius: 8px; padding: 12px 14px; margin: 10px 0;
+            font-size: 0.86em; line-height: 1.5;
+        }
+        .fin-alerta.info { background: #e8f4ff; border-left: 4px solid #2196F3; color: #0c4a80; }
+        .fin-alerta.sucesso { background: var(--green-light); border-left: 4px solid #28a745; color: #0a4a20; }
+        .fin-alerta.aviso { background: var(--orange-light); border-left: 4px solid #ff9800; color: #7a4400; }
+        .fin-alerta.perigo { background: #fdeaea; border-left: 4px solid #e53935; color: #7a1010; }
+        .fin-barra-container { background: #eee; border-radius: 20px; height: 12px; overflow: hidden; margin: 6px 0 4px; }
+        .fin-barra { height: 100%; border-radius: 20px; transition: width 0.8s ease; }
+        .fin-barra.verde { background: linear-gradient(90deg, #1a9955, var(--green)); }
+        .fin-barra.laranja { background: linear-gradient(90deg, #f5a623, var(--orange)); }
+        .fin-grafico-meses { display: flex; align-items: flex-end; gap: 8px; height: 84px; padding: 0 4px; border-bottom: 2px solid var(--gray-200); margin: 12px 0 6px; }
+        .fin-barra-mes { flex: 1; min-width: 28px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; cursor: default; }
+        .fin-barra-mes-fill { width: 100%; border-radius: 4px 4px 0 0; }
+        .fin-barra-mes-label { font-size: 0.62em; color: var(--gray-600); margin-top: 4px; }
+        .fin-barra-mes-val { font-size: 0.62em; color: #444; margin-bottom: 2px; }
+        .fin-cap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 12px; }
+        .fin-cap-card { border: 2px solid; border-radius: 10px; padding: 16px; }
+        .fin-cap-card.reserva { border-color: var(--orange); background: var(--orange-light); }
+        .fin-cap-card.capital { border-color: var(--blue); background: var(--blue-light); }
+        .fin-cap-card h4 { font-size: 0.92em; font-weight: 700; margin-bottom: 8px; }
+        .fin-cap-card.reserva h4 { color: var(--orange); }
+        .fin-cap-card.capital h4 { color: var(--blue); }
+        .fin-cap-valor { font-family: 'Rajdhani', sans-serif; font-size: 1.6em; font-weight: 700; margin: 4px 0; }
+        .fin-cap-card.reserva .fin-cap-valor { color: var(--orange); }
+        .fin-cap-card.capital .fin-cap-valor { color: var(--blue); }
+        .fin-slider-wrap { display: flex; align-items: center; gap: 10px; margin: 6px 0; }
+        .fin-slider-wrap input[type=range] { flex: 1; accent-color: var(--green); height: 6px; }
+        .fin-slider-wrap span { min-width: 38px; text-align: right; font-weight: 700; font-size: 0.88em; color: var(--green); }
+        .fin-orc-status-sel { padding: 4px 8px; border-radius: 6px; border: 1px solid var(--gray-200); font-size: 0.8em; cursor: pointer; }
+
+        /* ─── HISTÓRICO CLIENTE ─── */
+        .hist-cliente-info { background: var(--gray-50); border-radius: 8px; padding: 14px 16px; margin-bottom: 16px; }
+        .hist-cliente-info h3 { font-size: 1.1em; font-weight: 700; margin-bottom: 4px; }
+        .hist-cliente-info p { font-size: 0.85em; color: var(--gray-600); }
+        .hist-veiculos { margin-bottom: 16px; }
+        .hist-veiculos h4 { font-size: 0.85em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gray-600); margin-bottom: 8px; }
+        .hist-veiculo-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--dark); color: var(--white); padding: 5px 12px; border-radius: 20px; font-size: 0.8em; font-weight: 600; margin: 3px; }
+        .hist-section { margin-bottom: 14px; }
+        .hist-section h4 { font-size: 0.9em; font-weight: 700; color: var(--gray-800); border-bottom: 1px solid var(--gray-100); padding-bottom: 6px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+        .hist-section h4 i { color: var(--red); }
+
+        /* ─── PDF DOWNLOAD BTN ─── */
+        .btn-download { background: var(--red); color: var(--white); border: none; padding: 11px 22px; border-radius: 7px; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.9em; cursor: pointer; transition: background 0.2s; margin-top: 12px; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-download:hover { background: var(--red-dark); }
+
+        /* ─── RESPONSIVO ─── */
+        @media (max-width: 900px) {
+            .modal-content.modal-wide, .modal-content.modal-financeiro { max-width: 98vw; }
+            .form-grid-2, .form-grid-3 { grid-template-columns: 1fr; }
+            .item-orc-row { grid-template-columns: 1fr 1fr; }
+        }
         @media (max-width: 768px) {
-            h1 {
-                font-size: 1.5em;
-            }
-            .header-buttons button {
-                width: 100%;
-            }
+            header { padding: 14px; }
+            .header-buttons { justify-content: flex-start; }
+            .header-buttons button { padding: 8px 12px; font-size: 0.78em; }
+            .container { padding: 0 12px; margin: 12px auto; }
+            .card-grid { grid-template-columns: repeat(2, 1fr); }
+            .modal-content { margin: 2% auto; padding: 20px 16px; width: 96%; }
+            .recibo-info-grid { grid-template-columns: 1fr; }
+            .fin-proj-grid { grid-template-columns: 1fr 1fr; }
+            .fin-cap-grid { grid-template-columns: 1fr; }
+            .item-orc-row { grid-template-columns: 1fr; }
+            #orcamento-preview { padding: 16px 12px; font-size: 11px; }
+            .orc-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .orc-empresa-nome { text-align: left; }
+            .veiculo-row { grid-template-columns: 1fr 1fr; }
         }
-
-        footer {
-            text-align: center;
-            padding: 20px;
-            background-color: var(--cor-principal);
-            color: var(--cor-secundaria);
-            margin-top: 20px;
-            border-top: 5px solid var(--cor-destaque);
+        @media (max-width: 480px) {
+            .card p { font-size: 1.3em; }
+            .header-title h1 { font-size: 1.4em; }
         }
-
-        #loading-message {
-            text-align: center;
-            color: #555;
-            margin-top: 10px;
-            font-style: italic;
+        @media print {
+            body * { visibility: hidden; }
+            #modal-view-recibo, #modal-view-recibo * { visibility: visible; display: block; }
+            #modal-view-recibo { position: absolute; left: 0; top: 0; width: 100%; }
+            .btn-download, .close-btn { display: none !important; }
+            #modal-view-orcamento, #modal-view-orcamento * { visibility: visible; }
+            #modal-view-orcamento { position: absolute; left: 0; top: 0; width: 100%; }
         }
     </style>
 </head>
 <body>
-    
-    <header id="header">
-        <div class="logo-container">
-            <img id="logo" src="" alt="Logo da Empresa" style="display: none;">
-        </div>
-        <h1>Meus Recibos</h1>
-        <div class="header-buttons">
-            <button id="btn-config">Configurações</button>
-            <button id="btn-add-recibo">Criar Recibo</button>
-            <button id="btn-add-cliente">Cadastrar Cliente</button>
-        </div>
-    </header>
 
-    <main class="container">
-        
-        <section id="sumario">
-            <h2>Resumo Geral</h2>
+<header id="header">
+    <img id="header-bg" src="" alt="" style="display:none;">
+    <div class="header-left">
+        <img id="logo" src="" alt="Logo">
+        <div class="header-title">
+            <h1 id="titulo-sistema">Tony Fumê</h1>
+            <span>Sistema de Recibos & Orçamentos</span>
+        </div>
+    </div>
+    <div class="header-buttons">
+        <button class="btn-config" id="btn-config"><i class="fas fa-cog"></i> Configurações</button>
+        <button class="btn-recibo" id="btn-add-recibo"><i class="fas fa-file-alt"></i> Criar Recibo</button>
+        <button class="btn-cliente" id="btn-add-cliente"><i class="fas fa-user-plus"></i> Cadastrar Cliente</button>
+        <button class="btn-orcamento" id="btn-add-orcamento"><i class="fas fa-file-invoice-dollar"></i> Criar Orçamento</button>
+        <button class="btn-financeiro" id="btn-painel-financeiro"><i class="fas fa-chart-line"></i> Painel Financeiro</button>
+    </div>
+</header>
+
+<main class="container">
+
+    <!-- RESUMO -->
+    <section id="sumario">
+        <div class="section-header">
+            <h2><i class="fas fa-tachometer-alt"></i> Resumo Geral</h2>
+        </div>
+        <div class="section-body">
             <div class="card-grid">
                 <div class="card">
                     <h3>Total de Recibos</h3>
                     <p id="total-recibos">0</p>
                 </div>
                 <div class="card">
-                    <h3>Valor Total</h3>
+                    <h3>Valor Total (Recibos)</h3>
                     <p id="valor-total">R$ 0,00</p>
                 </div>
+                <div class="card card-orcamento">
+                    <h3>Total de Orçamentos</h3>
+                    <p id="total-orcamentos">0</p>
+                </div>
+                <div class="card card-orcamento">
+                    <h3>Valor Total (Orçamentos)</h3>
+                    <p id="valor-total-orcamentos">R$ 0,00</p>
+                </div>
+                <div class="card">
+                    <h3>Clientes Cadastrados</h3>
+                    <p id="total-clientes">0</p>
+                </div>
+                <div class="card card-financeiro" onclick="document.getElementById('btn-painel-financeiro').click()">
+                    <h3>Receita do Mês</h3>
+                    <p id="receita-mes-resumo">R$ 0,00</p>
+                    <small>Clique para ver o painel</small>
+                </div>
             </div>
-        </section>
-
-        <section id="historico">
-            <h2>Histórico de Recibos</h2>
-            <table id="tabela-recibos">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Cliente</th>
-                        <th>Valor</th>
-                        <th>Data</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    </tbody>
-            </table>
-        </section>
-
-        <section id="clientes">
-            <h2>Clientes Cadastrados</h2>
-            <table id="tabela-clientes">
-                <thead>
-                    <tr>
-                        <th>Nome</th>
-                        <th>Telefone</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    </tbody>
-            </table>
-        </section>
-
-    </main>
-
-    <div id="modal-config" class="modal">
-        <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <h2>Configurações da Empresa</h2>
-            <form id="form-config">
-                <label for="config-cnpj">CNPJ:</label>
-                <input type="text" id="config-cnpj" required value="13.949.583/0001-32">
-                
-                <label for="config-instagram">Instagram:</label>
-                <input type="text" id="config-instagram" value="@tonyfume">
-                
-                <label for="config-endereco">Endereço:</label>
-                <input type="text" id="config-endereco" value="Avenida Juca Sampaio, 1552, Jacintinho">
-                
-                <label for="config-whatsapp">Whatsapp:</label>
-                <input type="text" id="config-whatsapp" value="(82)99806-9585">
-                
-                <label for="config-logo">Upload da Logo:</label>
-                <input type="file" id="config-logo" accept="image/*">
-                <p id="loading-message" style="display:none;">Processando imagem...</p>
-
-                <label for="config-background">Upload do Plano de Fundo:</label>
-                <input type="file" id="config-background" accept="image/*">
-                
-                <button type="submit">Salvar Configurações</button>
-            </form>
         </div>
-    </div>
+    </section>
 
-    <div id="modal-recibo" class="modal">
-        <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <h2 id="modal-recibo-titulo">Criar Novo Recibo</h2>
-            <form id="form-recibo">
-                <input type="hidden" id="recibo-id-edicao">
-                
-                <label for="recibo-cliente">Cliente:</label>
+    <!-- HISTÓRICO -->
+    <section id="historico">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="trocarTab('tab-recibos', this)">
+                <i class="fas fa-file-alt"></i> Recibos
+            </button>
+            <button class="tab-btn" onclick="trocarTab('tab-orcamentos', this, true)">
+                <i class="fas fa-file-invoice-dollar"></i> Orçamentos
+                <span class="badge" id="badge-orcamentos">0</span>
+            </button>
+            <button class="tab-btn" onclick="trocarTab('tab-clientes', this)">
+                <i class="fas fa-users"></i> Clientes
+            </button>
+        </div>
+
+        <div id="tab-recibos" class="tab-content active">
+            <div class="section-body">
+                <div class="table-wrapper">
+                    <table id="tabela-recibos">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Cliente</th>
+                                <th>Veículo / Placa</th>
+                                <th>Película</th>
+                                <th>Valor</th>
+                                <th>Data</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-orcamentos" class="tab-content">
+            <div class="section-body">
+                <div class="table-wrapper">
+                    <table id="tabela-orcamentos">
+                        <thead>
+                            <tr>
+                                <th>Nº</th>
+                                <th>Empresa/Solicitante</th>
+                                <th>Veículo / Placa</th>
+                                <th>Película</th>
+                                <th>Valor Total</th>
+                                <th>Data</th>
+                                <th>Validade</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-clientes" class="tab-content">
+            <div class="section-body">
+                <div class="table-wrapper">
+                    <table id="tabela-clientes">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Telefone</th>
+                                <th>CNPJ</th>
+                                <th>Veículos</th>
+                                <th>Recibos</th>
+                                <th>Orçamentos</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<footer style="text-align:center; padding:16px; background:var(--dark); color:var(--gray-600); border-top:3px solid var(--red); font-size:0.82em;">
+    <p>Tony Fumê — Sistema de Gestão &nbsp;|&nbsp; Desenvolvedor: Alex Peixoto (82)99662-2036</p>
+</footer>
+
+<!-- ──────────── MODAL CONFIGURAÇÕES ──────────── -->
+<div id="modal-config" class="modal">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <div class="modal-title"><i class="fas fa-cog"></i> Configurações da Empresa</div>
+        <form id="form-config">
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label>Nome da Empresa</label>
+                    <input type="text" id="config-nome-empresa" placeholder="Ex: Tony Fumê">
+                </div>
+                <div class="form-group">
+                    <label>CNPJ</label>
+                    <input type="text" id="config-cnpj" value="13.949.583/0001-32">
+                </div>
+                <div class="form-group form-full">
+                    <label>Endereço Completo</label>
+                    <input type="text" id="config-endereco" value="Avenida Juca Sampaio, 1552, Jacintinho">
+                </div>
+                <div class="form-group">
+                    <label>Instagram</label>
+                    <input type="text" id="config-instagram" value="@tonyfume">
+                </div>
+                <div class="form-group">
+                    <label>WhatsApp</label>
+                    <input type="text" id="config-whatsapp" value="(82)99806-9585">
+                </div>
+                <div class="form-group">
+                    <label>Responsável Legal</label>
+                    <input type="text" id="config-responsavel" placeholder="Ex: Thiogo Jefferson">
+                </div>
+                <div class="form-group">
+                    <label>Cargo</label>
+                    <input type="text" id="config-cargo" placeholder="Ex: Responsável legal">
+                </div>
+                <div class="form-group form-full">
+                    <label>Chave Pix</label>
+                    <input type="text" id="config-pix" placeholder="CNPJ ou chave pix">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top:6px;">
+                <label>Upload da Logo <small style="font-weight:400;color:#888;text-transform:none;">(recibos, orçamentos e header)</small></label>
+                <input type="file" id="config-logo" accept="image/*">
+                <div style="display:flex;align-items:center;gap:8px;margin-top:6px;">
+                    <input type="checkbox" id="config-logo-rembg" checked style="width:auto;margin:0;">
+                    <label for="config-logo-rembg" style="font-weight:400;font-size:0.83em;color:#666;text-transform:none;">Remover fundo branco/sólido automaticamente</label>
+                </div>
+                <p id="loading-message" style="display:none;color:#888;font-style:italic;margin-top:6px;font-size:0.85em;">Processando imagem...</p>
+                <div id="logo-preview-container" style="display:none;margin-top:8px;">
+                    <img id="logo-preview" style="max-height:80px;border:1px solid #eee;border-radius:6px;background:#f5f5f5;padding:4px;" alt="Preview">
+                    <button type="button" id="btn-remover-logo" style="display:block;margin-top:6px;padding:5px 12px;background:var(--red);color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:0.8em;font-weight:600;">Remover Logo</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Upload do Plano de Fundo</label>
+                <input type="file" id="config-background" accept="image/*">
+            </div>
+
+            <div class="btn-row">
+                <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Salvar Configurações</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ──────────── MODAL RECIBO ──────────── -->
+<div id="modal-recibo" class="modal">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <div class="modal-title" id="modal-recibo-titulo-el"><i class="fas fa-file-alt"></i> Criar Novo Recibo</div>
+        <form id="form-recibo">
+            <input type="hidden" id="recibo-id-edicao">
+            <div class="form-group">
+                <label>Cliente</label>
                 <select id="recibo-cliente" required>
                     <option value="" disabled selected>Selecione um cliente</option>
-                    </select>
-                
-                <label for="recibo-servico">Serviço:</label>
-                <textarea id="recibo-servico" rows="3" required></textarea>
-                
-                <label for="recibo-valor">Valor:</label>
-                <input type="number" id="recibo-valor" step="0.01" required>
-                
-                <label for="recibo-data">Data:</label>
-                <input type="date" id="recibo-data" required>
-                
-                <button type="submit" id="btn-salvar-recibo">Baixar Recibo</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="modal-cliente" class="modal">
-        <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <h2 id="modal-cliente-titulo">Cadastrar Novo Cliente</h2>
-            <form id="form-cliente">
-                <input type="hidden" id="cliente-id-edicao">
-                
-                <label for="cliente-nome">Nome:</label>
-                <input type="text" id="cliente-nome" required>
-                
-                <label for="cliente-telefone">Telefone:</label>
-                <input type="text" id="cliente-telefone">
-                
-                <button type="submit">Salvar Cliente</button>
-            </form>
-        </div>
-    </div>
-    
-    <div id="modal-view-recibo" class="modal">
-        <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <div id="recibo-content">
+                </select>
+            </div>
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label>Modelo do Veículo</label>
+                    <input type="text" id="recibo-modelo" placeholder="Ex: Honda Civic">
                 </div>
-            <button id="btn-download-pdf">Baixar PDF</button>
-        </div>
+                <div class="form-group">
+                    <label>Placa</label>
+                    <input type="text" id="recibo-placa" placeholder="Ex: ABC-1234">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Tipo de Película</label>
+                <input type="text" id="recibo-pelicula" placeholder="Ex: Nano Cerâmica 5%">
+            </div>
+            <div class="form-group">
+                <label>Serviço</label>
+                <textarea id="recibo-servico" rows="3" required placeholder="Descreva o serviço realizado"></textarea>
+            </div>
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label>Valor (R$)</label>
+                    <input type="number" id="recibo-valor" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>Data</label>
+                    <input type="date" id="recibo-data" required>
+                </div>
+            </div>
+            <div class="btn-row">
+                <button type="submit" class="btn-primary" id="btn-salvar-recibo"><i class="fas fa-download"></i> Baixar Recibo</button>
+            </div>
+        </form>
     </div>
-    
-    <footer>
-        <p>Desenvolvedor - Alex Peixoto - (82)99662-2036</p>
-    </footer>
+</div>
 
-    <script src="https://unpkg.com/@danielgatis/rembg-browser"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script>
-        const btnConfig = document.getElementById('btn-config');
-        const btnAddRecibo = document.getElementById('btn-add-recibo');
-        const btnAddCliente = document.getElementById('btn-add-cliente');
-        const btnDownloadPdf = document.getElementById('btn-download-pdf');
-        
-        const modalConfig = document.getElementById('modal-config');
-        const modalRecibo = document.getElementById('modal-recibo');
-        const modalCliente = document.getElementById('modal-cliente');
-        const modalViewRecibo = document.getElementById('modal-view-recibo');
-        
-        const closeBtns = document.querySelectorAll('.close-btn');
-        
-        const formConfig = document.getElementById('form-config');
-        const formRecibo = document.getElementById('form-recibo');
-        const formCliente = document.getElementById('form-cliente');
-        
-        const tabelaRecibosBody = document.querySelector('#tabela-recibos tbody');
-        const tabelaClientesBody = document.querySelector('#tabela-clientes tbody');
-        const reciboContent = document.getElementById('recibo-content');
-        const loadingMessage = document.getElementById('loading-message');
+<!-- ──────────── MODAL CLIENTE ──────────── -->
+<div id="modal-cliente" class="modal">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <div class="modal-title" id="modal-cliente-titulo-el"><i class="fas fa-user-plus"></i> Cadastrar Cliente</div>
+        <form id="form-cliente">
+            <input type="hidden" id="cliente-id-edicao">
+            <div class="form-grid-2">
+                <div class="form-group form-full">
+                    <label>Nome Completo</label>
+                    <input type="text" id="cliente-nome" required placeholder="Nome do cliente">
+                </div>
+                <div class="form-group">
+                    <label>Telefone / WhatsApp</label>
+                    <input type="text" id="cliente-telefone" placeholder="(82) 99999-9999">
+                </div>
+                <div class="form-group">
+                    <label>CNPJ (opcional)</label>
+                    <input type="text" id="cliente-cnpj" placeholder="Ex: 79.379.491/0182-01">
+                </div>
+            </div>
 
-        let rembgInstance = null;
-        async function loadRembg() {
-            loadingMessage.textContent = 'Carregando removedor de fundo...';
-            loadingMessage.style.display = 'block';
-            rembgInstance = await rembg.load();
-            loadingMessage.style.display = 'none';
-        }
+            <div class="form-group" style="margin-top:4px;">
+                <label>Veículos do Cliente</label>
+                <div class="veiculos-container" id="cliente-veiculos-container">
+                    <!-- veículos adicionados dinamicamente -->
+                </div>
+                <button type="button" class="btn-add-small" id="btn-add-veiculo-cliente">
+                    <i class="fas fa-plus"></i> Adicionar Veículo
+                </button>
+            </div>
 
-        let empresaConfig = JSON.parse(localStorage.getItem('empresaConfig')) || {
-            cnpj: '13.949.583/0001-32',
-            instagram: '@tonyfume',
-            endereco: 'Avenida Juca Sampaio, 1552, Jacintinho',
-            whatsapp: '(82)99806-9585',
-            logo: null,
-            background: null
+            <div class="btn-row">
+                <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Salvar Cliente</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ──────────── MODAL VER RECIBO ──────────── -->
+<div id="modal-view-recibo" class="modal">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <div id="recibo-content"></div>
+        <button class="btn-download" id="btn-download-pdf"><i class="fas fa-download"></i> Baixar PDF</button>
+    </div>
+</div>
+
+<!-- ──────────── MODAL CRIAR ORÇAMENTO ──────────── -->
+<div id="modal-orcamento" class="modal">
+    <div class="modal-content modal-wide">
+        <span class="close-btn">&times;</span>
+        <div class="modal-title blue" id="modal-orcamento-titulo-el"><i class="fas fa-file-invoice-dollar"></i> Criar Orçamento</div>
+        <form id="form-orcamento">
+            <input type="hidden" id="orc-id-edicao">
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label>Empresa / Solicitante</label>
+                    <input type="text" id="orc-empresa" placeholder="Nome do cliente / empresa" required>
+                </div>
+                <div class="form-group">
+                    <label>CNPJ do Solicitante</label>
+                    <input type="text" id="orc-cnpj-solicitante" placeholder="Ex: 79.379.491/0182-01">
+                </div>
+                <div class="form-group">
+                    <label>Modelo do Veículo</label>
+                    <input type="text" id="orc-modelo" placeholder="Ex: Toyota Corolla">
+                </div>
+                <div class="form-group">
+                    <label>Placa do Veículo</label>
+                    <input type="text" id="orc-placa" placeholder="Ex: ABC-1234">
+                </div>
+                <div class="form-group form-full">
+                    <label>Tipo de Película</label>
+                    <input type="text" id="orc-pelicula" placeholder="Ex: Nano Cerâmica 35% — Insulfilm">
+                </div>
+                <div class="form-group">
+                    <label>Data do Orçamento</label>
+                    <input type="date" id="orc-data" required>
+                </div>
+                <div class="form-group">
+                    <label>Validade (dias)</label>
+                    <input type="number" id="orc-validade" value="30" min="1">
+                </div>
+                <div class="form-group form-full">
+                    <label>Observações</label>
+                    <textarea id="orc-obs" rows="2" placeholder="Ex: Orçamento inclui locação de andaimes e todas as despesas."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Condições de Pagamento</label>
+                    <input type="text" id="orc-pagamento" placeholder="Ex: transferência ou Pix" value="transferência ou Pix">
+                </div>
+                <div class="form-group">
+                    <label>Cidade / UF</label>
+                    <input type="text" id="orc-cidade" placeholder="Ex: Maceió (AL)" value="Maceió (AL)">
+                </div>
+            </div>
+
+            <div style="margin-top:14px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                    <label style="font-weight:700;font-size:0.85em;text-transform:uppercase;letter-spacing:0.4px;color:var(--blue);">Itens do Orçamento</label>
+                    <button type="button" id="btn-add-item" class="btn-add-small" style="background:var(--blue);margin:0;">
+                        <i class="fas fa-plus"></i> Adicionar Item
+                    </button>
+                </div>
+                <div style="font-size:0.75em;color:#999;margin-bottom:6px;">Foto | Descrição | Garantia | Valor | Remover</div>
+                <div id="itens-container"></div>
+            </div>
+
+            <div class="btn-row">
+                <button type="submit" class="btn-primary blue"><i class="fas fa-eye"></i> Gerar Pré-visualização</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ──────────── MODAL VER ORÇAMENTO ──────────── -->
+<div id="modal-view-orcamento" class="modal">
+    <div class="modal-content modal-wide">
+        <span class="close-btn">&times;</span>
+        <div id="orcamento-preview"></div>
+        <button class="btn-download" id="btn-download-orc-pdf" style="margin-top:14px;"><i class="fas fa-download"></i> Baixar PDF</button>
+    </div>
+</div>
+
+<!-- ──────────── MODAL HISTÓRICO CLIENTE ──────────── -->
+<div id="modal-hist-cliente" class="modal">
+    <div class="modal-content modal-hist">
+        <span class="close-btn">&times;</span>
+        <div class="modal-title green"><i class="fas fa-history"></i> Histórico do Cliente</div>
+        <div id="hist-cliente-content"></div>
+    </div>
+</div>
+
+<!-- ──────────── MODAL PAINEL FINANCEIRO ──────────── -->
+<div id="modal-financeiro" class="modal">
+    <div class="modal-content modal-financeiro">
+        <span class="close-btn">&times;</span>
+        <div class="modal-title green"><i class="fas fa-chart-line"></i> Painel Financeiro</div>
+
+        <div class="fin-section">
+            <h3><i class="fas fa-calendar-alt"></i> Mês Atual</h3>
+            <div class="fin-cards" id="fin-cards-mes"></div>
+        </div>
+
+        <div id="fin-progresso-container" style="margin:14px 0;">
+            <div style="display:flex;justify-content:space-between;font-size:0.78em;color:#555;margin-bottom:4px;">
+                <span>Progresso do mês</span>
+                <span id="fin-progresso-label">0%</span>
+            </div>
+            <div class="fin-barra-container">
+                <div class="fin-barra verde" id="fin-progresso-barra" style="width:0%"></div>
+            </div>
+            <div style="font-size:0.73em;color:#888;margin-top:3px;" id="fin-progresso-text"></div>
+        </div>
+
+        <div class="fin-projecao" id="fin-projecao-box">
+            <h3><i class="fas fa-chart-bar"></i> PROJEÇÃO PARA O FINAL DO MÊS</h3>
+            <div class="fin-proj-grid" id="fin-projecao-grid"></div>
+        </div>
+
+        <div id="fin-alerta-tendencia"></div>
+
+        <div class="fin-section">
+            <h3><i class="fas fa-history"></i> Histórico dos Últimos 3 Meses</h3>
+            <div class="fin-grafico-meses" id="fin-grafico-meses"></div>
+        </div>
+
+        <div class="fin-section">
+            <h3><i class="fas fa-file-invoice-dollar"></i> Orçamentos em Aberto</h3>
+            <div class="table-wrapper">
+                <table style="margin-top:0;">
+                    <thead>
+                        <tr><th>Nº</th><th>Cliente</th><th>Valor</th><th>Data</th><th>Status</th><th>Ação</th></tr>
+                    </thead>
+                    <tbody id="fin-orc-abertos-body"></tbody>
+                </table>
+            </div>
+            <div id="fin-orc-abertos-total" style="margin-top:10px;font-size:0.88em;"></div>
+        </div>
+
+        <div class="fin-section">
+            <h3><i class="fas fa-piggy-bank"></i> Capitalização & Reserva</h3>
+        </div>
+        <div id="fin-alerta-cap"></div>
+        <div style="background:var(--gray-50);border-radius:8px;padding:14px;border:1px solid var(--gray-200);margin-bottom:14px;">
+            <div style="margin-bottom:10px;">
+                <label style="font-weight:700;font-size:0.82em;color:var(--orange);">🛡️ Reserva de Emergência — recomendado: 10-20%</label>
+                <div class="fin-slider-wrap">
+                    <input type="range" id="slider-reserva" min="0" max="40" value="15" step="1" oninput="atualizarCapitalizacao()">
+                    <span id="val-reserva">15%</span>
+                </div>
+            </div>
+            <div>
+                <label style="font-weight:700;font-size:0.82em;color:var(--blue);">🔄 Capital de Giro — recomendado: 10-30%</label>
+                <div class="fin-slider-wrap">
+                    <input type="range" id="slider-capital" min="0" max="50" value="20" step="1" oninput="atualizarCapitalizacao()">
+                    <span id="val-capital">20%</span>
+                </div>
+            </div>
+        </div>
+        <div class="fin-cap-grid" id="fin-cap-grid"></div>
+        <div id="fin-cap-conselho" style="margin-top:14px;"></div>
+    </div>
+</div>
+
+<!-- ─── SCRIPTS ─── -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+// ╔══════════════════════════════════════════════════════╗
+// ║                      STATE                           ║
+// ╚══════════════════════════════════════════════════════╝
+let empresaConfig = JSON.parse(localStorage.getItem('empresaConfig')) || {
+    nomeEmpresa: 'Tony Fumê', cnpj: '13.949.583/0001-32',
+    instagram: '@tonyfume', endereco: 'Avenida Juca Sampaio, 1552, Jacintinho',
+    whatsapp: '(82)99806-9585', responsavel: '', cargo: '', pix: '',
+    logo: null, background: null
+};
+let recibos   = JSON.parse(localStorage.getItem('recibos'))   || [];
+let clientes  = JSON.parse(localStorage.getItem('clientes'))  || [];
+let orcamentos= JSON.parse(localStorage.getItem('orcamentos'))|| [];
+
+let nextReciboId  = recibos.length   ? Math.max(...recibos.map(r=>r.id))+1   : 1;
+let nextClienteId = clientes.length  ? Math.max(...clientes.map(c=>c.id))+1  : 1;
+let nextOrcId     = orcamentos.length? Math.max(...orcamentos.map(o=>o.id))+1 : 1;
+
+let itensFotos = {};
+
+// ╔══════════════════════════════════════════════════════╗
+// ║                   MODAL HELPERS                      ║
+// ╚══════════════════════════════════════════════════════╝
+function abrirModal(m)  { m.style.display='block'; }
+function fecharModal(m) { m.style.display='none'; }
+
+window.onclick = e => { if (e.target.classList.contains('modal')) fecharModal(e.target); };
+document.querySelectorAll('.close-btn').forEach(b => {
+    b.onclick = () => fecharModal(b.closest('.modal'));
+});
+
+// ╔══════════════════════════════════════════════════════╗
+// ║                      TABS                            ║
+// ╚══════════════════════════════════════════════════════╝
+function trocarTab(tabId, btn, isBlue) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active','active-blue'); });
+    document.getElementById(tabId).classList.add('active');
+    btn.classList.add('active');
+    if (isBlue) btn.classList.add('active-blue');
+}
+
+// ╔══════════════════════════════════════════════════════╗
+// ║                    FORMATAÇÃO                        ║
+// ╚══════════════════════════════════════════════════════╝
+function fmtMoeda(v) { return parseFloat(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
+function fmtData(ds) {
+    if (!ds) return '';
+    const [y,m,d] = ds.split('-');
+    return `${d}/${m}/${y}`;
+}
+function dataExtenso(ds) {
+    if (!ds) return '';
+    const meses=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+    const [y,m,d] = ds.split('-');
+    return `${parseInt(d)} de ${meses[parseInt(m)-1]} de ${y}`;
+}
+function valorExtenso(v) {
+    const n=parseFloat(v); if(isNaN(n)) return '';
+    const inteiro=Math.floor(n), centavos=Math.round((n-inteiro)*100);
+    const u=['','um','dois','três','quatro','cinco','seis','sete','oito','nove','dez','onze','doze','treze','quatorze','quinze','dezesseis','dezessete','dezoito','dezenove'];
+    const d=['','','vinte','trinta','quarenta','cinquenta','sessenta','setenta','oitenta','noventa'];
+    const c=['','cento','duzentos','trezentos','quatrocentos','quinhentos','seiscentos','setecentos','oitocentos','novecentos'];
+    function conv(num) {
+        if(!num) return '';
+        if(num===100) return 'cem';
+        let r=''; const cv=Math.floor(num/100), rest=num%100;
+        if(cv) r+=c[cv];
+        if(cv&&rest) r+=' e ';
+        if(rest>0&&rest<20) r+=u[rest];
+        else if(rest>=20) { r+=d[Math.floor(rest/10)]; if(rest%10) r+=' e '+u[rest%10]; }
+        return r;
+    }
+    let texto='';
+    if(inteiro===0) texto='zero';
+    else if(inteiro<1000) texto=conv(inteiro)+(inteiro===1?' real':' reais');
+    else if(inteiro<1000000) {
+        const mil=Math.floor(inteiro/1000), rest=inteiro%1000;
+        texto=(mil===1?'mil':conv(mil)+' mil');
+        if(rest) texto+=' e '+conv(rest);
+        texto+=' reais';
+    } else {
+        const m2=Math.floor(inteiro/1000000), rest=inteiro%1000000;
+        texto=conv(m2)+(m2===1?' milhão':' milhões');
+        if(rest) texto+=' e '+conv(rest);
+        texto+=' reais';
+    }
+    if(centavos>0) texto+=' e '+(centavos<20?u[centavos]:d[Math.floor(centavos/10)]+(centavos%10?' e '+u[centavos%10]:''))+(centavos===1?' centavo':' centavos');
+    return texto.charAt(0).toUpperCase()+texto.slice(1);
+}
+
+// ╔══════════════════════════════════════════════════════╗
+// ║               CONFIGURAÇÕES / LOGO                   ║
+// ╚══════════════════════════════════════════════════════╝
+function removerFundoCanvas(imgSrc) {
+    return new Promise(resolve => {
+        const img=new Image();
+        img.onload=()=>{
+            const canvas=document.createElement('canvas');
+            const W=img.naturalWidth, H=img.naturalHeight;
+            canvas.width=W; canvas.height=H;
+            const ctx=canvas.getContext('2d');
+            ctx.drawImage(img,0,0);
+            const imageData=ctx.getImageData(0,0,W,H);
+            const data=imageData.data;
+            const pts=[[0,0],[W-1,0],[0,H-1],[W-1,H-1],[Math.floor(W/2),0],[Math.floor(W/2),H-1],[0,Math.floor(H/2)],[W-1,Math.floor(H/2)]];
+            const am=pts.map(([x,y])=>{const i=(y*W+x)*4;return[data[i],data[i+1],data[i+2]];});
+            const bgR=Math.round(am.reduce((s,c)=>s+c[0],0)/am.length);
+            const bgG=Math.round(am.reduce((s,c)=>s+c[1],0)/am.length);
+            const bgB=Math.round(am.reduce((s,c)=>s+c[2],0)/am.length);
+            const TOL=40, SUV=22;
+            for(let i=0;i<data.length;i+=4){
+                const dist=Math.sqrt((data[i]-bgR)**2+(data[i+1]-bgG)**2+(data[i+2]-bgB)**2);
+                if(dist<=TOL) data[i+3]=0;
+                else if(dist<TOL+SUV) data[i+3]=Math.round(((dist-TOL)/SUV)*255);
+            }
+            ctx.putImageData(imageData,0,0);
+            resolve(canvas.toDataURL('image/png'));
         };
+        img.onerror=()=>resolve(imgSrc);
+        img.src=imgSrc;
+    });
+}
 
-        let recibos = JSON.parse(localStorage.getItem('recibos')) || [];
-        let clientes = JSON.parse(localStorage.getItem('clientes')) || [];
-        let proximoReciboId = recibos.length > 0 ? Math.max(...recibos.map(r => r.id)) + 1 : 1;
-        let proximoClienteId = clientes.length > 0 ? Math.max(...clientes.map(c => c.id)) + 1 : 1;
-        
-        function abrirModal(modal) {
-            modal.style.display = 'block';
-        }
-        
-        function fecharModal(modal) {
-            modal.style.display = 'none';
-        }
+function aplicarIdentidadeVisual() {
+    const logoEl=document.getElementById('logo');
+    if(empresaConfig.logo){logoEl.src=empresaConfig.logo;logoEl.style.display='block';}
+    else logoEl.style.display='none';
+    const hbg=document.getElementById('header-bg');
+    if(empresaConfig.background){hbg.src=empresaConfig.background;hbg.style.display='block';}
+    else hbg.style.display='none';
+    if(empresaConfig.nomeEmpresa) document.getElementById('titulo-sistema').textContent=empresaConfig.nomeEmpresa;
+}
 
-        window.onclick = function(event) {
-            if (event.target.classList.contains('modal')) {
-                fecharModal(event.target);
-            }
-        }
-        
-        closeBtns.forEach(btn => {
-            btn.onclick = function() {
-                fecharModal(this.closest('.modal'));
-            };
-        });
+function carregarConfiguracoes() {
+    document.getElementById('config-nome-empresa').value=empresaConfig.nomeEmpresa||'';
+    document.getElementById('config-cnpj').value=empresaConfig.cnpj||'';
+    document.getElementById('config-instagram').value=empresaConfig.instagram||'';
+    document.getElementById('config-endereco').value=empresaConfig.endereco||'';
+    document.getElementById('config-whatsapp').value=empresaConfig.whatsapp||'';
+    document.getElementById('config-responsavel').value=empresaConfig.responsavel||'';
+    document.getElementById('config-cargo').value=empresaConfig.cargo||'';
+    document.getElementById('config-pix').value=empresaConfig.pix||'';
+    aplicarIdentidadeVisual();
+    if(empresaConfig.logo) atualizarPreviewLogo(empresaConfig.logo);
+}
 
-        function formatarMoeda(valor) {
-            return parseFloat(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        }
+function atualizarPreviewLogo(src) {
+    const c=document.getElementById('logo-preview-container');
+    const img=document.getElementById('logo-preview');
+    if(src){img.src=src;c.style.display='block';} else c.style.display='none';
+}
 
-        function carregarConfiguracoes() {
-            document.getElementById('config-cnpj').value = empresaConfig.cnpj || '';
-            document.getElementById('config-instagram').value = empresaConfig.instagram || '';
-            document.getElementById('config-endereco').value = empresaConfig.endereco || '';
-            document.getElementById('config-whatsapp').value = empresaConfig.whatsapp || '';
+document.getElementById('config-logo').addEventListener('change',async e=>{
+    const file=e.target.files[0]; if(!file) return;
+    const usarRembg=document.getElementById('config-logo-rembg').checked;
+    const reader=new FileReader();
+    reader.onload=async ev=>{
+        if(!usarRembg){
+            empresaConfig.logo=ev.target.result;
+            localStorage.setItem('empresaConfig',JSON.stringify(empresaConfig));
+            aplicarIdentidadeVisual(); atualizarPreviewLogo(ev.target.result); return;
+        }
+        const lm=document.getElementById('loading-message');
+        lm.style.display='block';
+        try{ empresaConfig.logo=await removerFundoCanvas(ev.target.result); }
+        catch(err){ empresaConfig.logo=ev.target.result; }
+        localStorage.setItem('empresaConfig',JSON.stringify(empresaConfig));
+        lm.style.display='none'; aplicarIdentidadeVisual(); atualizarPreviewLogo(empresaConfig.logo);
+    };
+    reader.readAsDataURL(file);
+});
 
-            const logoElement = document.getElementById('logo');
-            if (empresaConfig.logo) {
-                logoElement.src = empresaConfig.logo;
-                logoElement.style.display = 'block';
-            } else {
-                logoElement.style.display = 'none';
-            }
-        }
-        
-        function salvarConfiguracoes() {
-            empresaConfig.cnpj = document.getElementById('config-cnpj').value;
-            empresaConfig.instagram = document.getElementById('config-instagram').value;
-            empresaConfig.endereco = document.getElementById('config-endereco').value;
-            empresaConfig.whatsapp = document.getElementById('config-whatsapp').value;
-            
-            localStorage.setItem('empresaConfig', JSON.stringify(empresaConfig));
-            carregarConfiguracoes();
-            fecharModal(modalConfig);
-        }
+document.getElementById('config-background').addEventListener('change',e=>{
+    const file=e.target.files[0]; if(!file) return;
+    const reader=new FileReader();
+    reader.onload=ev=>{ empresaConfig.background=ev.target.result; localStorage.setItem('empresaConfig',JSON.stringify(empresaConfig)); aplicarIdentidadeVisual(); };
+    reader.readAsDataURL(file);
+});
 
-        formConfig.addEventListener('submit', (e) => {
-            e.preventDefault();
-            salvarConfiguracoes();
-        });
+document.getElementById('btn-remover-logo').addEventListener('click',()=>{
+    empresaConfig.logo=null; localStorage.setItem('empresaConfig',JSON.stringify(empresaConfig));
+    aplicarIdentidadeVisual(); atualizarPreviewLogo(null);
+    document.getElementById('config-logo').value='';
+});
 
-        document.getElementById('config-logo').addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                loadingMessage.textContent = 'Removendo o fundo da imagem...';
-                loadingMessage.style.display = 'block';
-                
-                const reader = new FileReader();
-                reader.onload = async (event) => {
-                    const img = new Image();
-                    img.onload = async () => {
-                        if (!rembgInstance) {
-                            await loadRembg();
-                        }
-                        const output = await rembgInstance.remove(img);
-                        empresaConfig.logo = output.toDataURL('image/png');
-                        loadingMessage.style.display = 'none';
-                        salvarConfiguracoes();
-                    };
-                    img.src = event.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
+document.getElementById('form-config').addEventListener('submit',e=>{
+    e.preventDefault();
+    empresaConfig.nomeEmpresa=document.getElementById('config-nome-empresa').value;
+    empresaConfig.cnpj=document.getElementById('config-cnpj').value;
+    empresaConfig.instagram=document.getElementById('config-instagram').value;
+    empresaConfig.endereco=document.getElementById('config-endereco').value;
+    empresaConfig.whatsapp=document.getElementById('config-whatsapp').value;
+    empresaConfig.responsavel=document.getElementById('config-responsavel').value;
+    empresaConfig.cargo=document.getElementById('config-cargo').value;
+    empresaConfig.pix=document.getElementById('config-pix').value;
+    localStorage.setItem('empresaConfig',JSON.stringify(empresaConfig));
+    carregarConfiguracoes(); fecharModal(document.getElementById('modal-config'));
+});
 
-        document.getElementById('config-background').addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    empresaConfig.background = event.target.result;
-                    salvarConfiguracoes();
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-        
-        function renderizarRecibos() {
-            tabelaRecibosBody.innerHTML = '';
-            let valorTotal = 0;
-            
-            recibos.forEach(recibo => {
-                const cliente = clientes.find(c => c.id === recibo.clienteId);
-                if (!cliente) return;
-                
-                valorTotal += parseFloat(recibo.valor);
-                
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${recibo.id}</td>
-                    <td>${cliente.nome}</td>
-                    <td>${formatarMoeda(recibo.valor)}</td>
-                    <td>${recibo.data}</td>
-                    <td>
-                        <button class="btn-acao" onclick="visualizarRecibo(${recibo.id})"><i class="fas fa-eye"></i></button>
-                        <button class="btn-acao" onclick="editarRecibo(${recibo.id})"><i class="fas fa-edit"></i></button>
-                        <button class="btn-acao" onclick="excluirRecibo(${recibo.id})"><i class="fas fa-trash-alt"></i></button>
-                    </td>
-                `;
-                tabelaRecibosBody.appendChild(tr);
-            });
-            
-            document.getElementById('total-recibos').textContent = recibos.length;
-            document.getElementById('valor-total').textContent = formatarMoeda(valorTotal);
-        }
+document.getElementById('btn-config').addEventListener('click',()=>abrirModal(document.getElementById('modal-config')));
 
-        function renderizarClientes() {
-            tabelaClientesBody.innerHTML = '';
-            const selectClienteRecibo = document.getElementById('recibo-cliente');
-            selectClienteRecibo.innerHTML = '<option value="" disabled selected>Selecione um cliente</option>';
-            
-            clientes.forEach(cliente => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${cliente.nome}</td>
-                    <td>${cliente.telefone}</td>
-                    <td>
-                        <button class="btn-acao" onclick="editarCliente(${cliente.id})"><i class="fas fa-edit"></i></button>
-                        <button class="btn-acao" onclick="excluirCliente(${cliente.id})"><i class="fas fa-trash-alt"></i></button>
-                    </td>
-                `;
-                tabelaClientesBody.appendChild(tr);
-                
-                const option = document.createElement('option');
-                option.value = cliente.id;
-                option.textContent = cliente.nome;
-                selectClienteRecibo.appendChild(option);
-            });
-        }
-        
-        function salvarRecibo(recibo) {
-            const index = recibos.findIndex(r => r.id === recibo.id);
-            if (index > -1) {
-                recibos[index] = recibo;
-            } else {
-                recibo.id = proximoReciboId++;
-                recibos.push(recibo);
-            }
-            localStorage.setItem('recibos', JSON.stringify(recibos));
-            renderizarRecibos();
-            return recibo.id;
-        }
+// ╔══════════════════════════════════════════════════════╗
+// ║                VEÍCULOS (WIDGET)                     ║
+// ╚══════════════════════════════════════════════════════╝
+function adicionarVeiculoCliente(veiculo) {
+    const container=document.getElementById('cliente-veiculos-container');
+    const div=document.createElement('div');
+    div.className='veiculo-row';
+    div.innerHTML=`
+        <div class="form-group" style="margin:0;">
+            <label style="font-size:0.75em;">Modelo</label>
+            <input type="text" class="veiculo-modelo" placeholder="Ex: Honda Civic" value="${veiculo?veiculo.modelo:''}">
+        </div>
+        <div class="form-group" style="margin:0;">
+            <label style="font-size:0.75em;">Placa</label>
+            <input type="text" class="veiculo-placa" placeholder="ABC-1234" value="${veiculo?veiculo.placa:''}">
+        </div>
+        <div class="form-group" style="margin:0;">
+            <label style="font-size:0.75em;">Cor</label>
+            <input type="text" class="veiculo-cor" placeholder="Preto" value="${veiculo?veiculo.cor:''}">
+        </div>
+        <button type="button" class="btn-rm-veiculo" onclick="this.closest('.veiculo-row').remove()">
+            <i class="fas fa-times"></i>
+        </button>`;
+    container.appendChild(div);
+}
 
-        function salvarCliente(cliente) {
-            const index = clientes.findIndex(c => c.id === cliente.id);
-            if (index > -1) {
-                clientes[index] = cliente;
-            } else {
-                cliente.id = proximoClienteId++;
-                clientes.push(cliente);
-            }
-            localStorage.setItem('clientes', JSON.stringify(clientes));
-            renderizarClientes();
-            fecharModal(modalCliente);
-        }
-        
-        formRecibo.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const recibo = {
-                id: document.getElementById('recibo-id-edicao').value ? parseInt(document.getElementById('recibo-id-edicao').value) : null,
-                clienteId: parseInt(document.getElementById('recibo-cliente').value),
-                servico: document.getElementById('recibo-servico').value,
-                valor: parseFloat(document.getElementById('recibo-valor').value),
-                data: document.getElementById('recibo-data').value,
-            };
-            const novoId = salvarRecibo(recibo);
-            e.target.reset();
-            fecharModal(modalRecibo);
-            
-            if (novoId) {
-                visualizarRecibo(novoId, true);
-            }
-        });
+function coletarVeiculosCliente() {
+    return Array.from(document.querySelectorAll('#cliente-veiculos-container .veiculo-row')).map(row=>({
+        modelo: row.querySelector('.veiculo-modelo').value.trim(),
+        placa: row.querySelector('.veiculo-placa').value.trim(),
+        cor: row.querySelector('.veiculo-cor').value.trim()
+    })).filter(v=>v.modelo||v.placa);
+}
 
-        function baixarReciboPdf() {
-            window.jsPDF = window.jspdf.jsPDF;
-            const doc = new jsPDF('p', 'pt', 'a4');
-            const element = document.getElementById('recibo-content');
-            
-            html2canvas(element, { scale: 2 }).then((canvas) => {
-                const imgData = canvas.toDataURL('image/png');
-                const imgWidth = 595.28;
-                const pageHeight = 841.89;
-                const margin = 20;
-                
-                const imgHeight = (canvas.height * (imgWidth - (2 * margin))) / canvas.width;
-                
-                doc.addImage(imgData, 'PNG', margin, margin, imgWidth - (2 * margin), imgHeight);
+document.getElementById('btn-add-veiculo-cliente').addEventListener('click',()=>adicionarVeiculoCliente(null));
 
-                doc.save('recibo.pdf');
-                fecharModal(modalViewRecibo);
-            });
-        }
-        
-        formCliente.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const cliente = {
-                id: document.getElementById('cliente-id-edicao').value ? parseInt(document.getElementById('cliente-id-edicao').value) : null,
-                nome: document.getElementById('cliente-nome').value,
-                telefone: document.getElementById('cliente-telefone').value,
-            };
-            salvarCliente(cliente);
-            e.target.reset();
-        });
+// ╔══════════════════════════════════════════════════════╗
+// ║                    CLIENTES                          ║
+// ╚══════════════════════════════════════════════════════╝
+function renderizarClientes() {
+    const tbody=document.querySelector('#tabela-clientes tbody');
+    tbody.innerHTML='';
+    const selRecibo=document.getElementById('recibo-cliente');
+    selRecibo.innerHTML='<option value="" disabled selected>Selecione um cliente</option>';
 
-        function editarRecibo(id) {
-            const recibo = recibos.find(r => r.id === id);
-            if (!recibo) return;
-            document.getElementById('modal-recibo-titulo').textContent = 'Editar Recibo';
-            document.getElementById('recibo-id-edicao').value = recibo.id;
-            document.getElementById('recibo-cliente').value = recibo.clienteId;
-            document.getElementById('recibo-servico').value = recibo.servico;
-            document.getElementById('recibo-valor').value = recibo.valor;
-            document.getElementById('recibo-data').value = recibo.data;
-            document.getElementById('btn-salvar-recibo').textContent = 'Salvar Recibo';
-            const formReciboSubmitHandler = (e) => {
-                e.preventDefault();
-                const reciboEditado = {
-                    id: parseInt(document.getElementById('recibo-id-edicao').value),
-                    clienteId: parseInt(document.getElementById('recibo-cliente').value),
-                    servico: document.getElementById('recibo-servico').value,
-                    valor: parseFloat(document.getElementById('recibo-valor').value),
-                    data: document.getElementById('recibo-data').value,
-                };
-                salvarRecibo(reciboEditado);
-                fecharModal(modalRecibo);
-                formRecibo.removeEventListener('submit', formReciboSubmitHandler);
-                formRecibo.addEventListener('submit', formReciboDefaultHandler);
-            };
-            const formReciboDefaultHandler = (e) => {
-                e.preventDefault();
-                const recibo = {
-                    id: document.getElementById('recibo-id-edicao').value ? parseInt(document.getElementById('recibo-id-edicao').value) : null,
-                    clienteId: parseInt(document.getElementById('recibo-cliente').value),
-                    servico: document.getElementById('recibo-servico').value,
-                    valor: parseFloat(document.getElementById('recibo-valor').value),
-                    data: document.getElementById('recibo-data').value,
-                };
-                const novoId = salvarRecibo(recibo);
-                e.target.reset();
-                fecharModal(modalRecibo);
-                if (novoId) {
-                    visualizarRecibo(novoId, true);
-                }
-            };
-            formRecibo.removeEventListener('submit', formReciboDefaultHandler);
-            formRecibo.addEventListener('submit', formReciboSubmitHandler);
-            abrirModal(modalRecibo);
-        }
-        
-        function excluirRecibo(id) {
-            if (confirm('Tem certeza que deseja excluir este recibo?')) {
-                recibos = recibos.filter(r => r.id !== id);
-                localStorage.setItem('recibos', JSON.stringify(recibos));
-                renderizarRecibos();
-            }
-        }
-        
-        function editarCliente(id) {
-            const cliente = clientes.find(c => c.id === id);
-            if (!cliente) return;
-            document.getElementById('modal-cliente-titulo').textContent = 'Editar Cliente';
-            document.getElementById('cliente-id-edicao').value = cliente.id;
-            document.getElementById('cliente-nome').value = cliente.nome;
-            document.getElementById('cliente-telefone').value = cliente.telefone;
-            abrirModal(modalCliente);
-        }
-        
-        function excluirCliente(id) {
-            if (confirm('Tem certeza que deseja excluir este cliente?')) {
-                clientes = clientes.filter(c => c.id !== id);
-                localStorage.setItem('clientes', JSON.stringify(clientes));
-                renderizarClientes();
-            }
-        }
+    clientes.forEach(c=>{
+        const recCli=recibos.filter(r=>r.clienteId===c.id).length;
+        const orcCli=orcamentos.filter(o=>o.clienteId===c.id||o.empresa===c.nome).length;
+        const veiculos=c.veiculos||[];
+        const veiculosHtml=veiculos.slice(0,2).map(v=>`<span style="background:#f0f0f0;border-radius:10px;padding:2px 8px;font-size:0.75em;margin:1px;display:inline-block;">${v.modelo||''} ${v.placa?'•'+v.placa:''}</span>`).join('')+(veiculos.length>2?`<span style="font-size:0.75em;color:#888;"> +${veiculos.length-2}</span>`:'');
 
-        function visualizarRecibo(id, baixarAutomaticamente = false) {
-            const recibo = recibos.find(r => r.id === id);
-            const cliente = clientes.find(c => c.id === recibo.clienteId);
-            
-            const conteudo = `
-                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;">
-                    ${empresaConfig.background ? `<img src="${empresaConfig.background}" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.1;"/>` : ''}
+        const tr=document.createElement('tr');
+        tr.innerHTML=`
+            <td style="font-weight:600;">${c.nome}</td>
+            <td>${c.telefone||'—'}</td>
+            <td>${c.cnpj||'—'}</td>
+            <td>${veiculosHtml||'—'}</td>
+            <td><span class="badge badge-red">${recCli}</span></td>
+            <td><span class="badge">${orcCli}</span></td>
+            <td>
+                <button class="btn-acao hist" title="Histórico" onclick="verHistoricoCliente(${c.id})"><i class="fas fa-history"></i></button>
+                <button class="btn-acao" title="Editar" onclick="editarCliente(${c.id})"><i class="fas fa-edit"></i></button>
+                <button class="btn-acao" title="Excluir" onclick="excluirCliente(${c.id})"><i class="fas fa-trash-alt"></i></button>
+            </td>`;
+        tbody.appendChild(tr);
+
+        const opt=document.createElement('option');
+        opt.value=c.id; opt.textContent=c.nome;
+        selRecibo.appendChild(opt);
+    });
+
+    document.getElementById('total-clientes').textContent=clientes.length;
+}
+
+function salvarCliente(c) {
+    const idx=clientes.findIndex(x=>x.id===c.id);
+    if(idx>-1) clientes[idx]=c;
+    else { c.id=nextClienteId++; clientes.push(c); }
+    localStorage.setItem('clientes',JSON.stringify(clientes));
+    renderizarClientes(); fecharModal(document.getElementById('modal-cliente'));
+}
+
+function editarCliente(id) {
+    const c=clientes.find(x=>x.id===id); if(!c) return;
+    document.getElementById('modal-cliente-titulo-el').innerHTML='<i class="fas fa-edit"></i> Editar Cliente';
+    document.getElementById('cliente-id-edicao').value=c.id;
+    document.getElementById('cliente-nome').value=c.nome;
+    document.getElementById('cliente-telefone').value=c.telefone||'';
+    document.getElementById('cliente-cnpj').value=c.cnpj||'';
+    // Veículos
+    document.getElementById('cliente-veiculos-container').innerHTML='';
+    (c.veiculos||[]).forEach(v=>adicionarVeiculoCliente(v));
+    abrirModal(document.getElementById('modal-cliente'));
+}
+
+function excluirCliente(id) {
+    if(!confirm('Excluir este cliente?')) return;
+    clientes=clientes.filter(c=>c.id!==id);
+    localStorage.setItem('clientes',JSON.stringify(clientes));
+    renderizarClientes();
+}
+
+document.getElementById('form-cliente').addEventListener('submit',e=>{
+    e.preventDefault();
+    const c={
+        id: document.getElementById('cliente-id-edicao').value ? parseInt(document.getElementById('cliente-id-edicao').value) : null,
+        nome: document.getElementById('cliente-nome').value,
+        telefone: document.getElementById('cliente-telefone').value,
+        cnpj: document.getElementById('cliente-cnpj').value,
+        veiculos: coletarVeiculosCliente()
+    };
+    salvarCliente(c); e.target.reset();
+    document.getElementById('cliente-veiculos-container').innerHTML='';
+});
+
+document.getElementById('btn-add-cliente').addEventListener('click',()=>{
+    document.getElementById('modal-cliente-titulo-el').innerHTML='<i class="fas fa-user-plus"></i> Cadastrar Cliente';
+    document.getElementById('cliente-id-edicao').value='';
+    document.getElementById('form-cliente').reset();
+    document.getElementById('cliente-veiculos-container').innerHTML='';
+    abrirModal(document.getElementById('modal-cliente'));
+});
+
+// ╔══════════════════════════════════════════════════════╗
+// ║              HISTÓRICO POR CLIENTE                   ║
+// ╚══════════════════════════════════════════════════════╝
+function verHistoricoCliente(id) {
+    const c=clientes.find(x=>x.id===id); if(!c) return;
+    const recCli=recibos.filter(r=>r.clienteId===id);
+    const orcCli=orcamentos.filter(o=>o.clienteId===id||o.empresa===c.nome);
+    const veiculos=c.veiculos||[];
+    const totalRecibos=recCli.reduce((s,r)=>s+parseFloat(r.valor||0),0);
+
+    const veiculosHtml=veiculos.length
+        ? veiculos.map(v=>`<span class="hist-veiculo-chip"><i class="fas fa-car"></i> ${v.modelo||'Veículo'} ${v.placa?'• '+v.placa:''} ${v.cor?'• '+v.cor:''}</span>`).join('')
+        : '<span style="color:#999;font-size:0.85em;">Nenhum veículo cadastrado</span>';
+
+    const recibosHTML=recCli.length
+        ? `<table><thead><tr><th>ID</th><th>Veículo / Placa</th><th>Película</th><th>Serviço</th><th>Valor</th><th>Data</th><th>Ver</th></tr></thead><tbody>`
+          +recCli.map(r=>`<tr>
+            <td>#${r.id}</td>
+            <td>${r.modelo||'—'}${r.placa?' / '+r.placa:''}</td>
+            <td>${r.pelicula||'—'}</td>
+            <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${r.servico}">${r.servico}</td>
+            <td style="font-weight:700;">${fmtMoeda(r.valor)}</td>
+            <td>${fmtData(r.data)}</td>
+            <td><button class="btn-acao view" onclick="visualizarRecibo(${r.id})"><i class="fas fa-eye"></i></button></td>
+          </tr>`).join('')+'</tbody></table>'
+        : '<p style="color:#999;font-size:0.85em;">Nenhum recibo encontrado.</p>';
+
+    const orcamentosHTML=orcCli.length
+        ? `<table><thead><tr><th>Nº</th><th>Veículo / Placa</th><th>Película</th><th>Valor</th><th>Data</th><th>Status</th><th>Ver</th></tr></thead><tbody>`
+          +orcCli.map(o=>{
+            const t=calcularTotalOrcamento(o.itens);
+            const s=o.status||'pendente';
+            return `<tr>
+              <td>#${o.id}</td>
+              <td>${o.modelo||'—'}${o.placa?' / '+o.placa:''}</td>
+              <td>${o.pelicula||'—'}</td>
+              <td style="font-weight:700;">${fmtMoeda(t)}</td>
+              <td>${fmtData(o.data)}</td>
+              <td><span class="status-badge status-${s}">${s.charAt(0).toUpperCase()+s.slice(1)}</span></td>
+              <td><button class="btn-acao view" onclick="visualizarOrcamento(${o.id})"><i class="fas fa-eye"></i></button></td>
+            </tr>`;}).join('')+'</tbody></table>'
+        : '<p style="color:#999;font-size:0.85em;">Nenhum orçamento encontrado.</p>';
+
+    document.getElementById('hist-cliente-content').innerHTML=`
+        <div class="hist-cliente-info">
+            <h3>${c.nome}</h3>
+            <p>${c.telefone||''} ${c.cnpj?'| CNPJ: '+c.cnpj:''}</p>
+            <p style="margin-top:6px;font-weight:700;color:var(--green);">Total gasto: ${fmtMoeda(totalRecibos)}</p>
+        </div>
+        <div class="hist-veiculos">
+            <h4>Veículos Cadastrados</h4>
+            ${veiculosHtml}
+        </div>
+        <div class="hist-section">
+            <h4><i class="fas fa-file-alt"></i> Recibos (${recCli.length})</h4>
+            <div class="table-wrapper">${recibosHTML}</div>
+        </div>
+        <div class="hist-section">
+            <h4><i class="fas fa-file-invoice-dollar"></i> Orçamentos (${orcCli.length})</h4>
+            <div class="table-wrapper">${orcamentosHTML}</div>
+        </div>`;
+    abrirModal(document.getElementById('modal-hist-cliente'));
+}
+
+// ╔══════════════════════════════════════════════════════╗
+// ║                     RECIBOS                          ║
+// ╚══════════════════════════════════════════════════════╝
+function renderizarRecibos() {
+    const tbody=document.querySelector('#tabela-recibos tbody');
+    tbody.innerHTML=''; let total=0;
+
+    recibos.forEach(r=>{
+        const c=clientes.find(x=>x.id===r.clienteId); if(!c) return;
+        total+=parseFloat(r.valor);
+        const tr=document.createElement('tr');
+        tr.innerHTML=`
+            <td>#${r.id}</td>
+            <td style="font-weight:600;">${c.nome}</td>
+            <td>${r.modelo||'—'}${r.placa?' <span style="color:#888;font-size:0.85em;">/ '+r.placa+'</span>':''}</td>
+            <td>${r.pelicula||'—'}</td>
+            <td style="font-weight:700;">${fmtMoeda(r.valor)}</td>
+            <td>${fmtData(r.data)}</td>
+            <td>
+                <button class="btn-acao view" title="Visualizar" onclick="visualizarRecibo(${r.id})"><i class="fas fa-eye"></i></button>
+                <button class="btn-acao" title="Editar" onclick="editarRecibo(${r.id})"><i class="fas fa-edit"></i></button>
+                <button class="btn-acao" title="Excluir" onclick="excluirRecibo(${r.id})"><i class="fas fa-trash-alt"></i></button>
+            </td>`;
+        tbody.appendChild(tr);
+    });
+
+    document.getElementById('total-recibos').textContent=recibos.length;
+    document.getElementById('valor-total').textContent=fmtMoeda(total);
+
+    const hoje=new Date();
+    const receitaMes=recibos.filter(r=>{
+        const d=new Date(r.data+'T12:00:00');
+        return d.getMonth()===hoje.getMonth()&&d.getFullYear()===hoje.getFullYear();
+    }).reduce((s,r)=>s+parseFloat(r.valor),0);
+    document.getElementById('receita-mes-resumo').textContent=fmtMoeda(receitaMes);
+}
+
+function salvarRecibo(r) {
+    const idx=recibos.findIndex(x=>x.id===r.id);
+    if(idx>-1) recibos[idx]=r; else { r.id=nextReciboId++; recibos.push(r); }
+    localStorage.setItem('recibos',JSON.stringify(recibos));
+    renderizarRecibos(); return r.id;
+}
+
+function visualizarRecibo(id, baixarAuto=false) {
+    const r=recibos.find(x=>x.id===id); if(!r) return;
+    const c=clientes.find(x=>x.id===r.clienteId);
+    const nome=c?c.nome:'(cliente removido)';
+
+    const bgHtml=empresaConfig.background?`<img class="recibo-bg-img" src="${empresaConfig.background}" alt="">`:'';
+    const logoHtml=empresaConfig.logo?`<img src="${empresaConfig.logo}" alt="Logo">`:'';
+
+    const veiculoInfo=(r.modelo||r.placa)
+        ?`<div class="recibo-info-box"><h4>Veículo / Placa</h4><p>${r.modelo||''}${r.placa?' — '+r.placa:''}</p></div>`
+        :'';
+    const peliculaInfo=r.pelicula
+        ?`<div class="recibo-info-box"><h4>Tipo de Película</h4><p>${r.pelicula}</p></div>`:'';
+
+    document.getElementById('recibo-content').innerHTML=`
+        ${bgHtml}
+        <div class="recibo-inner">
+            <div class="recibo-header">
+                ${logoHtml}
+                <h3>Recibo de Serviço</h3>
+                <div class="recibo-divider"></div>
+            </div>
+            <div class="recibo-body">
+                <div class="recibo-info-grid">
+                    <div class="recibo-info-box"><h4>Recebemos de:</h4><p>${nome}</p></div>
+                    <div class="recibo-info-box"><h4>Valor:</h4><p style="color:var(--green);font-size:1.1em;">${fmtMoeda(r.valor)}</p></div>
+                    ${veiculoInfo}
+                    ${peliculaInfo}
+                    <div class="recibo-info-box" ${!r.modelo&&!r.placa?'style="grid-column:1/-1"':''}><h4>Serviço referente:</h4><p>${r.servico}</p></div>
+                    <div class="recibo-info-box"><h4>Data:</h4><p>${fmtData(r.data)}</p></div>
                 </div>
-                <div class="recibo-header">
-                    ${empresaConfig.logo ? `<img src="${empresaConfig.logo}" alt="Logo da Empresa">` : ''}
-                    <h3>RECIBO DE SERVIÇO</h3>
+                <div class="recibo-assinatura">
+                    <div class="linha"></div>
+                    <p>Assinatura do Responsável</p>
+                    <p style="font-weight:600;">${empresaConfig.instagram}</p>
                 </div>
-                <div class="recibo-body">
-                    <div class="recibo-info-grid">
-                        <div class="recibo-info-box">
-                            <h4>Recebemos de:</h4>
-                            <p>${cliente.nome}</p>
-                        </div>
-                        <div class="recibo-info-box">
-                            <h4>Valor:</h4>
-                            <p>${formatarMoeda(recibo.valor)}</p>
-                        </div>
-                        <div class="recibo-info-box">
-                            <h4>Serviço referente:</h4>
-                            <p>${recibo.servico}</p>
-                        </div>
-                        <div class="recibo-info-box">
-                            <h4>Data:</h4>
-                            <p>${new Date(recibo.data).toLocaleDateString('pt-BR')}</p>
-                        </div>
-                    </div>
-                    
-                    <div class="recibo-assinatura">
-                        <div class="linha-assinatura"></div>
-                        <p>Assinatura do Responsável</p>
-                        <p>${empresaConfig.instagram}</p>
-                    </div>
+            </div>
+            <div class="recibo-footer">
+                <div class="recibo-contatos">
+                    <div class="recibo-contato"><i class="fas fa-phone"></i> ${empresaConfig.whatsapp}</div>
+                    ${empresaConfig.instagram?`<div class="recibo-contato"><i class="fab fa-instagram"></i> ${empresaConfig.instagram}</div>`:''}
                 </div>
-                <div class="recibo-footer">
-                    <div class="contato-container">
-                        <div class="contato-item">
-                            <i class="fas fa-whatsapp"></i>
-                            <p>${empresaConfig.whatsapp}</p>
-                        </div>
-                        <div class="contato-item">
-                            <i class="fas fa-envelope"></i>
-                            <p>contato@tonyfume.com.br</p>
-                        </div>
-                    </div>
-                    <p><strong>CNPJ:</strong> ${empresaConfig.cnpj}</p>
-                    <p>${empresaConfig.endereco}</p>
-                </div>
-            `;
-            reciboContent.innerHTML = conteudo;
-            abrirModal(modalViewRecibo);
+                <p><strong>CNPJ:</strong> ${empresaConfig.cnpj}</p>
+                <p>${empresaConfig.endereco}</p>
+            </div>
+        </div>`;
+    abrirModal(document.getElementById('modal-view-recibo'));
+    if(baixarAuto) setTimeout(baixarReciboPdf, 600);
+}
 
-            if (baixarAutomaticamente) {
-                setTimeout(baixarReciboPdf, 500);
+function editarRecibo(id) {
+    const r=recibos.find(x=>x.id===id); if(!r) return;
+    document.getElementById('modal-recibo-titulo-el').innerHTML='<i class="fas fa-edit"></i> Editar Recibo';
+    document.getElementById('recibo-id-edicao').value=r.id;
+    document.getElementById('recibo-cliente').value=r.clienteId;
+    document.getElementById('recibo-modelo').value=r.modelo||'';
+    document.getElementById('recibo-placa').value=r.placa||'';
+    document.getElementById('recibo-pelicula').value=r.pelicula||'';
+    document.getElementById('recibo-servico').value=r.servico;
+    document.getElementById('recibo-valor').value=r.valor;
+    document.getElementById('recibo-data').value=r.data;
+    document.getElementById('btn-salvar-recibo').innerHTML='<i class="fas fa-save"></i> Salvar';
+    abrirModal(document.getElementById('modal-recibo'));
+}
+
+function excluirRecibo(id) {
+    if(!confirm('Excluir este recibo?')) return;
+    recibos=recibos.filter(r=>r.id!==id);
+    localStorage.setItem('recibos',JSON.stringify(recibos));
+    renderizarRecibos();
+}
+
+document.getElementById('form-recibo').addEventListener('submit',e=>{
+    e.preventDefault();
+    const r={
+        id: document.getElementById('recibo-id-edicao').value?parseInt(document.getElementById('recibo-id-edicao').value):null,
+        clienteId: parseInt(document.getElementById('recibo-cliente').value),
+        modelo: document.getElementById('recibo-modelo').value,
+        placa: document.getElementById('recibo-placa').value,
+        pelicula: document.getElementById('recibo-pelicula').value,
+        servico: document.getElementById('recibo-servico').value,
+        valor: parseFloat(document.getElementById('recibo-valor').value),
+        data: document.getElementById('recibo-data').value,
+    };
+    const newId=salvarRecibo(r);
+    e.target.reset();
+    document.getElementById('recibo-id-edicao').value='';
+    document.getElementById('btn-salvar-recibo').innerHTML='<i class="fas fa-download"></i> Baixar Recibo';
+    fecharModal(document.getElementById('modal-recibo'));
+    visualizarRecibo(newId, true);
+});
+
+document.getElementById('btn-add-recibo').addEventListener('click',()=>{
+    document.getElementById('modal-recibo-titulo-el').innerHTML='<i class="fas fa-file-alt"></i> Criar Novo Recibo';
+    document.getElementById('recibo-id-edicao').value='';
+    document.getElementById('btn-salvar-recibo').innerHTML='<i class="fas fa-download"></i> Baixar Recibo';
+    document.getElementById('form-recibo').reset();
+    abrirModal(document.getElementById('modal-recibo'));
+});
+
+// ─── PDF RECIBO ───
+function baixarReciboPdf() {
+    window.jsPDF=window.jspdf.jsPDF;
+    const doc=new jsPDF('p','mm','a5');
+    const el=document.getElementById('recibo-content');
+    html2canvas(el,{scale:2.5,useCORS:true,backgroundColor:'#ffffff'}).then(canvas=>{
+        const imgData=canvas.toDataURL('image/png');
+        const pageW=148.5, pageH=210;
+        const margin=8;
+        const usableW=pageW-2*margin;
+        const imgH=(canvas.height*(usableW))/canvas.width;
+        doc.addImage(imgData,'PNG',margin,margin,usableW,Math.min(imgH,pageH-2*margin));
+        doc.save(`recibo_${Date.now()}.pdf`);
+        fecharModal(document.getElementById('modal-view-recibo'));
+    });
+}
+document.getElementById('btn-download-pdf').onclick=baixarReciboPdf;
+
+// ╔══════════════════════════════════════════════════════╗
+// ║                   ORÇAMENTOS                         ║
+// ╚══════════════════════════════════════════════════════╝
+function adicionarItemOrcamento(item) {
+    const idx=document.getElementById('itens-container').children.length;
+    const div=document.createElement('div');
+    div.className='item-orc-row';
+    div.dataset.idx=idx;
+    div.innerHTML=`
+        <div>
+            <label class="img-upload-label" for="item-foto-${idx}"><i class="fas fa-image"></i><br>Foto</label>
+            <input type="file" id="item-foto-${idx}" accept="image/*" style="display:none;" onchange="carregarFotoItem(this,${idx})">
+            <img id="item-foto-prev-${idx}" class="item-img-preview" src="">
+        </div>
+        <textarea placeholder="Descrição&#10;Ex: Aplicação de película nano cerâmica&#10;Medidas: 8,80m x 2,65m">${item?item.descricao:''}</textarea>
+        <input type="text" placeholder="Garantia&#10;Ex: 10 anos" value="${item?item.garantia:''}">
+        <input type="text" placeholder="Valor&#10;Ex: R$ 1.500,00" value="${item?item.valor:''}">
+        <button type="button" class="btn-rm-item" onclick="removerItem(this)"><i class="fas fa-times"></i></button>`;
+    if(item&&item.foto){
+        itensFotos[idx]=item.foto;
+        const img=div.querySelector(`#item-foto-prev-${idx}`);
+        img.src=item.foto; img.style.display='block';
+    }
+    document.getElementById('itens-container').appendChild(div);
+}
+
+function carregarFotoItem(input,idx) {
+    if(!input.files[0]) return;
+    const reader=new FileReader();
+    reader.onload=e=>{
+        itensFotos[idx]=e.target.result;
+        const img=document.getElementById(`item-foto-prev-${idx}`);
+        img.src=e.target.result; img.style.display='block';
+    };
+    reader.readAsDataURL(input.files[0]);
+}
+
+function removerItem(btn) { btn.closest('.item-orc-row').remove(); }
+document.getElementById('btn-add-item').addEventListener('click',()=>adicionarItemOrcamento(null));
+
+function coletarItens() {
+    return Array.from(document.querySelectorAll('.item-orc-row')).map(row=>{
+        const idx=parseInt(row.dataset.idx);
+        return {
+            descricao: row.querySelector('textarea').value,
+            garantia: row.querySelectorAll('input[type=text]')[0].value,
+            valor: row.querySelectorAll('input[type=text]')[1].value,
+            foto: itensFotos[idx]||null
+        };
+    });
+}
+
+function calcularTotalOrcamento(itens) {
+    return (itens||[]).reduce((t,item)=>{
+        const v=parseFloat((item.valor||'').replace(/[R$\s.]/g,'').replace(',','.'));
+        return t+(isNaN(v)?0:v);
+    },0);
+}
+
+function gerarHTMLOrcamento(orc) {
+    const total=calcularTotalOrcamento(orc.itens);
+    const bgHtml=empresaConfig.background?`<img class="orc-bg-img" src="${empresaConfig.background}" alt="">`:'';
+    const logoHtml=empresaConfig.logo?`<img src="${empresaConfig.logo}" alt="Logo">`:`<div style="font-size:11px;color:#aaa;">(Logo)</div>`;
+    const pixInfo=empresaConfig.pix||empresaConfig.cnpj;
+    const nomeEmp=empresaConfig.nomeEmpresa||'Empresa';
+    const veiculoBlock=(orc.modelo||orc.placa||orc.pelicula)?`
+        <div class="orc-veiculo-info">
+            ${orc.modelo?`<p><strong>Veículo:</strong> ${orc.modelo}</p>`:''}
+            ${orc.placa?`<p><strong>Placa:</strong> ${orc.placa}</p>`:''}
+            ${orc.pelicula?`<p><strong>Película:</strong> ${orc.pelicula}</p>`:''}
+        </div>`:'';
+
+    const itensHTML=(orc.itens||[]).map(item=>{
+        const fotoCell=item.foto
+            ?`<img src="${item.foto}" style="max-width:55px;max-height:48px;object-fit:contain;">`
+            :`<div style="width:55px;height:40px;background:#f0f0f0;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;color:#bbb;">sem foto</div>`;
+        return `<tr>
+            <td class="col-img">${fotoCell}</td>
+            <td style="white-space:pre-line;">${item.descricao}</td>
+            <td class="col-garantia">${item.garantia}</td>
+            <td class="col-valor">${item.valor||'—'}</td>
+        </tr>`;
+    }).join('');
+
+    return `
+    <div id="orcamento-preview">
+        ${bgHtml}
+        <div class="orc-inner">
+            <div class="orc-header">
+                <div class="orc-logo-area">${logoHtml}</div>
+                <div class="orc-empresa-nome">
+                    <div class="nome-grande">${nomeEmp.toUpperCase()}</div>
+                </div>
+            </div>
+            <p class="orc-intro">
+                A empresa ${nomeEmp}, com sede na ${empresaConfig.endereco}, inscrita no CNPJ sob o nº ${empresaConfig.cnpj},
+                envia o presente orçamento, com validade de até ${orc.validade||30} dias.
+            </p>
+            <div class="orc-solicitante">
+                <p><strong>Empresa/Solicitante:</strong> ${orc.empresa}</p>
+                ${orc.cnpjSolicitante?`<p><strong>CNPJ:</strong> ${orc.cnpjSolicitante}</p>`:''}
+            </div>
+            ${veiculoBlock}
+            <div class="orc-table-wrapper">
+                <div class="orc-table-title">ORÇAMENTO</div>
+                <table class="orc-table">
+                    <thead>
+                        <tr>
+                            <th style="width:70px;"></th>
+                            <th>Descrição dos produtos e serviços</th>
+                            <th style="width:90px;text-align:center;">Garantia</th>
+                            <th style="width:120px;text-align:right;">Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${itensHTML}
+                        <tr class="row-total">
+                            <td colspan="4"><strong>Total: ${fmtMoeda(total)} (${valorExtenso(total)})</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            ${orc.obs?`<p class="orc-obs"><strong>Observação:</strong> ${orc.obs}</p>`:''}
+            <div class="orc-pagamento">
+                <strong>Condições de pagamento:</strong>
+                Forma de pagamento: ${orc.pagamento||'transferência ou Pix'}<br>
+                ${pixInfo?`Chave-Pix (CNPJ): ${pixInfo}`:''}
+            </div>
+            <p class="orc-footer-loc">${orc.cidade||'Maceió (AL)'}, ${dataExtenso(orc.data)}.</p>
+            <div class="orc-assinatura">
+                <p>Atenciosamente,</p>
+                <div class="linha-ass"></div>
+                ${empresaConfig.responsavel?`<p><strong>${empresaConfig.responsavel}</strong></p>`:''}
+                ${empresaConfig.cargo?`<p>${empresaConfig.cargo}</p>`:''}
+            </div>
+        </div>
+    </div>`;
+}
+
+function renderizarOrcamentos() {
+    const tbody=document.querySelector('#tabela-orcamentos tbody');
+    tbody.innerHTML=''; let total=0;
+
+    orcamentos.forEach(orc=>{
+        const t=calcularTotalOrcamento(orc.itens); total+=t;
+        const s=orc.status||'pendente';
+        const tr=document.createElement('tr');
+        tr.innerHTML=`
+            <td>#${orc.id}</td>
+            <td style="font-weight:600;">${orc.empresa}</td>
+            <td>${orc.modelo||'—'}${orc.placa?' <span style="color:#888;font-size:0.85em;">/ '+orc.placa+'</span>':''}</td>
+            <td>${orc.pelicula||'—'}</td>
+            <td style="font-weight:700;">${fmtMoeda(t)}</td>
+            <td>${fmtData(orc.data)}</td>
+            <td>${orc.validade||30} dias</td>
+            <td><span class="status-badge status-${s}">${s.charAt(0).toUpperCase()+s.slice(1)}</span></td>
+            <td>
+                <button class="btn-acao view" title="Visualizar" onclick="visualizarOrcamento(${orc.id})"><i class="fas fa-eye"></i></button>
+                <button class="btn-acao" title="Editar" onclick="editarOrcamento(${orc.id})"><i class="fas fa-edit"></i></button>
+                <button class="btn-acao" title="Excluir" onclick="excluirOrcamento(${orc.id})"><i class="fas fa-trash-alt"></i></button>
+            </td>`;
+        tbody.appendChild(tr);
+    });
+
+    document.getElementById('total-orcamentos').textContent=orcamentos.length;
+    document.getElementById('valor-total-orcamentos').textContent=fmtMoeda(total);
+    document.getElementById('badge-orcamentos').textContent=orcamentos.length;
+}
+
+function salvarOrcamento(orc) {
+    const idx=orcamentos.findIndex(x=>x.id===orc.id);
+    if(idx>-1) orcamentos[idx]=orc; else { orc.id=nextOrcId++; orcamentos.push(orc); }
+    localStorage.setItem('orcamentos',JSON.stringify(orcamentos));
+    renderizarOrcamentos(); return orc.id;
+}
+
+function visualizarOrcamento(id) {
+    const orc=orcamentos.find(x=>x.id===id); if(!orc) return;
+    const container=document.querySelector('#modal-view-orcamento .modal-content');
+    const existing=container.querySelector('#orcamento-preview');
+    const newHTML=gerarHTMLOrcamento(orc);
+    const tmp=document.createElement('div'); tmp.innerHTML=newHTML;
+    if(existing) existing.replaceWith(tmp.firstElementChild);
+    else container.insertBefore(tmp.firstElementChild,document.getElementById('btn-download-orc-pdf'));
+    abrirModal(document.getElementById('modal-view-orcamento'));
+}
+
+function editarOrcamento(id) {
+    const orc=orcamentos.find(x=>x.id===id); if(!orc) return;
+    preencherFormOrcamento(orc);
+    document.getElementById('modal-orcamento-titulo-el').innerHTML='<i class="fas fa-edit"></i> Editar Orçamento';
+    abrirModal(document.getElementById('modal-orcamento'));
+}
+
+function excluirOrcamento(id) {
+    if(!confirm('Excluir este orçamento?')) return;
+    orcamentos=orcamentos.filter(o=>o.id!==id);
+    localStorage.setItem('orcamentos',JSON.stringify(orcamentos));
+    renderizarOrcamentos();
+}
+
+function alterarStatusOrcamento(id,status) {
+    const orc=orcamentos.find(x=>x.id===id); if(!orc) return;
+    orc.status=status;
+    localStorage.setItem('orcamentos',JSON.stringify(orcamentos));
+    renderizarOrcamentos();
+    renderizarPainelFinanceiro();
+}
+
+function preencherFormOrcamento(orc) {
+    document.getElementById('orc-id-edicao').value=orc.id||'';
+    document.getElementById('orc-empresa').value=orc.empresa||'';
+    document.getElementById('orc-cnpj-solicitante').value=orc.cnpjSolicitante||'';
+    document.getElementById('orc-modelo').value=orc.modelo||'';
+    document.getElementById('orc-placa').value=orc.placa||'';
+    document.getElementById('orc-pelicula').value=orc.pelicula||'';
+    document.getElementById('orc-data').value=orc.data||'';
+    document.getElementById('orc-validade').value=orc.validade||30;
+    document.getElementById('orc-obs').value=orc.obs||'';
+    document.getElementById('orc-pagamento').value=orc.pagamento||'transferência ou Pix';
+    document.getElementById('orc-cidade').value=orc.cidade||'Maceió (AL)';
+    document.getElementById('itens-container').innerHTML='';
+    itensFotos={};
+    (orc.itens||[]).forEach(item=>adicionarItemOrcamento(item));
+}
+
+document.getElementById('form-orcamento').addEventListener('submit',e=>{
+    e.preventDefault();
+    const itens=coletarItens();
+    if(!itens.length){ alert('Adicione pelo menos um item.'); return; }
+    const orc={
+        id: document.getElementById('orc-id-edicao').value?parseInt(document.getElementById('orc-id-edicao').value):null,
+        empresa: document.getElementById('orc-empresa').value,
+        cnpjSolicitante: document.getElementById('orc-cnpj-solicitante').value,
+        modelo: document.getElementById('orc-modelo').value,
+        placa: document.getElementById('orc-placa').value,
+        pelicula: document.getElementById('orc-pelicula').value,
+        data: document.getElementById('orc-data').value,
+        validade: document.getElementById('orc-validade').value,
+        obs: document.getElementById('orc-obs').value,
+        pagamento: document.getElementById('orc-pagamento').value,
+        cidade: document.getElementById('orc-cidade').value,
+        status: document.getElementById('orc-id-edicao').value
+            ? (orcamentos.find(o=>o.id===parseInt(document.getElementById('orc-id-edicao').value))||{}).status||'pendente'
+            : 'pendente',
+        itens
+    };
+    const newId=salvarOrcamento(orc);
+    fecharModal(document.getElementById('modal-orcamento'));
+    visualizarOrcamento(newId);
+});
+
+document.getElementById('btn-add-orcamento').addEventListener('click',()=>{
+    document.getElementById('modal-orcamento-titulo-el').innerHTML='<i class="fas fa-file-invoice-dollar"></i> Criar Orçamento';
+    document.getElementById('orc-id-edicao').value='';
+    document.getElementById('form-orcamento').reset();
+    document.getElementById('itens-container').innerHTML='';
+    itensFotos={};
+    adicionarItemOrcamento(null);
+    abrirModal(document.getElementById('modal-orcamento'));
+});
+
+// ─── PDF ORÇAMENTO ───
+document.getElementById('btn-download-orc-pdf').onclick=function(){
+    window.jsPDF=window.jspdf.jsPDF;
+    const el=document.getElementById('orcamento-preview');
+    if(!el){ alert('Gere a pré-visualização primeiro.'); return; }
+    const doc=new jsPDF('p','mm','a4');
+    const pageW=210, pageH=297, margin=10, usableW=pageW-2*margin;
+    html2canvas(el,{scale:2.5,useCORS:true,backgroundColor:'#ffffff',logging:false}).then(canvas=>{
+        const imgData=canvas.toDataURL('image/png');
+        const imgH=(canvas.height*usableW)/canvas.width;
+        if(imgH<=pageH-2*margin){
+            doc.addImage(imgData,'PNG',margin,margin,usableW,imgH);
+        } else {
+            // Divide em páginas
+            const ratio=usableW/canvas.width;
+            const pageHeightPx=(pageH-2*margin)/ratio;
+            let yPos=0, pageNum=0;
+            while(yPos<canvas.height){
+                if(pageNum>0) doc.addPage();
+                const sliceH=Math.min(pageHeightPx,canvas.height-yPos);
+                const sliceCanvas=document.createElement('canvas');
+                sliceCanvas.width=canvas.width; sliceCanvas.height=sliceH;
+                sliceCanvas.getContext('2d').drawImage(canvas,0,-yPos);
+                doc.addImage(sliceCanvas.toDataURL('image/png'),'PNG',margin,margin,usableW,sliceH*ratio);
+                yPos+=sliceH; pageNum++;
             }
         }
+        doc.save(`orcamento_${Date.now()}.pdf`);
+    });
+};
 
-        btnDownloadPdf.onclick = baixarReciboPdf;
+// ╔══════════════════════════════════════════════════════╗
+// ║               PAINEL FINANCEIRO                      ║
+// ╚══════════════════════════════════════════════════════╝
+function getReceitaMes(ano,mes){
+    return recibos.filter(r=>{
+        const d=new Date(r.data+'T12:00:00');
+        return d.getFullYear()===ano&&d.getMonth()===mes;
+    }).reduce((s,r)=>s+parseFloat(r.valor||0),0);
+}
 
-        btnConfig.addEventListener('click', () => {
-            abrirModal(modalConfig);
-            if (!rembgInstance) {
-                loadRembg();
-            }
-        });
+function renderizarPainelFinanceiro(){
+    const hoje=new Date();
+    const mesAtual=hoje.getMonth(), anoAtual=hoje.getFullYear();
+    const diaAtual=hoje.getDate(), diasNoMes=new Date(anoAtual,mesAtual+1,0).getDate();
+    const receitaMesAtual=getReceitaMes(anoAtual,mesAtual);
+    const totalOrcamentos=calcularTotalOrcamento(orcamentos.flatMap(o=>o.itens));
+    const orcAceitos=orcamentos.filter(o=>o.status==='aceito');
+    const orcPendentes=orcamentos.filter(o=>!o.status||o.status==='pendente');
+    const totalOrcAceito=orcAceitos.reduce((s,o)=>s+calcularTotalOrcamento(o.itens),0);
+    const totalOrcPendente=orcPendentes.reduce((s,o)=>s+calcularTotalOrcamento(o.itens),0);
+    const ticketMedio=recibos.length?recibos.reduce((s,r)=>s+parseFloat(r.valor||0),0)/recibos.length:0;
 
-        btnAddRecibo.addEventListener('click', () => {
-            document.getElementById('modal-recibo-titulo').textContent = 'Criar Novo Recibo';
-            document.getElementById('recibo-id-edicao').value = '';
-            document.getElementById('btn-salvar-recibo').textContent = 'Baixar Recibo';
-            formRecibo.reset();
-            abrirModal(modalRecibo);
-        });
-        btnAddCliente.addEventListener('click', () => {
-            document.getElementById('modal-cliente-titulo').textContent = 'Cadastrar Novo Cliente';
-            document.getElementById('cliente-id-edicao').value = '';
-            formCliente.reset();
-            abrirModal(modalCliente);
-        });
-        
-        document.addEventListener('DOMContentLoaded', () => {
-            carregarConfiguracoes();
-            renderizarClientes();
-            renderizarRecibos();
-        });
+    // Cards
+    document.getElementById('fin-cards-mes').innerHTML=`
+        <div class="fin-card verde"><div class="fin-card-icon">💰</div><div class="fin-card-label">Receita Realizada</div><div class="fin-card-value">${fmtMoeda(receitaMesAtual)}</div></div>
+        <div class="fin-card azul"><div class="fin-card-icon">📋</div><div class="fin-card-label">Orçamentos Aceitos</div><div class="fin-card-value">${fmtMoeda(totalOrcAceito)}</div></div>
+        <div class="fin-card laranja"><div class="fin-card-icon">⏳</div><div class="fin-card-label">Em Aberto</div><div class="fin-card-value">${fmtMoeda(totalOrcPendente)}</div></div>
+        <div class="fin-card verde"><div class="fin-card-icon">🎯</div><div class="fin-card-label">Ticket Médio</div><div class="fin-card-value">${fmtMoeda(ticketMedio)}</div></div>`;
 
-    </script>
+    // Progresso
+    const pct=Math.round((diaAtual/diasNoMes)*100);
+    document.getElementById('fin-progresso-label').textContent=pct+'%';
+    document.getElementById('fin-progresso-barra').style.width=pct+'%';
+    document.getElementById('fin-progresso-text').textContent=`Dia ${diaAtual} de ${diasNoMes} — ${diasNoMes-diaAtual} dias restantes`;
+
+    // Projeção
+    const projecaoRitmo=diaAtual>0?(receitaMesAtual/diaAtual)*diasNoMes:0;
+    const projecaoComAceitos=projecaoRitmo+totalOrcAceito;
+    function getMes(delta){ const d=new Date(anoAtual,mesAtual+delta,1); return {mes:d.getMonth(),ano:d.getFullYear(),nome:d.toLocaleString('pt-BR',{month:'short'})}; }
+    const m3=getMes(-3),m2=getMes(-2),m1=getMes(-1);
+    const r3=getReceitaMes(m3.ano,m3.mes),r2=getReceitaMes(m2.ano,m2.mes),r1=getReceitaMes(m1.ano,m1.mes);
+    const mediaUltimos3=(r3+r2+r1)/3||1;
+    const projecaoHistorica=mediaUltimos3;
+    document.getElementById('fin-projecao-grid').innerHTML=`
+        <div class="fin-proj-item"><div class="val">${fmtMoeda(projecaoRitmo)}</div><div class="lab">Projeção pelo ritmo atual</div></div>
+        <div class="fin-proj-item"><div class="val">${fmtMoeda(projecaoHistorica)}</div><div class="lab">Média histórica (3 meses)</div></div>
+        <div class="fin-proj-item"><div class="val">${fmtMoeda(projecaoComAceitos)}</div><div class="lab">Com orçamentos aceitos</div></div>`;
+
+    // Alerta tendência
+    let alertaHTML='';
+    if(diaAtual<5) alertaHTML=`<div class="fin-alerta info"><i class="fas fa-info-circle"></i><span>Início do mês — a projeção ficará mais precisa ao longo do mês.</span></div>`;
+    else if(projecaoRitmo>=mediaUltimos3*1.1) alertaHTML=`<div class="fin-alerta sucesso"><i class="fas fa-arrow-trend-up"></i><span><strong>Acima da média!</strong> Ritmo <strong>${Math.round((projecaoRitmo/mediaUltimos3-1)*100)}% superior</strong> à média histórica. Excelente momento!</span></div>`;
+    else if(projecaoRitmo<mediaUltimos3*0.7) alertaHTML=`<div class="fin-alerta perigo"><i class="fas fa-exclamation-triangle"></i><span><strong>Atenção:</strong> Ritmo <strong>${Math.round((1-projecaoRitmo/mediaUltimos3)*100)}% abaixo</strong> da média histórica. Intensifique as prospecções.</span></div>`;
+    else alertaHTML=`<div class="fin-alerta sucesso"><i class="fas fa-check-circle"></i><span>Você está no ritmo esperado para o mês. Continue assim!</span></div>`;
+    document.getElementById('fin-alerta-tendencia').innerHTML=alertaHTML;
+
+    // Gráfico
+    const vals=[r3,r2,r1,receitaMesAtual], maxVal=Math.max(...vals,1);
+    document.getElementById('fin-grafico-meses').innerHTML=[m3,m2,m1,{nome:'Atual'}].map((m,i)=>{
+        const h=Math.max(6,Math.round((vals[i]/maxVal)*70));
+        const cor=i===3?'var(--green)':'var(--blue)';
+        return `<div class="fin-barra-mes" title="${m.nome}: ${fmtMoeda(vals[i])}">
+            <div class="fin-barra-mes-val">${fmtMoeda(vals[i])}</div>
+            <div class="fin-barra-mes-fill" style="height:${h}px;background:${cor};"></div>
+            <div class="fin-barra-mes-label">${m.nome}</div>
+        </div>`;
+    }).join('');
+
+    // Orçamentos abertos
+    const orcAbertos=orcamentos.filter(o=>!o.status||o.status==='pendente'||o.status==='aceito');
+    const tbody=document.getElementById('fin-orc-abertos-body');
+    tbody.innerHTML='';
+    if(!orcAbertos.length){
+        tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:#999;">Nenhum orçamento em aberto</td></tr>';
+    } else {
+        orcAbertos.forEach(orc=>{
+            const t=calcularTotalOrcamento(orc.itens);
+            const s=orc.status||'pendente';
+            const tr=document.createElement('tr');
+            tr.innerHTML=`
+                <td>#${orc.id}</td>
+                <td>${orc.empresa}</td>
+                <td style="font-weight:700;">${fmtMoeda(t)}</td>
+                <td>${fmtData(orc.data)}</td>
+                <td><span class="status-badge status-${s}">${s.charAt(0).toUpperCase()+s.slice(1)}</span></td>
+                <td><select class="fin-orc-status-sel" onchange="alterarStatusOrcamento(${orc.id},this.value)">
+                    <option value="pendente" ${s==='pendente'?'selected':''}>Pendente</option>
+                    <option value="aceito" ${s==='aceito'?'selected':''}>Aceito</option>
+                    <option value="recusado" ${s==='recusado'?'selected':''}>Recusado</option>
+                </select></td>`;
+            tbody.appendChild(tr);
+        });
+    }
+    const totalAberto=orcAbertos.reduce((s,o)=>s+calcularTotalOrcamento(o.itens),0);
+    document.getElementById('fin-orc-abertos-total').innerHTML=`Total em aberto: <strong>${fmtMoeda(totalAberto)}</strong> — Aceitos: <strong style="color:var(--green)">${fmtMoeda(totalOrcAceito)}</strong> — Pendentes: <strong style="color:var(--orange)">${fmtMoeda(totalOrcPendente)}</strong>`;
+
+    // Capitalização
+    const alertaCapHTML=receitaMesAtual>0
+        ?`<div class="fin-alerta sucesso"><i class="fas fa-piggy-bank"></i><span>Receita realizada: <strong>${fmtMoeda(receitaMesAtual)}</strong>. Configure os percentuais abaixo para calcular os aportes sugeridos.</span></div>`
+        :`<div class="fin-alerta info"><i class="fas fa-info-circle"></i><span>Registre recibos para receber recomendações de capitalização.</span></div>`;
+    document.getElementById('fin-alerta-cap').innerHTML=alertaCapHTML;
+    atualizarCapitalizacao();
+}
+
+function atualizarCapitalizacao(){
+    const hoje=new Date();
+    const receitaMes=getReceitaMes(hoje.getFullYear(),hoje.getMonth());
+    const pctRes=parseInt(document.getElementById('slider-reserva').value);
+    const pctCap=parseInt(document.getElementById('slider-capital').value);
+    document.getElementById('val-reserva').textContent=pctRes+'%';
+    document.getElementById('val-capital').textContent=pctCap+'%';
+    const vRes=receitaMes*pctRes/100, vCap=receitaMes*pctCap/100;
+    const total=vRes+vCap, restante=receitaMes-total;
+    const pctTotal=Math.min(100,pctRes+pctCap);
+    let cap=JSON.parse(localStorage.getItem('capitalizacao'))||{reserva:0,capital:0};
+    document.getElementById('fin-cap-grid').innerHTML=`
+        <div class="fin-cap-card reserva">
+            <h4>🛡️ Reserva de Emergência</h4>
+            <p style="font-size:0.82em;color:#555;line-height:1.5;margin-bottom:8px;">Protege o negócio em meses com baixa receita.</p>
+            <div class="fin-cap-valor">${fmtMoeda(vRes)}</div>
+            <div style="font-size:0.75em;color:#777;">Sugerido este mês (${pctRes}%)</div>
+            <div style="font-size:0.73em;color:#999;margin-top:4px;">Acumulado: ${fmtMoeda(cap.reserva)}</div>
+            <button onclick="registrarAporte('reserva',${vRes})" style="margin-top:8px;padding:6px 12px;background:var(--orange);color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:0.8em;font-weight:700;">✔ Registrar Aporte</button>
+        </div>
+        <div class="fin-cap-card capital">
+            <h4>🔄 Capital de Giro</h4>
+            <p style="font-size:0.82em;color:#555;line-height:1.5;margin-bottom:8px;">Garante a continuidade das operações.</p>
+            <div class="fin-cap-valor">${fmtMoeda(vCap)}</div>
+            <div style="font-size:0.75em;color:#777;">Sugerido este mês (${pctCap}%)</div>
+            <div style="font-size:0.73em;color:#999;margin-top:4px;">Acumulado: ${fmtMoeda(cap.capital)}</div>
+            <button onclick="registrarAporte('capital',${vCap})" style="margin-top:8px;padding:6px 12px;background:var(--blue);color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:0.8em;font-weight:700;">✔ Registrar Aporte</button>
+        </div>`;
+    let conselho='';
+    if(receitaMes>0){
+        if(pctTotal>50) conselho=`<div class="fin-alerta aviso"><i class="fas fa-exclamation-circle"></i><span>Você está alocando <strong>${pctTotal}%</strong> em aportes. Certifique-se que o restante <strong>(${fmtMoeda(restante)})</strong> cobre os custos operacionais.</span></div>`;
+        else if(pctTotal<10) conselho=`<div class="fin-alerta aviso"><i class="fas fa-lightbulb"></i><span>Percentual de aporte baixo. Recomenda-se pelo menos <strong>20-30%</strong> da receita.</span></div>`;
+        else conselho=`<div class="fin-alerta sucesso"><i class="fas fa-check-circle"></i><span>Boa estratégia! Destinando <strong>${pctTotal}%</strong> (${fmtMoeda(total)}) para capitalização, sobrando <strong>${fmtMoeda(restante)}</strong> para operações.</span></div>`;
+    }
+    document.getElementById('fin-cap-conselho').innerHTML=conselho;
+}
+
+function registrarAporte(tipo,valor){
+    let cap=JSON.parse(localStorage.getItem('capitalizacao'))||{reserva:0,capital:0};
+    cap[tipo]=(cap[tipo]||0)+valor;
+    localStorage.setItem('capitalizacao',JSON.stringify(cap));
+    alert(`Aporte de ${fmtMoeda(valor)} registrado em ${tipo==='reserva'?'Reserva de Emergência':'Capital de Giro'}!`);
+    atualizarCapitalizacao();
+}
+
+document.getElementById('btn-painel-financeiro').addEventListener('click',()=>{
+    renderizarPainelFinanceiro();
+    abrirModal(document.getElementById('modal-financeiro'));
+});
+
+// ╔══════════════════════════════════════════════════════╗
+// ║                      INIT                            ║
+// ╚══════════════════════════════════════════════════════╝
+carregarConfiguracoes();
+renderizarClientes();
+renderizarRecibos();
+renderizarOrcamentos();
+</script>
 </body>
 </html>
