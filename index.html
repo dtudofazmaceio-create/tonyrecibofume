@@ -123,8 +123,8 @@
             display:flex;justify-content:space-around;
             padding-bottom:var(--safe-bottom);z-index:50;
         }
-        .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#555;text-decoration:none;font-size:.62rem;font-weight:600;gap:3px;cursor:pointer;transition:.2s;border:none;background:transparent;}
-        .nav-item i{font-size:1.1rem;}
+        .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#555;text-decoration:none;font-size:.58rem;font-weight:600;gap:3px;cursor:pointer;transition:.2s;border:none;background:transparent;}
+        .nav-item i{font-size:1rem;}
         .nav-item.active{color:var(--red);}
         .nav-item:active{transform:scale(.92);}
 
@@ -319,6 +319,7 @@
         </div>
     </div>
     <div class="header-actions">
+        <button class="icon-btn" onclick="openSheet('backup')" title="Backup"><i class="fas fa-database"></i></button>
         <button class="icon-btn" onclick="openSheet('config')"><i class="fas fa-cog"></i></button>
         <button class="icon-btn" onclick="openSheet('painel-fin')"><i class="fas fa-chart-line"></i></button>
     </div>
@@ -415,6 +416,15 @@
         <div id="clientes-list"></div>
     </div>
 
+    <!-- MATERIAIS -->
+    <div id="view-materiais" class="view">
+        <div class="search-wrap">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" class="search-input" placeholder="Buscar materiais..." oninput="renderMateriais(this.value)">
+        </div>
+        <div id="materiais-list"></div>
+    </div>
+
 </main>
 
 <!-- FAB -->
@@ -433,6 +443,9 @@
     </button>
     <button class="nav-item" id="nav-clientes" onclick="navigate('clientes')">
         <i class="fas fa-users"></i>Clientes
+    </button>
+    <button class="nav-item" id="nav-materiais" onclick="navigate('materiais')">
+        <i class="fas fa-boxes"></i>Materiais
     </button>
 </nav>
 
@@ -694,24 +707,183 @@
     <button type="button" class="btn-block ghost" style="margin-top:8px;" onclick="closeSheet('painel-fin')">Fechar</button>
 </div>
 
+<!-- ═══════════════════════════════════════
+     SHEET: MATERIAL FORM
+════════════════════════════════════════ -->
+<div class="modal-overlay" id="ov-material"></div>
+<div class="modal-sheet" id="sheet-material">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" style="color:var(--text);"><i class="fas fa-box" style="color:var(--orange)"></i> <span id="material-form-title">Novo Material</span></div>
+    <form onsubmit="saveMaterial(event)">
+        <input type="hidden" id="m-id">
+        <div class="form-group">
+            <label class="form-label">Nome do Material / Produto</label>
+            <input type="text" id="m-nome" class="form-control" required placeholder="Ex: Película Nano Cerâmica 35%">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Categoria</label>
+            <input type="text" id="m-categoria" class="form-control" placeholder="Ex: Película, Insumo, Ferramenta...">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Unidade</label>
+            <input type="text" id="m-unidade" class="form-control" placeholder="Ex: rolo, metro, unidade, litro">
+        </div>
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label class="form-label">Estoque Atual</label>
+                <input type="number" id="m-estoque" class="form-control" step="0.01" placeholder="0" value="0">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Estoque Mínimo</label>
+                <input type="number" id="m-estoque-min" class="form-control" step="0.01" placeholder="0" value="0">
+            </div>
+        </div>
+        <div style="background:var(--blue-light);border-radius:10px;padding:12px;margin-bottom:14px;border:1px solid #bfdbfe;">
+            <div style="font-size:.78rem;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;"><i class="fas fa-calculator"></i> Precificação</div>
+            <div class="form-grid-2">
+                <div class="form-group" style="margin-bottom:10px;">
+                    <label class="form-label" style="color:var(--blue);">Preço de Compra (R$)</label>
+                    <input type="number" id="m-preco-compra" class="form-control" step="0.01" placeholder="0,00" oninput="calcLucroMaterial()">
+                </div>
+                <div class="form-group" style="margin-bottom:10px;">
+                    <label class="form-label" style="color:var(--orange);">Custo Adicional (R$)</label>
+                    <input type="number" id="m-custo-adicional" class="form-control" step="0.01" placeholder="0,00" oninput="calcLucroMaterial()">
+                </div>
+            </div>
+            <div class="form-group" style="margin-bottom:10px;">
+                <label class="form-label" style="color:var(--green);">Preço de Venda (R$)</label>
+                <input type="number" id="m-preco-venda" class="form-control" step="0.01" placeholder="0,00" oninput="calcLucroMaterial()">
+            </div>
+            <div id="lucro-preview" style="display:none;background:#fff;border-radius:8px;padding:10px;margin-top:6px;">
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;">
+                    <div>
+                        <div style="font-size:.68rem;color:var(--muted);font-weight:700;text-transform:uppercase;">Custo Total</div>
+                        <div id="lp-custo" style="font-family:Rajdhani,sans-serif;font-size:1.05rem;font-weight:700;color:var(--orange);">—</div>
+                    </div>
+                    <div>
+                        <div style="font-size:.68rem;color:var(--muted);font-weight:700;text-transform:uppercase;">Lucro</div>
+                        <div id="lp-lucro" style="font-family:Rajdhani,sans-serif;font-size:1.05rem;font-weight:700;color:var(--green);">—</div>
+                    </div>
+                    <div>
+                        <div style="font-size:.68rem;color:var(--muted);font-weight:700;text-transform:uppercase;">Margem</div>
+                        <div id="lp-margem" style="font-family:Rajdhani,sans-serif;font-size:1.05rem;font-weight:700;color:var(--blue);">—</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Observações</label>
+            <textarea id="m-obs" class="form-control" placeholder="Opcional..."></textarea>
+        </div>
+        <button type="submit" class="btn-block primary"><i class="fas fa-save"></i> Salvar Material</button>
+        <button type="button" class="btn-block ghost" onclick="closeSheet('material')">Cancelar</button>
+    </form>
+</div>
+
+<!-- ═══════════════════════════════════════
+     MODAL: BACKUP
+════════════════════════════════════════ -->
+<div class="modal-overlay active" id="ov-backup" style="display:none;"></div>
+<div class="modal-sheet" id="sheet-backup" style="transform:translateY(100%);">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title"><i class="fas fa-database" style="color:var(--green)"></i> Backup de Dados</div>
+    <div style="background:var(--green-light);border-radius:10px;padding:14px;margin-bottom:16px;border:1px solid #bbf7d0;">
+        <div style="font-size:.88rem;font-weight:700;color:var(--green);margin-bottom:4px;"><i class="fas fa-shield-alt"></i> Proteção dos seus dados</div>
+        <div style="font-size:.8rem;color:#555;line-height:1.6;">Como o sistema é local, o backup periódico garante que você não perca nenhum dado. Recomendamos fazer backup a cada 3 dias.</div>
+    </div>
+    <div id="backup-stats" style="margin-bottom:16px;"></div>
+    <button class="btn-block primary" onclick="fazerBackup()"><i class="fas fa-download"></i> Fazer Backup Agora</button>
+    <button class="btn-block" style="background:var(--blue);color:#fff;margin-top:8px;" onclick="document.getElementById('inp-restore').click()"><i class="fas fa-upload"></i> Restaurar Backup</button>
+    <input type="file" id="inp-restore" accept=".json" style="display:none;" onchange="restaurarBackup(this)">
+    <button type="button" class="btn-block ghost" style="margin-top:8px;" onclick="closeSheet('backup');salvarUltimoBackupCheck()">Lembrar depois</button>
+    <button type="button" style="width:100%;padding:10px;background:none;border:none;color:var(--muted);font-size:.8rem;cursor:pointer;margin-top:4px;" onclick="closeSheet('backup');ignorarAlertaBackup()">Não mostrar novamente por 3 dias</button>
+</div>
+
 <!-- ═══════════════════════════════════════ JS ════════════════════════════════════════ -->
 <script>
+// ╔══════════════════════════════════════════╗
+// ║   INDEXEDDB — armazenamento principal    ║
+// ╚══════════════════════════════════════════╝
+const DB_NAME = 'TonyFumeDB';
+const DB_VERSION = 2;
+let db = null;
+
+function initDB(){
+    return new Promise((resolve, reject)=>{
+        const req = indexedDB.open(DB_NAME, DB_VERSION);
+        req.onupgradeneeded = e => {
+            const d = e.target.result;
+            if(!d.objectStoreNames.contains('config'))    d.createObjectStore('config',    {keyPath:'id'});
+            if(!d.objectStoreNames.contains('recibos'))   d.createObjectStore('recibos',   {keyPath:'id', autoIncrement:true});
+            if(!d.objectStoreNames.contains('clientes'))  d.createObjectStore('clientes',  {keyPath:'id', autoIncrement:true});
+            if(!d.objectStoreNames.contains('orcamentos'))d.createObjectStore('orcamentos',{keyPath:'id', autoIncrement:true});
+            if(!d.objectStoreNames.contains('materiais')) d.createObjectStore('materiais', {keyPath:'id', autoIncrement:true});
+        };
+        req.onsuccess = e => { db = e.target.result; resolve(db); };
+        req.onerror   = e => { console.error('IndexedDB error', e); reject(e); };
+    });
+}
+
+function dbGetAll(store){
+    return new Promise((resolve, reject)=>{
+        const tx  = db.transaction(store,'readonly');
+        const req = tx.objectStore(store).getAll();
+        req.onsuccess = ()=>resolve(req.result||[]);
+        req.onerror   = ()=>reject(req.error);
+    });
+}
+function dbGet(store, key){
+    return new Promise((resolve, reject)=>{
+        const tx  = db.transaction(store,'readonly');
+        const req = tx.objectStore(store).get(key);
+        req.onsuccess = ()=>resolve(req.result);
+        req.onerror   = ()=>reject(req.error);
+    });
+}
+function dbPut(store, obj){
+    return new Promise((resolve, reject)=>{
+        const tx  = db.transaction(store,'readwrite');
+        const req = tx.objectStore(store).put(obj);
+        req.onsuccess = ()=>resolve(req.result);
+        req.onerror   = ()=>reject(req.error);
+    });
+}
+function dbDelete(store, key){
+    return new Promise((resolve, reject)=>{
+        const tx  = db.transaction(store,'readwrite');
+        const req = tx.objectStore(store).delete(key);
+        req.onsuccess = ()=>resolve();
+        req.onerror   = ()=>reject(req.error);
+    });
+}
+function dbClear(store){
+    return new Promise((resolve,reject)=>{
+        const tx  = db.transaction(store,'readwrite');
+        const req = tx.objectStore(store).clear();
+        req.onsuccess = ()=>resolve();
+        req.onerror   = ()=>reject(req.error);
+    });
+}
+
 // ╔══════════════════════════════╗
 // ║        STATE / STORAGE       ║
 // ╚══════════════════════════════╝
-let cfg = JSON.parse(localStorage.getItem('empresaConfig')) || {
+let cfg = {
+    id:'config',
     nomeEmpresa:'Tony Fumê', cnpj:'13.949.583/0001-32',
     instagram:'@tonyfume', endereco:'Avenida Juca Sampaio, 1552, Jacintinho',
     whatsapp:'(82)99806-9585', responsavel:'', cargo:'', pix:'', logo:null, background:null
 };
-let recibos    = JSON.parse(localStorage.getItem('recibos'))    || [];
-let clientes   = JSON.parse(localStorage.getItem('clientes'))   || [];
-let orcamentos = JSON.parse(localStorage.getItem('orcamentos')) || [];
+let recibos    = [];
+let clientes   = [];
+let orcamentos = [];
+let materiais  = [];
 let itensFotos = {};
 
-let nextRId = recibos.length    ? Math.max(...recibos.map(r=>r.id))+1    : 1;
-let nextCId = clientes.length   ? Math.max(...clientes.map(c=>c.id))+1   : 1;
-let nextOId = orcamentos.length ? Math.max(...orcamentos.map(o=>o.id))+1 : 1;
+let nextRId = 1;
+let nextCId = 1;
+let nextOId = 1;
+let nextMId = 1;
 
 let currentView = 'dashboard';
 let orcFilter   = 'all';
@@ -723,11 +895,13 @@ function navigate(view){
     document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
     document.getElementById('view-'+view).classList.add('active');
-    document.getElementById('nav-'+view).classList.add('active');
+    const navEl=document.getElementById('nav-'+view);
+    if(navEl) navEl.classList.add('active');
     currentView = view;
     if(view==='recibos')    renderRecibos();
     if(view==='orcamentos') renderOrcamentos();
     if(view==='clientes')   renderClientes();
+    if(view==='materiais')  renderMateriais();
     if(view==='dashboard')  renderDashboard();
     document.querySelector('main').scrollTo(0,0);
 }
@@ -736,6 +910,7 @@ function fabAction(){
     if(currentView==='recibos')    openReciboForm();
     else if(currentView==='orcamentos') openOrcamentoForm();
     else if(currentView==='clientes')   openClienteForm();
+    else if(currentView==='materiais')  openMaterialForm();
     else openReciboForm();
 }
 
@@ -746,17 +921,19 @@ function openSheet(name){
     const ov=document.getElementById('ov-'+name);
     const sh=document.getElementById('sheet-'+name);
     if(!ov||!sh) return;
+    ov.style.display='flex';
     ov.classList.add('active');
     setTimeout(()=>sh.style.transform='translateY(0)',10);
     if(name==='painel-fin') renderPainelFinanceiro();
     if(name==='config')     loadConfigForm();
+    if(name==='backup')     renderBackupStats();
 }
 function closeSheet(name){
     const ov=document.getElementById('ov-'+name);
     const sh=document.getElementById('sheet-'+name);
     if(!ov||!sh) return;
     sh.style.transform='translateY(100%)';
-    setTimeout(()=>ov.classList.remove('active'),300);
+    setTimeout(()=>{ov.classList.remove('active');ov.style.display='none';},300);
 }
 document.querySelectorAll('.modal-overlay').forEach(ov=>{
     ov.addEventListener('click',e=>{
@@ -861,6 +1038,20 @@ function applyBrand(){
     if(cfg.logo){logo.src=cfg.logo;logo.style.display='block';}
     else logo.style.display='none';
 }
+function applyBackground(){
+    if(cfg.background){
+        document.body.style.backgroundImage=`url(${cfg.background})`;
+        document.body.style.backgroundSize='cover';
+        document.body.style.backgroundPosition='center';
+        document.body.style.backgroundAttachment='fixed';
+        // Overlay for readability
+        let ov=document.getElementById('bg-overlay');
+        if(!ov){ov=document.createElement('div');ov.id='bg-overlay';ov.style.cssText='position:fixed;inset:0;background:rgba(244,244,245,0.88);z-index:-1;pointer-events:none;';document.body.prepend(ov);}
+    } else {
+        document.body.style.backgroundImage='';
+        const ov=document.getElementById('bg-overlay');if(ov)ov.remove();
+    }
+}
 function loadConfigForm(){
     document.getElementById('cfg-nome').value=cfg.nomeEmpresa||'';
     document.getElementById('cfg-cnpj').value=cfg.cnpj||'';
@@ -908,8 +1099,8 @@ function saveConfig(e){
     cfg.responsavel=document.getElementById('cfg-responsavel').value;
     cfg.cargo=document.getElementById('cfg-cargo').value;
     cfg.pix=document.getElementById('cfg-pix').value;
-    localStorage.setItem('empresaConfig',JSON.stringify(cfg));
-    applyBrand();closeSheet('config');toast('Configurações salvas! ✅');
+    dbPut('config', cfg);
+    applyBrand();applyBackground();closeSheet('config');toast('Configurações salvas! ✅');
 }
 
 // ╔══════════════════════════════╗
@@ -1005,25 +1196,28 @@ function openClienteForm(id){
 function editarCliente(id){openClienteForm(id);}
 function excluirCliente(id){
     if(!confirm('Excluir este cliente?'))return;
-    clientes=clientes.filter(c=>c.id!==id);
-    localStorage.setItem('clientes',JSON.stringify(clientes));
-    renderClientes();renderDashboard();toast('Cliente excluído');
+    dbDelete('clientes',id).then(()=>{
+        clientes=clientes.filter(c=>c.id!==id);
+        renderClientes();renderDashboard();toast('Cliente excluído');
+    });
 }
 function saveCliente(e){
     e.preventDefault();
     const id=document.getElementById('c-id').value;
     const c={
-        id:id?parseInt(id):null,
         nome:document.getElementById('c-nome').value,
         telefone:document.getElementById('c-telefone').value,
         cnpj:document.getElementById('c-cnpj').value,
         veiculos:getVeiculos()
     };
-    const idx=clientes.findIndex(x=>x.id===c.id);
-    if(idx>-1)clientes[idx]=c;else{c.id=nextCId++;clientes.push(c);}
-    localStorage.setItem('clientes',JSON.stringify(clientes));
-    renderClientes();populateClienteSelect();renderDashboard();
-    closeSheet('cliente');toast('Cliente salvo! ✅');
+    if(id) c.id=parseInt(id);
+    dbPut('clientes',c).then(newId=>{
+        if(!id) c.id=newId;
+        const idx=clientes.findIndex(x=>x.id===c.id);
+        if(idx>-1)clientes[idx]=c;else{c.id=newId||c.id;clientes.push(c);}
+        renderClientes();populateClienteSelect();renderDashboard();
+        closeSheet('cliente');toast('Cliente salvo! ✅');
+    });
 }
 
 // ─── HISTÓRICO CLIENTE ───
@@ -1146,15 +1340,15 @@ function openReciboForm(id){
 function editarRecibo(id){openReciboForm(id);}
 function excluirRecibo(id){
     if(!confirm('Excluir este recibo?'))return;
-    recibos=recibos.filter(r=>r.id!==id);
-    localStorage.setItem('recibos',JSON.stringify(recibos));
-    renderRecibos();renderDashboard();toast('Recibo excluído');
+    dbDelete('recibos',id).then(()=>{
+        recibos=recibos.filter(r=>r.id!==id);
+        renderRecibos();renderDashboard();toast('Recibo excluído');
+    });
 }
 function saveRecibo(e){
     e.preventDefault();
     const id=document.getElementById('r-id').value;
     const r={
-        id:id?parseInt(id):null,
         clienteId:parseInt(document.getElementById('r-cliente').value),
         modelo:document.getElementById('r-modelo').value,
         placa:document.getElementById('r-placa').value,
@@ -1163,13 +1357,16 @@ function saveRecibo(e){
         valor:parseFloat(document.getElementById('r-valor').value),
         data:document.getElementById('r-data').value,
     };
-    const idx=recibos.findIndex(x=>x.id===r.id);
-    if(idx>-1)recibos[idx]=r;else{r.id=nextRId++;recibos.push(r);}
-    localStorage.setItem('recibos',JSON.stringify(recibos));
-    renderRecibos();renderDashboard();
-    closeSheet('recibo');
-    setTimeout(()=>verRecibo(r.id,true),350);
-    toast('Recibo salvo! ✅');
+    if(id) r.id=parseInt(id);
+    dbPut('recibos',r).then(newId=>{
+        r.id=r.id||newId;
+        const idx=recibos.findIndex(x=>x.id===r.id);
+        if(idx>-1)recibos[idx]=r;else recibos.push(r);
+        renderRecibos();renderDashboard();
+        closeSheet('recibo');
+        setTimeout(()=>verRecibo(r.id,true),350);
+        toast('Recibo salvo! ✅');
+    });
 }
 
 function gerarHTMLRecibo(r){
@@ -1204,47 +1401,25 @@ function gerarHTMLRecibo(r){
     </div>`;
 }
 
-let _reciboAtualId = null;
-
 function verRecibo(id, baixar=false){
     const r=recibos.find(x=>x.id===id);if(!r)return;
-    _reciboAtualId = id;
     document.getElementById('recibo-content').innerHTML=gerarHTMLRecibo(r);
-    document.getElementById('btn-dl-recibo').onclick=()=>baixarRecibosPdf(id);
+    document.getElementById('btn-dl-recibo').onclick=()=>baixarRecibosPdf();
     openSheet('ver-recibo');
-    if(baixar) setTimeout(()=>baixarRecibosPdf(id), 600);
+    if(baixar) setTimeout(baixarRecibosPdf,500);
 }
 
-function baixarRecibosPdf(id){
-    const r = recibos.find(x=>x.id===(id||_reciboAtualId));
-    if(!r){ toast('Erro: recibo não encontrado'); return; }
-    window.jsPDF = window.jspdf.jsPDF;
-    toast('Gerando PDF...');
-    const wrap = document.createElement('div');
-    wrap.style.cssText='position:fixed;left:-9999px;top:0;width:480px;background:#ffffff;z-index:-1;padding:20px;font-family:Inter,sans-serif;box-sizing:border-box;';
-    wrap.innerHTML = gerarHTMLRecibo(r);
-    document.body.appendChild(wrap);
-    const imgs = Array.from(wrap.querySelectorAll('img'));
-    const loads = imgs.map(img => new Promise(res=>{ if(img.complete)res(); else{img.onload=res;img.onerror=res;} }));
-    Promise.all(loads).then(()=>{
-        const fullH = wrap.scrollHeight;
-        wrap.style.height = fullH + 'px';
-        html2canvas(wrap,{scale:2.5,useCORS:true,backgroundColor:'#ffffff',logging:false,width:wrap.offsetWidth,height:fullH,windowWidth:wrap.offsetWidth,windowHeight:fullH}).then(canvas=>{
-            document.body.removeChild(wrap);
-            const doc = new jsPDF('p','mm','a5');
-            const pageW=148.5, margin=8, usableW=pageW-2*margin, pageH=210;
-            const ratio = usableW / canvas.width;
-            const totalImgH = canvas.height * ratio;
-            if(totalImgH <= pageH-2*margin){
-                doc.addImage(canvas.toDataURL('image/png'),'PNG',margin,margin,usableW,totalImgH);
-            } else {
-                const phPx = Math.floor((pageH-2*margin)/ratio);
-                let yPos=0,pn=0;
-                while(yPos<canvas.height){ if(pn>0)doc.addPage(); const sliceH=Math.min(phPx,canvas.height-yPos); const sc=document.createElement('canvas'); sc.width=canvas.width;sc.height=sliceH; sc.getContext('2d').drawImage(canvas,0,-yPos); doc.addImage(sc.toDataURL('image/png'),'PNG',margin,margin,usableW,sliceH*ratio); yPos+=sliceH;pn++; }
-            }
-            doc.save(`recibo_${Date.now()}.pdf`);
-            toast('PDF baixado! 📄');
-        }).catch(err=>{ document.body.removeChild(wrap); toast('Erro ao gerar PDF'); });
+function baixarRecibosPdf(){
+    window.jsPDF=window.jspdf.jsPDF;
+    const el=document.getElementById('recibo-content');
+    const doc=new jsPDF('p','mm','a5');
+    html2canvas(el,{scale:2.5,useCORS:true,backgroundColor:'#ffffff'}).then(canvas=>{
+        const imgData=canvas.toDataURL('image/png');
+        const pageW=148.5,margin=8,usableW=pageW-2*margin;
+        const imgH=(canvas.height*usableW)/canvas.width;
+        doc.addImage(imgData,'PNG',margin,margin,usableW,Math.min(imgH,210-2*margin));
+        doc.save(`recibo_${Date.now()}.pdf`);
+        toast('PDF baixado! 📄');
     });
 }
 
@@ -1379,15 +1554,17 @@ function openOrcamentoForm(id){
 function editarOrcamento(id){openOrcamentoForm(id);}
 function excluirOrcamento(id){
     if(!confirm('Excluir este orçamento?'))return;
-    orcamentos=orcamentos.filter(o=>o.id!==id);
-    localStorage.setItem('orcamentos',JSON.stringify(orcamentos));
-    renderOrcamentos();renderDashboard();toast('Orçamento excluído');
+    dbDelete('orcamentos',id).then(()=>{
+        orcamentos=orcamentos.filter(o=>o.id!==id);
+        renderOrcamentos();renderDashboard();toast('Orçamento excluído');
+    });
 }
 function alterarStatusOrc(id,status){
     const o=orcamentos.find(x=>x.id===id);if(!o)return;
     o.status=status;
-    localStorage.setItem('orcamentos',JSON.stringify(orcamentos));
-    renderOrcamentos();renderDashboard();toast('Status atualizado');
+    dbPut('orcamentos',o).then(()=>{
+        renderOrcamentos();renderDashboard();toast('Status atualizado');
+    });
 }
 function saveOrcamento(e){
     e.preventDefault();
@@ -1396,7 +1573,6 @@ function saveOrcamento(e){
     const id=document.getElementById('o-id').value;
     const existente=id?orcamentos.find(x=>x.id===parseInt(id)):null;
     const o={
-        id:id?parseInt(id):null,
         empresa:document.getElementById('o-empresa').value,
         cnpjSolicitante:document.getElementById('o-cnpj').value,
         modelo:document.getElementById('o-modelo').value,
@@ -1410,13 +1586,16 @@ function saveOrcamento(e){
         status:existente?existente.status:'pendente',
         itens
     };
-    const idx=orcamentos.findIndex(x=>x.id===o.id);
-    if(idx>-1)orcamentos[idx]=o;else{o.id=nextOId++;orcamentos.push(o);}
-    localStorage.setItem('orcamentos',JSON.stringify(orcamentos));
-    renderOrcamentos();renderDashboard();
-    closeSheet('orcamento');
-    setTimeout(()=>verOrcamento(o.id),350);
-    toast('Orçamento salvo! ✅');
+    if(id) o.id=parseInt(id);
+    dbPut('orcamentos',o).then(newId=>{
+        o.id=o.id||newId;
+        const idx=orcamentos.findIndex(x=>x.id===o.id);
+        if(idx>-1)orcamentos[idx]=o;else orcamentos.push(o);
+        renderOrcamentos();renderDashboard();
+        closeSheet('orcamento');
+        setTimeout(()=>verOrcamento(o.id),350);
+        toast('Orçamento salvo! ✅');
+    });
 }
 
 function gerarHTMLOrcamento(o){
@@ -1451,96 +1630,40 @@ function gerarHTMLOrcamento(o){
     </div>`;
 }
 
-let _orcAtualId = null;
-
 function verOrcamento(id){
     const o=orcamentos.find(x=>x.id===id);if(!o)return;
-    _orcAtualId = id;
     document.getElementById('orc-preview-wrap').innerHTML=gerarHTMLOrcamento(o);
-    document.getElementById('btn-dl-orc').onclick=()=>baixarOrcPdf(id);
+    document.getElementById('btn-dl-orc').onclick=()=>baixarOrcPdf();
     openSheet('ver-orcamento');
 }
 
-function baixarOrcPdf(id){
-    const o = orcamentos.find(x=>x.id===(id||_orcAtualId));
-    if(!o){ toast('Erro: orçamento não encontrado'); return; }
-
-    window.jsPDF = window.jspdf.jsPDF;
-    toast('Gerando PDF...');
-
-    // Cria container offscreen (fora do sheet, sem restrição de altura)
-    const wrap = document.createElement('div');
-    wrap.style.cssText = [
-        'position:fixed',
-        'left:-9999px',
-        'top:0',
-        'width:760px',          // largura fixa A4-like
-        'background:#ffffff',
-        'z-index:-1',
-        'padding:32px 36px',
-        'font-family:Inter,sans-serif',
-        'font-size:12.5px',
-        'color:#222',
-        'box-sizing:border-box'
-    ].join(';');
-    wrap.innerHTML = gerarHTMLOrcamento(o);
-    document.body.appendChild(wrap);
-
-    // Aguarda imagens carregarem dentro do wrap
-    const imgs = Array.from(wrap.querySelectorAll('img'));
-    const loads = imgs.map(img => new Promise(res=>{
-        if(img.complete) res();
-        else { img.onload=res; img.onerror=res; }
-    }));
-
-    Promise.all(loads).then(()=>{
-        // Força o browser a calcular o layout completo
-        const fullH = wrap.scrollHeight;
-        wrap.style.height = fullH + 'px';
-
-        html2canvas(wrap, {
-            scale: 2.5,
-            useCORS: true,
-            backgroundColor: '#ffffff',
-            logging: false,
-            width: wrap.offsetWidth,
-            height: fullH,
-            windowWidth: wrap.offsetWidth,
-            windowHeight: fullH
-        }).then(canvas => {
-            document.body.removeChild(wrap);
-
-            const doc = new jsPDF('p','mm','a4');
-            const pageW=210, margin=10, usableW=pageW-2*margin, pageH=297;
-            const ratio = usableW / canvas.width;
-            const totalImgH = canvas.height * ratio;
-
-            if(totalImgH <= pageH - 2*margin){
-                // Cabe em uma página
-                doc.addImage(canvas.toDataURL('image/png'),'PNG',margin,margin,usableW,totalImgH);
-            } else {
-                // Divide em múltiplas páginas sem cortar conteúdo
-                const pageHeightPx = Math.floor((pageH - 2*margin) / ratio);
-                let yPos = 0, pageNum = 0;
-                while(yPos < canvas.height){
-                    if(pageNum > 0) doc.addPage();
-                    const sliceH = Math.min(pageHeightPx, canvas.height - yPos);
-                    const sc = document.createElement('canvas');
-                    sc.width = canvas.width;
-                    sc.height = sliceH;
-                    sc.getContext('2d').drawImage(canvas, 0, -yPos);
-                    doc.addImage(sc.toDataURL('image/png'),'PNG', margin, margin, usableW, sliceH * ratio);
-                    yPos += sliceH;
-                    pageNum++;
-                }
+function baixarOrcPdf(){
+    window.jsPDF=window.jspdf.jsPDF;
+    const el=document.getElementById('orc-preview-wrap');
+    if(!el)return;
+    const doc=new jsPDF('p','mm','a4');
+    const pageW=210,margin=10,usableW=pageW-2*margin,pageH=297;
+    html2canvas(el,{scale:2.5,useCORS:true,backgroundColor:'#ffffff',logging:false}).then(canvas=>{
+        const imgData=canvas.toDataURL('image/png');
+        const imgH=(canvas.height*usableW)/canvas.width;
+        if(imgH<=pageH-2*margin){
+            doc.addImage(imgData,'PNG',margin,margin,usableW,imgH);
+        } else {
+            const ratio=usableW/canvas.width;
+            const phPx=(pageH-2*margin)/ratio;
+            let yPos=0,pn=0;
+            while(yPos<canvas.height){
+                if(pn>0)doc.addPage();
+                const sliceH=Math.min(phPx,canvas.height-yPos);
+                const sc=document.createElement('canvas');
+                sc.width=canvas.width;sc.height=sliceH;
+                sc.getContext('2d').drawImage(canvas,0,-yPos);
+                doc.addImage(sc.toDataURL('image/png'),'PNG',margin,margin,usableW,sliceH*ratio);
+                yPos+=sliceH;pn++;
             }
-            doc.save(`orcamento_${Date.now()}.pdf`);
-            toast('PDF baixado! 📄');
-        }).catch(err=>{
-            document.body.removeChild(wrap);
-            toast('Erro ao gerar PDF');
-            console.error(err);
-        });
+        }
+        doc.save(`orcamento_${Date.now()}.pdf`);
+        toast('PDF baixado! 📄');
     });
 }
 
@@ -1584,6 +1707,35 @@ function renderDashboard(){
             </div>
         </div>`;
     }).join('');
+}
+
+function gerarResumoMateriais(){
+    if(!materiais.length) return '<p style="color:#aaa;font-size:.82rem;text-align:center;padding:10px 0;">Nenhum material cadastrado. <button onclick="closeSheet(\'painel-fin\');navigate(\'materiais\')" style="background:none;border:none;color:var(--blue);font-weight:700;cursor:pointer;text-decoration:underline;">Cadastrar agora</button></p>';
+    const totalCustoEstoque=materiais.reduce((s,m)=>(m.estoque||0)*(m.custoTotal||0)+s,0);
+    const totalVendaEstoque=materiais.reduce((s,m)=>(m.estoque||0)*(m.precoVenda||0)+s,0);
+    const lucroEstoque=totalVendaEstoque-totalCustoEstoque;
+    const semEstoque=materiais.filter(m=>(m.estoque||0)<=(m.estoqueMin||0)&&(m.estoqueMin||0)>0);
+    return`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+        <div class="fin-card laranja"><div class="fin-card-label">Custo em Estoque</div><div class="fin-card-value">${fmtM(totalCustoEstoque)}</div></div>
+        <div class="fin-card verde"><div class="fin-card-label">Valor de Venda Est.</div><div class="fin-card-value">${fmtM(totalVendaEstoque)}</div></div>
+        <div class="fin-card ${lucroEstoque>=0?'verde':'azul'}"><div class="fin-card-label">Lucro Potencial</div><div class="fin-card-value" style="color:${lucroEstoque>=0?'var(--green)':'var(--red)'};">${fmtM(lucroEstoque)}</div></div>
+        <div class="fin-card azul"><div class="fin-card-label">Total Materiais</div><div class="fin-card-value">${materiais.length}</div></div>
+    </div>
+    ${semEstoque.length?`<div class="fin-alerta aviso"><i class="fas fa-exclamation-triangle"></i><span><strong>${semEstoque.length} material(is) abaixo do estoque mínimo:</strong> ${semEstoque.slice(0,3).map(m=>m.nome).join(', ')}${semEstoque.length>3?'...':''}</span></div>`:''}
+    <div style="margin-top:8px;">
+        ${materiais.filter(m=>m.precoVenda).slice(0,5).map(m=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);">
+            <div>
+                <div style="font-weight:700;font-size:.83rem;">${m.nome}</div>
+                <div style="font-size:.72rem;color:var(--muted);">Compra: ${fmtM(m.precoCompra)} → Venda: ${fmtM(m.precoVenda)}</div>
+            </div>
+            <div style="text-align:right;">
+                <div style="font-weight:700;font-size:.88rem;color:${m.lucro>=0?'var(--green)':'var(--red)'};">${fmtM(m.lucro)}</div>
+                <div style="font-size:.7rem;color:var(--muted);">${m.margem.toFixed(1)}% margem</div>
+            </div>
+        </div>`).join('')}
+    </div>`;
 }
 
 // ╔══════════════════════════════╗
@@ -1679,6 +1831,9 @@ function renderPainelFinanceiro(){
         ${orcRows}
         <div style="font-size:.78rem;color:var(--muted);margin-top:8px;">Aceitos: <strong style="color:var(--green)">${fmtM(totalAceito)}</strong> — Pendentes: <strong style="color:var(--orange)">${fmtM(totalPendente)}</strong></div>
 
+        <div style="font-size:.88rem;font-weight:700;border-bottom:2px solid var(--border);padding-bottom:6px;margin:16px 0 8px;display:flex;align-items:center;gap:6px;"><i class="fas fa-boxes" style="color:var(--orange)"></i> Materiais & Custos</div>
+        ${gerarResumoMateriais()}
+
         <div style="font-size:.88rem;font-weight:700;border-bottom:2px solid var(--border);padding-bottom:6px;margin:16px 0 8px;display:flex;align-items:center;gap:6px;"><i class="fas fa-piggy-bank" style="color:var(--orange)"></i> Capitalização</div>
         <div id="fin-slider-area">
             <div style="background:#fafafa;border-radius:10px;padding:12px;border:1px solid var(--border);">
@@ -1703,48 +1858,356 @@ function calcCapitalizacao(){
     if(document.getElementById('vl-cap')) document.getElementById('vl-cap').textContent=pCap+'%';
     const vRes=rec*pRes/100,vCap=rec*pCap/100;
     const total=vRes+vCap,pTotal=Math.min(100,pRes+pCap);
-    let cap=JSON.parse(localStorage.getItem('capitalizacao'))||{reserva:0,capital:0};
-    const grid=document.getElementById('fin-cap-grid');
-    if(!grid)return;
-    grid.innerHTML=`
-        <div class="fin-cap-card res">
-            <h4>🛡️ Reserva</h4>
-            <div class="fin-cap-val">${fmtM(vRes)}</div>
-            <div style="font-size:.72rem;color:#777;">Sugerido (${pRes}%)</div>
-            <div style="font-size:.7rem;color:#aaa;margin-top:3px;">Acumulado: ${fmtM(cap.reserva)}</div>
-            <button onclick="registrarAporte('reserva',${vRes})" style="margin-top:7px;padding:5px 10px;background:var(--orange);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:.72rem;font-weight:700;width:100%;">✔ Registrar</button>
-        </div>
-        <div class="fin-cap-card cap">
-            <h4>🔄 Capital</h4>
-            <div class="fin-cap-val">${fmtM(vCap)}</div>
-            <div style="font-size:.72rem;color:#777;">Sugerido (${pCap}%)</div>
-            <div style="font-size:.7rem;color:#aaa;margin-top:3px;">Acumulado: ${fmtM(cap.capital)}</div>
-            <button onclick="registrarAporte('capital',${vCap})" style="margin-top:7px;padding:5px 10px;background:var(--blue);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:.72rem;font-weight:700;width:100%;">✔ Registrar</button>
-        </div>`;
-    const conselho=document.getElementById('fin-cap-conselho');
-    if(!conselho)return;
-    let msg='';
-    if(rec>0){
-        if(pTotal>50) msg=`<div class="fin-alerta aviso"><i class="fas fa-exclamation-circle"></i><span>Alocando <strong>${pTotal}%</strong> em aportes. Verifique se o restante cobre os custos.</span></div>`;
-        else if(pTotal<10) msg=`<div class="fin-alerta aviso"><i class="fas fa-lightbulb"></i><span>Percentual baixo. Recomenda-se pelo menos <strong>20-30%</strong>.</span></div>`;
-        else msg=`<div class="fin-alerta sucesso"><i class="fas fa-check-circle"></i><span>Boa estratégia! Destinando <strong>${pTotal}%</strong> para capitalização.</span></div>`;
-    }
-    conselho.innerHTML=msg;
+    
+    const renderCap=(cap)=>{
+        const grid=document.getElementById('fin-cap-grid');
+        if(!grid)return;
+        grid.innerHTML=`
+            <div class="fin-cap-card res">
+                <h4>🛡️ Reserva</h4>
+                <div class="fin-cap-val">${fmtM(vRes)}</div>
+                <div style="font-size:.72rem;color:#777;">Sugerido (${pRes}%)</div>
+                <div style="font-size:.7rem;color:#aaa;margin-top:3px;">Acumulado: ${fmtM(cap.reserva)}</div>
+                <button onclick="registrarAporte('reserva',${vRes})" style="margin-top:7px;padding:5px 10px;background:var(--orange);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:.72rem;font-weight:700;width:100%;">✔ Registrar</button>
+            </div>
+            <div class="fin-cap-card cap">
+                <h4>🔄 Capital</h4>
+                <div class="fin-cap-val">${fmtM(vCap)}</div>
+                <div style="font-size:.72rem;color:#777;">Sugerido (${pCap}%)</div>
+                <div style="font-size:.7rem;color:#aaa;margin-top:3px;">Acumulado: ${fmtM(cap.capital)}</div>
+                <button onclick="registrarAporte('capital',${vCap})" style="margin-top:7px;padding:5px 10px;background:var(--blue);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:.72rem;font-weight:700;width:100%;">✔ Registrar</button>
+            </div>`;
+        const conselho=document.getElementById('fin-cap-conselho');
+        if(!conselho)return;
+        let msg='';
+        if(rec>0){
+            if(pTotal>50) msg=`<div class="fin-alerta aviso"><i class="fas fa-exclamation-circle"></i><span>Alocando <strong>${pTotal}%</strong> em aportes. Verifique se o restante cobre os custos.</span></div>`;
+            else if(pTotal<10) msg=`<div class="fin-alerta aviso"><i class="fas fa-lightbulb"></i><span>Percentual baixo. Recomenda-se pelo menos <strong>20-30%</strong>.</span></div>`;
+            else msg=`<div class="fin-alerta sucesso"><i class="fas fa-check-circle"></i><span>Boa estratégia! Destinando <strong>${pTotal}%</strong> para capitalização.</span></div>`;
+        }
+        conselho.innerHTML=msg;
+    };
+    
+    dbGet('config','cap_data').then(rec=>{
+        renderCap(rec?JSON.parse(rec.value):{reserva:0,capital:0});
+    }).catch(()=>renderCap({reserva:0,capital:0}));
 }
 function registrarAporte(tipo,valor){
-    let cap=JSON.parse(localStorage.getItem('capitalizacao'))||{reserva:0,capital:0};
-    cap[tipo]=(cap[tipo]||0)+valor;
-    localStorage.setItem('capitalizacao',JSON.stringify(cap));
-    toast(`Aporte de ${fmtM(valor)} registrado! 💰`);
-    calcCapitalizacao();
+    dbGet('config','cap_data').then(rec=>{
+        const cap=rec?JSON.parse(rec.value):{reserva:0,capital:0};
+        cap[tipo]=(cap[tipo]||0)+valor;
+        dbPut('config',{id:'cap_data',value:JSON.stringify(cap)}).then(()=>{
+            toast(`Aporte de ${fmtM(valor)} registrado! 💰`);
+            calcCapitalizacao();
+        });
+    }).catch(()=>{
+        const cap={reserva:0,capital:0};
+        cap[tipo]=valor;
+        dbPut('config',{id:'cap_data',value:JSON.stringify(cap)}).then(()=>{
+            toast(`Aporte de ${fmtM(valor)} registrado! 💰`);
+            calcCapitalizacao();
+        });
+    });
+}
+
+// ╔══════════════════════════════════════════╗
+// ║   MATERIAIS                              ║
+// ╚══════════════════════════════════════════╝
+function calcLucroMaterial(){
+    const compra=parseFloat(document.getElementById('m-preco-compra').value)||0;
+    const custo=parseFloat(document.getElementById('m-custo-adicional').value)||0;
+    const venda=parseFloat(document.getElementById('m-preco-venda').value)||0;
+    const prev=document.getElementById('lucro-preview');
+    if(!compra&&!venda){prev.style.display='none';return;}
+    prev.style.display='block';
+    const custoTotal=compra+custo;
+    const lucro=venda-custoTotal;
+    const margem=venda>0?((lucro/venda)*100):0;
+    document.getElementById('lp-custo').textContent=fmtM(custoTotal);
+    document.getElementById('lp-lucro').textContent=fmtM(lucro);
+    document.getElementById('lp-lucro').style.color=lucro>=0?'var(--green)':'var(--red)';
+    document.getElementById('lp-margem').textContent=margem.toFixed(1)+'%';
+    document.getElementById('lp-margem').style.color=margem>=20?'var(--green)':margem>=10?'var(--orange)':'var(--red)';
+}
+
+function openMaterialForm(id){
+    document.getElementById('m-id').value='';
+    document.getElementById('material-form-title').textContent='Novo Material';
+    document.getElementById('m-nome').value='';
+    document.getElementById('m-categoria').value='';
+    document.getElementById('m-unidade').value='';
+    document.getElementById('m-estoque').value='0';
+    document.getElementById('m-estoque-min').value='0';
+    document.getElementById('m-preco-compra').value='';
+    document.getElementById('m-custo-adicional').value='';
+    document.getElementById('m-preco-venda').value='';
+    document.getElementById('m-obs').value='';
+    document.getElementById('lucro-preview').style.display='none';
+    if(id){
+        const m=materiais.find(x=>x.id===id);if(!m)return;
+        document.getElementById('m-id').value=m.id;
+        document.getElementById('material-form-title').textContent='Editar Material';
+        document.getElementById('m-nome').value=m.nome||'';
+        document.getElementById('m-categoria').value=m.categoria||'';
+        document.getElementById('m-unidade').value=m.unidade||'';
+        document.getElementById('m-estoque').value=m.estoque||0;
+        document.getElementById('m-estoque-min').value=m.estoqueMin||0;
+        document.getElementById('m-preco-compra').value=m.precoCompra||'';
+        document.getElementById('m-custo-adicional').value=m.custoAdicional||'';
+        document.getElementById('m-preco-venda').value=m.precoVenda||'';
+        document.getElementById('m-obs').value=m.obs||'';
+        calcLucroMaterial();
+    }
+    openSheet('material');
+}
+
+function saveMaterial(e){
+    e.preventDefault();
+    const id=document.getElementById('m-id').value;
+    const precoCompra=parseFloat(document.getElementById('m-preco-compra').value)||0;
+    const custoAdicional=parseFloat(document.getElementById('m-custo-adicional').value)||0;
+    const precoVenda=parseFloat(document.getElementById('m-preco-venda').value)||0;
+    const m={
+        nome:document.getElementById('m-nome').value,
+        categoria:document.getElementById('m-categoria').value,
+        unidade:document.getElementById('m-unidade').value,
+        estoque:parseFloat(document.getElementById('m-estoque').value)||0,
+        estoqueMin:parseFloat(document.getElementById('m-estoque-min').value)||0,
+        precoCompra,custoAdicional,precoVenda,
+        custoTotal:precoCompra+custoAdicional,
+        lucro:precoVenda-(precoCompra+custoAdicional),
+        margem:precoVenda>0?(((precoVenda-(precoCompra+custoAdicional))/precoVenda)*100):0,
+        obs:document.getElementById('m-obs').value
+    };
+    if(id) m.id=parseInt(id);
+    dbPut('materiais',m).then(newId=>{
+        m.id=m.id||newId;
+        const idx=materiais.findIndex(x=>x.id===m.id);
+        if(idx>-1)materiais[idx]=m;else materiais.push(m);
+        renderMateriais();closeSheet('material');toast('Material salvo! ✅');
+    });
+}
+
+function excluirMaterial(id){
+    if(!confirm('Excluir este material?'))return;
+    dbDelete('materiais',id).then(()=>{
+        materiais=materiais.filter(m=>m.id!==id);
+        renderMateriais();toast('Material excluído');
+    });
+}
+
+function renderMateriais(q=''){
+    const container=document.getElementById('materiais-list');
+    const list=materiais.filter(m=>!q||m.nome.toLowerCase().includes(q.toLowerCase())||m.categoria?.toLowerCase().includes(q.toLowerCase()));
+    if(!list.length){
+        container.innerHTML=`<div class="empty-state"><i class="fas fa-boxes"></i><p>Nenhum material cadastrado</p></div>`;
+        return;
+    }
+    // Calcular totais
+    const totalCusto=list.reduce((s,m)=>(m.estoque||0)*(m.custoTotal||0)+s,0);
+    const totalVenda=list.reduce((s,m)=>(m.estoque||0)*(m.precoVenda||0)+s,0);
+    const semEstoque=list.filter(m=>(m.estoque||0)<=(m.estoqueMin||0)&&(m.estoqueMin||0)>0).length;
+    container.innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;">
+        <div style="background:var(--blue-light);border-radius:10px;padding:10px;text-align:center;border:1px solid #bfdbfe;">
+            <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;color:var(--blue);margin-bottom:2px;">Itens</div>
+            <div style="font-family:Rajdhani,sans-serif;font-size:1.3rem;font-weight:700;color:var(--blue);">${list.length}</div>
+        </div>
+        <div style="background:var(--orange-light);border-radius:10px;padding:10px;text-align:center;border:1px solid #fcd34d;">
+            <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;color:var(--orange);margin-bottom:2px;">Custo Est.</div>
+            <div style="font-family:Rajdhani,sans-serif;font-size:.95rem;font-weight:700;color:var(--orange);">${fmtMShort(totalCusto)}</div>
+        </div>
+        <div style="background:${semEstoque>0?'#fdeaea':'var(--green-light)'};border-radius:10px;padding:10px;text-align:center;border:1px solid ${semEstoque>0?'#fecaca':'#bbf7d0'};">
+            <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;color:${semEstoque>0?'var(--red)':'var(--green)'};margin-bottom:2px;">⚠ Estoque</div>
+            <div style="font-family:Rajdhani,sans-serif;font-size:1.3rem;font-weight:700;color:${semEstoque>0?'var(--red)':'var(--green)'};">${semEstoque}</div>
+        </div>
+    </div>
+    `+list.map(m=>{
+        const estoqueOk=(m.estoque||0)>(m.estoqueMin||0)||(m.estoqueMin||0)===0;
+        const margemOk=m.margem>=20;
+        return`<div class="list-card orange">
+            <div class="card-top">
+                <div style="flex:1">
+                    <div class="card-name">${m.nome}</div>
+                    ${m.categoria?`<div class="card-sub"><i class="fas fa-tag"></i>${m.categoria}</div>`:''}
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;">
+                        <span style="font-size:.7rem;padding:2px 8px;border-radius:99px;font-weight:700;background:${estoqueOk?'var(--green-light)':'#fdeaea'};color:${estoqueOk?'var(--green)':'var(--red)'};">
+                            <i class="fas fa-box"></i> ${m.estoque||0} ${m.unidade||'un'}
+                        </span>
+                        ${m.precoVenda?`<span style="font-size:.7rem;padding:2px 8px;border-radius:99px;font-weight:700;background:var(--blue-light);color:var(--blue);">Venda: ${fmtM(m.precoVenda)}</span>`:''}
+                    </div>
+                </div>
+                <div style="text-align:right;min-width:80px;">
+                    ${m.margem!==undefined&&m.precoVenda?`
+                    <div style="font-family:Rajdhani,sans-serif;font-size:1.1rem;font-weight:700;color:${margemOk?'var(--green)':'var(--orange)'};">${m.margem.toFixed(1)}%</div>
+                    <div style="font-size:.65rem;color:var(--muted);">margem</div>
+                    <div style="font-size:.78rem;font-weight:700;color:${m.lucro>=0?'var(--green)':'var(--red)'};">${fmtM(m.lucro)}</div>
+                    `:'<div style="font-size:.72rem;color:#aaa;">Sem preço</div>'}
+                </div>
+            </div>
+            ${m.precoCompra?`
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);">
+                <div style="background:#fafafa;border-radius:6px;padding:5px 7px;">
+                    <div style="font-size:.6rem;color:var(--muted);font-weight:700;">COMPRA</div>
+                    <div style="font-size:.82rem;font-weight:700;color:var(--orange);">${fmtM(m.precoCompra)}</div>
+                </div>
+                <div style="background:#fafafa;border-radius:6px;padding:5px 7px;">
+                    <div style="font-size:.6rem;color:var(--muted);font-weight:700;">CUSTO TOTAL</div>
+                    <div style="font-size:.82rem;font-weight:700;color:#555;">${fmtM(m.custoTotal)}</div>
+                </div>
+                <div style="background:#fafafa;border-radius:6px;padding:5px 7px;">
+                    <div style="font-size:.6rem;color:var(--muted);font-weight:700;">LUCRO UN.</div>
+                    <div style="font-size:.82rem;font-weight:700;color:${m.lucro>=0?'var(--green)':'var(--red)'};">${fmtM(m.lucro)}</div>
+                </div>
+            </div>`:''}
+            <div class="action-row">
+                <button class="btn-sm btn-light" onclick="openMaterialForm(${m.id})"><i class="fas fa-edit"></i> Editar</button>
+                <button class="btn-sm btn-red" onclick="excluirMaterial(${m.id})"><i class="fas fa-trash"></i></button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// ╔══════════════════════════════════════════╗
+// ║   BACKUP SYSTEM                          ║
+// ╚══════════════════════════════════════════╝
+const BACKUP_KEY = 'tonyfume_lastBackup';
+const BACKUP_INTERVAL_DAYS = 3;
+
+function getLastBackupDate(){
+    return localStorage.getItem(BACKUP_KEY)?new Date(localStorage.getItem(BACKUP_KEY)):null;
+}
+function salvarUltimoBackupCheck(){
+    // Apenas fecha, não atualiza a data — vai perguntar de novo amanhã
+}
+function ignorarAlertaBackup(){
+    localStorage.setItem(BACKUP_KEY, new Date().toISOString());
+}
+
+function checkBackupAlert(){
+    const last=getLastBackupDate();
+    const agora=new Date();
+    const diasDesde=last?Math.floor((agora-last)/(1000*60*60*24)):999;
+    if(diasDesde>=BACKUP_INTERVAL_DAYS){
+        setTimeout(()=>openSheet('backup'),1500);
+    }
+}
+
+function renderBackupStats(){
+    const last=getLastBackupDate();
+    const agora=new Date();
+    const diasDesde=last?Math.floor((agora-last)/(1000*60*60*24)):null;
+    document.getElementById('backup-stats').innerHTML=`
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;">
+                <div style="font-size:.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">Último backup</div>
+                <div style="font-weight:700;font-size:.9rem;color:${diasDesde===null||diasDesde>3?'var(--red)':'var(--green)'};">${last?fmtD(last.toISOString().split('T')[0]):'Nunca'}</div>
+                ${diasDesde!==null?`<div style="font-size:.7rem;color:var(--muted);">${diasDesde===0?'hoje':diasDesde===1?'há 1 dia':'há '+diasDesde+' dias'}</div>`:''}
+            </div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;">
+                <div style="font-size:.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">Dados salvos</div>
+                <div style="font-weight:700;font-size:.82rem;color:var(--blue);">${recibos.length} recibos</div>
+                <div style="font-size:.72rem;color:var(--muted);">${clientes.length} clientes • ${orcamentos.length} orç. • ${materiais.length} mat.</div>
+            </div>
+        </div>
+        ${diasDesde===null||diasDesde>3?`<div class="fin-alerta perigo"><i class="fas fa-exclamation-triangle"></i><span><strong>Atenção!</strong> ${diasDesde===null?'Você nunca fez backup.':'Seu último backup foi há '+diasDesde+' dias.'} Faça um backup agora para proteger seus dados!</span></div>`
+        :`<div class="fin-alerta sucesso"><i class="fas fa-check-circle"></i><span>Seus dados estão protegidos. Último backup há ${diasDesde===0?'hoje':diasDesde+' dias'}.</span></div>`}
+    `;
+}
+
+async function fazerBackup(){
+    const dados={
+        versao:'2.0',
+        data:new Date().toISOString(),
+        config:cfg,
+        recibos,clientes,orcamentos,materiais
+    };
+    // Incluir capitalizacao
+    try{const cap=await dbGet('config','cap_data');if(cap)dados.capitalizacao=cap.value;}catch(e){}
+    
+    const json=JSON.stringify(dados,null,2);
+    const blob=new Blob([json],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    const hoje=new Date();
+    a.href=url;
+    a.download=`tonyfume_backup_${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,'0')}-${String(hoje.getDate()).padStart(2,'0')}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    localStorage.setItem(BACKUP_KEY,new Date().toISOString());
+    toast('Backup realizado com sucesso! 💾');
+    renderBackupStats();
+}
+
+async function restaurarBackup(input){
+    const file=input.files[0];if(!file)return;
+    if(!confirm('⚠️ Isso vai SUBSTITUIR todos os dados atuais pelo backup. Deseja continuar?'))return;
+    const reader=new FileReader();
+    reader.onload=async ev=>{
+        try{
+            const dados=JSON.parse(ev.target.result);
+            // Limpar stores
+            await dbClear('recibos');await dbClear('clientes');await dbClear('orcamentos');await dbClear('materiais');
+            // Restaurar config
+            if(dados.config){cfg={...dados.config,id:'config'};await dbPut('config',cfg);}
+            // Restaurar arrays
+            for(const r of (dados.recibos||[]))   await dbPut('recibos',r);
+            for(const c of (dados.clientes||[]))  await dbPut('clientes',c);
+            for(const o of (dados.orcamentos||[])) await dbPut('orcamentos',o);
+            for(const m of (dados.materiais||[]))  await dbPut('materiais',m);
+            if(dados.capitalizacao) await dbPut('config',{id:'cap_data',value:dados.capitalizacao});
+            // Recarregar estado
+            recibos   =await dbGetAll('recibos');
+            clientes  =await dbGetAll('clientes');
+            orcamentos=await dbGetAll('orcamentos');
+            materiais =await dbGetAll('materiais');
+            applyBrand();applyBackground();renderDashboard();
+            closeSheet('backup');
+            toast('Backup restaurado com sucesso! ✅');
+        }catch(err){
+            alert('Erro ao restaurar o backup. Verifique se o arquivo é válido.\n'+err);
+        }
+    };
+    reader.readAsText(file);
+    input.value='';
 }
 
 // ╔══════════════════════════════╗
 // ║         INIT                 ║
 // ╚══════════════════════════════╝
-applyBrand();
-populateClienteSelect();
-renderDashboard();
+async function init(){
+    await initDB();
+
+    // Migrar dados do localStorage para IndexedDB (primeira vez)
+    const migrated=localStorage.getItem('tf_migrated_idb');
+    if(!migrated){
+        const lsCfg=localStorage.getItem('empresaConfig');
+        const lsRec=localStorage.getItem('recibos');
+        const lsCli=localStorage.getItem('clientes');
+        const lsOrc=localStorage.getItem('orcamentos');
+        if(lsCfg){const c=JSON.parse(lsCfg);c.id='config';await dbPut('config',c);}
+        if(lsRec){for(const r of JSON.parse(lsRec)) await dbPut('recibos',r);}
+        if(lsCli){for(const c of JSON.parse(lsCli)) await dbPut('clientes',c);}
+        if(lsOrc){for(const o of JSON.parse(lsOrc)) await dbPut('orcamentos',o);}
+        localStorage.setItem('tf_migrated_idb','1');
+    }
+
+    // Carregar dados do IndexedDB
+    const savedCfg=await dbGet('config','config');
+    if(savedCfg) cfg=savedCfg;
+    recibos   =await dbGetAll('recibos');
+    clientes  =await dbGetAll('clientes');
+    orcamentos=await dbGetAll('orcamentos');
+    materiais =await dbGetAll('materiais');
+
+    applyBrand();
+    applyBackground();
+    populateClienteSelect();
+    renderDashboard();
+    checkBackupAlert();
+}
+
+init();
 </script>
 </body>
 </html>
