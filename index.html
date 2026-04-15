@@ -1204,25 +1204,47 @@ function gerarHTMLRecibo(r){
     </div>`;
 }
 
+let _reciboAtualId = null;
+
 function verRecibo(id, baixar=false){
     const r=recibos.find(x=>x.id===id);if(!r)return;
+    _reciboAtualId = id;
     document.getElementById('recibo-content').innerHTML=gerarHTMLRecibo(r);
-    document.getElementById('btn-dl-recibo').onclick=()=>baixarRecibosPdf();
+    document.getElementById('btn-dl-recibo').onclick=()=>baixarRecibosPdf(id);
     openSheet('ver-recibo');
-    if(baixar) setTimeout(baixarRecibosPdf,500);
+    if(baixar) setTimeout(()=>baixarRecibosPdf(id), 600);
 }
 
-function baixarRecibosPdf(){
-    window.jsPDF=window.jspdf.jsPDF;
-    const el=document.getElementById('recibo-content');
-    const doc=new jsPDF('p','mm','a5');
-    html2canvas(el,{scale:2.5,useCORS:true,backgroundColor:'#ffffff'}).then(canvas=>{
-        const imgData=canvas.toDataURL('image/png');
-        const pageW=148.5,margin=8,usableW=pageW-2*margin;
-        const imgH=(canvas.height*usableW)/canvas.width;
-        doc.addImage(imgData,'PNG',margin,margin,usableW,Math.min(imgH,210-2*margin));
-        doc.save(`recibo_${Date.now()}.pdf`);
-        toast('PDF baixado! 📄');
+function baixarRecibosPdf(id){
+    const r = recibos.find(x=>x.id===(id||_reciboAtualId));
+    if(!r){ toast('Erro: recibo não encontrado'); return; }
+    window.jsPDF = window.jspdf.jsPDF;
+    toast('Gerando PDF...');
+    const wrap = document.createElement('div');
+    wrap.style.cssText='position:fixed;left:-9999px;top:0;width:480px;background:#ffffff;z-index:-1;padding:20px;font-family:Inter,sans-serif;box-sizing:border-box;';
+    wrap.innerHTML = gerarHTMLRecibo(r);
+    document.body.appendChild(wrap);
+    const imgs = Array.from(wrap.querySelectorAll('img'));
+    const loads = imgs.map(img => new Promise(res=>{ if(img.complete)res(); else{img.onload=res;img.onerror=res;} }));
+    Promise.all(loads).then(()=>{
+        const fullH = wrap.scrollHeight;
+        wrap.style.height = fullH + 'px';
+        html2canvas(wrap,{scale:2.5,useCORS:true,backgroundColor:'#ffffff',logging:false,width:wrap.offsetWidth,height:fullH,windowWidth:wrap.offsetWidth,windowHeight:fullH}).then(canvas=>{
+            document.body.removeChild(wrap);
+            const doc = new jsPDF('p','mm','a5');
+            const pageW=148.5, margin=8, usableW=pageW-2*margin, pageH=210;
+            const ratio = usableW / canvas.width;
+            const totalImgH = canvas.height * ratio;
+            if(totalImgH <= pageH-2*margin){
+                doc.addImage(canvas.toDataURL('image/png'),'PNG',margin,margin,usableW,totalImgH);
+            } else {
+                const phPx = Math.floor((pageH-2*margin)/ratio);
+                let yPos=0,pn=0;
+                while(yPos<canvas.height){ if(pn>0)doc.addPage(); const sliceH=Math.min(phPx,canvas.height-yPos); const sc=document.createElement('canvas'); sc.width=canvas.width;sc.height=sliceH; sc.getContext('2d').drawImage(canvas,0,-yPos); doc.addImage(sc.toDataURL('image/png'),'PNG',margin,margin,usableW,sliceH*ratio); yPos+=sliceH;pn++; }
+            }
+            doc.save(`recibo_${Date.now()}.pdf`);
+            toast('PDF baixado! 📄');
+        }).catch(err=>{ document.body.removeChild(wrap); toast('Erro ao gerar PDF'); });
     });
 }
 
@@ -1429,40 +1451,96 @@ function gerarHTMLOrcamento(o){
     </div>`;
 }
 
+let _orcAtualId = null;
+
 function verOrcamento(id){
     const o=orcamentos.find(x=>x.id===id);if(!o)return;
+    _orcAtualId = id;
     document.getElementById('orc-preview-wrap').innerHTML=gerarHTMLOrcamento(o);
-    document.getElementById('btn-dl-orc').onclick=()=>baixarOrcPdf();
+    document.getElementById('btn-dl-orc').onclick=()=>baixarOrcPdf(id);
     openSheet('ver-orcamento');
 }
 
-function baixarOrcPdf(){
-    window.jsPDF=window.jspdf.jsPDF;
-    const el=document.getElementById('orc-preview-wrap');
-    if(!el)return;
-    const doc=new jsPDF('p','mm','a4');
-    const pageW=210,margin=10,usableW=pageW-2*margin,pageH=297;
-    html2canvas(el,{scale:2.5,useCORS:true,backgroundColor:'#ffffff',logging:false}).then(canvas=>{
-        const imgData=canvas.toDataURL('image/png');
-        const imgH=(canvas.height*usableW)/canvas.width;
-        if(imgH<=pageH-2*margin){
-            doc.addImage(imgData,'PNG',margin,margin,usableW,imgH);
-        } else {
-            const ratio=usableW/canvas.width;
-            const phPx=(pageH-2*margin)/ratio;
-            let yPos=0,pn=0;
-            while(yPos<canvas.height){
-                if(pn>0)doc.addPage();
-                const sliceH=Math.min(phPx,canvas.height-yPos);
-                const sc=document.createElement('canvas');
-                sc.width=canvas.width;sc.height=sliceH;
-                sc.getContext('2d').drawImage(canvas,0,-yPos);
-                doc.addImage(sc.toDataURL('image/png'),'PNG',margin,margin,usableW,sliceH*ratio);
-                yPos+=sliceH;pn++;
+function baixarOrcPdf(id){
+    const o = orcamentos.find(x=>x.id===(id||_orcAtualId));
+    if(!o){ toast('Erro: orçamento não encontrado'); return; }
+
+    window.jsPDF = window.jspdf.jsPDF;
+    toast('Gerando PDF...');
+
+    // Cria container offscreen (fora do sheet, sem restrição de altura)
+    const wrap = document.createElement('div');
+    wrap.style.cssText = [
+        'position:fixed',
+        'left:-9999px',
+        'top:0',
+        'width:760px',          // largura fixa A4-like
+        'background:#ffffff',
+        'z-index:-1',
+        'padding:32px 36px',
+        'font-family:Inter,sans-serif',
+        'font-size:12.5px',
+        'color:#222',
+        'box-sizing:border-box'
+    ].join(';');
+    wrap.innerHTML = gerarHTMLOrcamento(o);
+    document.body.appendChild(wrap);
+
+    // Aguarda imagens carregarem dentro do wrap
+    const imgs = Array.from(wrap.querySelectorAll('img'));
+    const loads = imgs.map(img => new Promise(res=>{
+        if(img.complete) res();
+        else { img.onload=res; img.onerror=res; }
+    }));
+
+    Promise.all(loads).then(()=>{
+        // Força o browser a calcular o layout completo
+        const fullH = wrap.scrollHeight;
+        wrap.style.height = fullH + 'px';
+
+        html2canvas(wrap, {
+            scale: 2.5,
+            useCORS: true,
+            backgroundColor: '#ffffff',
+            logging: false,
+            width: wrap.offsetWidth,
+            height: fullH,
+            windowWidth: wrap.offsetWidth,
+            windowHeight: fullH
+        }).then(canvas => {
+            document.body.removeChild(wrap);
+
+            const doc = new jsPDF('p','mm','a4');
+            const pageW=210, margin=10, usableW=pageW-2*margin, pageH=297;
+            const ratio = usableW / canvas.width;
+            const totalImgH = canvas.height * ratio;
+
+            if(totalImgH <= pageH - 2*margin){
+                // Cabe em uma página
+                doc.addImage(canvas.toDataURL('image/png'),'PNG',margin,margin,usableW,totalImgH);
+            } else {
+                // Divide em múltiplas páginas sem cortar conteúdo
+                const pageHeightPx = Math.floor((pageH - 2*margin) / ratio);
+                let yPos = 0, pageNum = 0;
+                while(yPos < canvas.height){
+                    if(pageNum > 0) doc.addPage();
+                    const sliceH = Math.min(pageHeightPx, canvas.height - yPos);
+                    const sc = document.createElement('canvas');
+                    sc.width = canvas.width;
+                    sc.height = sliceH;
+                    sc.getContext('2d').drawImage(canvas, 0, -yPos);
+                    doc.addImage(sc.toDataURL('image/png'),'PNG', margin, margin, usableW, sliceH * ratio);
+                    yPos += sliceH;
+                    pageNum++;
+                }
             }
-        }
-        doc.save(`orcamento_${Date.now()}.pdf`);
-        toast('PDF baixado! 📄');
+            doc.save(`orcamento_${Date.now()}.pdf`);
+            toast('PDF baixado! 📄');
+        }).catch(err=>{
+            document.body.removeChild(wrap);
+            toast('Erro ao gerar PDF');
+            console.error(err);
+        });
     });
 }
 
