@@ -2,1979 +2,1671 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tony Fumê - Sistema de Recibos & Orçamentos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0a0a0a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Tony Fumê</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
             --red: #e70000;
             --red-dark: #b50000;
-            --red-light: #fff0f0;
+            --red-soft: #fff0f0;
             --black: #0a0a0a;
             --dark: #111;
-            --white: #fff;
-            --gray-50: #f8f8f8;
-            --gray-100: #f0f0f0;
-            --gray-200: #e0e0e0;
-            --gray-400: #aaa;
-            --gray-600: #666;
-            --gray-800: #333;
+            --surface: #ffffff;
+            --bg: #f4f4f5;
+            --border: #e4e4e7;
+            --text: #0a0a0a;
+            --muted: #71717a;
             --blue: #1a3a6b;
-            --blue-dark: #0d2145;
             --blue-light: #e8f0fb;
             --green: #0a6640;
-            --green-dark: #074d30;
             --green-light: #e8f5ee;
             --orange: #c97d00;
             --orange-light: #fff9ef;
+            --safe-top: env(safe-area-inset-top);
+            --safe-bottom: env(safe-area-inset-bottom);
+            --header-h: calc(58px + var(--safe-top));
+            --nav-h: calc(62px + var(--safe-bottom));
+            --r-lg: 18px;
+            --r-md: 12px;
+            --r-sm: 8px;
+            --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.10);
+            --shadow-float: 0 8px 24px rgba(231,0,0,0.30);
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', sans-serif; background: #0f0f0f; color: var(--black); line-height: 1.6; }
+        *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+        body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column;user-select:none;}
 
         /* ─── HEADER ─── */
-        header {
-            background: var(--dark);
-            color: var(--white);
-            padding: 18px 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 20px;
-            border-bottom: 3px solid var(--red);
-            position: relative;
-            overflow: hidden;
-            flex-wrap: wrap;
+        header{
+            background:var(--dark);
+            padding-top:var(--safe-top);
+            height:var(--header-h);
+            display:flex;align-items:center;justify-content:space-between;
+            padding-left:16px;padding-right:12px;
+            position:fixed;top:0;left:0;right:0;z-index:50;
+            border-bottom:2px solid var(--red);
         }
-        header::after {
-            content: '';
-            position: absolute;
-            bottom: 0; left: 0; right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--red), transparent);
-        }
-        #header-bg {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: cover; opacity: 0.05; pointer-events: none; z-index: 0;
-        }
-        .header-left { display: flex; align-items: center; gap: 16px; position: relative; z-index: 1; }
-        #logo { max-height: 52px; max-width: 140px; object-fit: contain; display: none; }
-        .header-title { display: flex; flex-direction: column; }
-        .header-title h1 {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 1.9em; font-weight: 700; color: var(--red);
-            text-transform: uppercase; letter-spacing: 3px; line-height: 1;
-        }
-        .header-title span { font-size: 0.7em; color: var(--gray-400); letter-spacing: 2px; text-transform: uppercase; }
-        .header-buttons {
-            display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;
-            position: relative; z-index: 1;
-        }
-        .header-buttons button {
-            display: flex; align-items: center; gap: 7px;
-            padding: 9px 16px; border: none; border-radius: 6px;
-            font-family: 'Inter', sans-serif; font-size: 0.82em; font-weight: 600;
-            cursor: pointer; transition: all 0.2s; white-space: nowrap;
-        }
-        .btn-config { background: #1e1e1e; color: var(--gray-400); border: 1px solid #333 !important; }
-        .btn-config:hover { background: #2a2a2a; color: var(--white); }
-        .btn-recibo { background: var(--red); color: var(--white); }
-        .btn-recibo:hover { background: var(--red-dark); }
-        .btn-cliente { background: #1e1e1e; color: var(--white); border: 1px solid #444 !important; }
-        .btn-cliente:hover { background: #2a2a2a; }
-        .btn-orcamento { background: var(--blue); color: var(--white); }
-        .btn-orcamento:hover { background: var(--blue-dark); }
-        .btn-financeiro { background: var(--green); color: var(--white); }
-        .btn-financeiro:hover { background: var(--green-dark); }
+        .brand{display:flex;align-items:center;gap:10px;}
+        .brand-logo{width:32px;height:32px;border-radius:8px;object-fit:contain;display:none;}
+        .brand-title{font-family:'Rajdhani',sans-serif;font-size:1.35rem;font-weight:700;color:#fff;letter-spacing:1px;line-height:1;}
+        .brand-title span{color:var(--red);}
+        .brand-sub{font-size:0.6rem;color:#666;letter-spacing:1.5px;text-transform:uppercase;}
+        .header-actions{display:flex;gap:4px;}
+        .icon-btn{background:none;border:none;font-size:1.1rem;color:#aaa;padding:8px;border-radius:50%;cursor:pointer;transition:0.2s;}
+        .icon-btn:active{background:#1e1e1e;color:#fff;transform:scale(0.92);}
 
-        /* ─── CONTAINER ─── */
-        .container { max-width: 1280px; margin: 20px auto; padding: 0 20px; }
+        /* ─── MAIN ─── */
+        main{flex:1;overflow-y:auto;padding-top:calc(var(--header-h) + 14px);padding-bottom:calc(var(--nav-h) + 76px);padding-left:14px;padding-right:14px;scroll-behavior:smooth;}
+        .view{display:none;animation:fadeUp .3s ease;}
+        .view.active{display:block;}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 
-        /* ─── SECTION ─── */
-        section {
-            background: var(--white);
-            border-radius: 12px;
-            margin-bottom: 18px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-            overflow: hidden;
-        }
-        .section-header {
-            padding: 16px 24px;
-            border-bottom: 1px solid var(--gray-100);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-        }
-        .section-header h2 {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 1.2em; font-weight: 700; color: var(--black);
-            text-transform: uppercase; letter-spacing: 1px;
-            display: flex; align-items: center; gap: 8px;
-        }
-        .section-header h2 i { color: var(--red); font-size: 0.9em; }
-        .section-body { padding: 20px 24px; }
+        /* ─── SECTION TITLE ─── */
+        .sec-title{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+        .sec-title i{color:var(--red);margin-right:4px;}
 
-        /* ─── CARD GRID ─── */
-        .card-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 14px;
-        }
-        .card {
-            background: var(--dark);
-            color: var(--white);
-            padding: 18px 20px;
-            border-radius: 10px;
-            position: relative;
-            overflow: hidden;
-        }
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0;
-            width: 4px; height: 100%;
-            background: var(--red);
-        }
-        .card.card-orcamento::before { background: var(--blue); }
-        .card.card-financeiro::before { background: var(--green); }
-        .card.card-financeiro { cursor: pointer; }
-        .card.card-financeiro:hover { opacity: 0.9; }
-        .card h3 { font-size: 0.75em; text-transform: uppercase; letter-spacing: 1px; color: var(--gray-400); margin-bottom: 8px; }
-        .card p { font-family: 'Rajdhani', sans-serif; font-size: 1.7em; font-weight: 700; color: var(--white); }
-        .card small { font-size: 0.65em; color: var(--gray-400); display: block; margin-top: 4px; }
+        /* ─── STAT CARDS ─── */
+        .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px;}
+        .stat-card{background:var(--surface);padding:14px;border-radius:var(--r-md);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px;cursor:pointer;transition:transform .2s;position:relative;overflow:hidden;}
+        .stat-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--red);}
+        .stat-card.blue::before{background:var(--blue);}
+        .stat-card.green::before{background:var(--green);}
+        .stat-card.orange::before{background:var(--orange);}
+        .stat-card:active{transform:scale(.97);}
+        .stat-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.85rem;}
+        .si-red{background:var(--red-soft);color:var(--red);}
+        .si-blue{background:var(--blue-light);color:var(--blue);}
+        .si-green{background:var(--green-light);color:var(--green);}
+        .si-orange{background:var(--orange-light);color:var(--orange);}
+        .si-dark{background:#f4f4f5;color:#333;}
+        .stat-value{font-family:'Rajdhani',sans-serif;font-size:1.6rem;font-weight:700;color:var(--text);line-height:1;}
+        .stat-label{font-size:0.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;}
 
-        /* ─── TABS ─── */
-        .tabs {
-            display: flex; gap: 0;
-            border-bottom: 2px solid var(--gray-100);
-            padding: 0 24px;
-        }
-        .tab-btn {
-            padding: 14px 22px; border: none; background: transparent;
-            cursor: pointer; font-family: 'Inter', sans-serif;
-            font-size: 0.88em; font-weight: 600; color: var(--gray-600);
-            border-bottom: 3px solid transparent; margin-bottom: -2px;
-            transition: all 0.2s; display: flex; align-items: center; gap: 7px;
-        }
-        .tab-btn:hover { color: var(--black); }
-        .tab-btn.active { color: var(--red); border-bottom-color: var(--red); }
-        .tab-btn.active-blue { color: var(--blue); border-bottom-color: var(--blue); }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        /* ─── LIST CARD ─── */
+        .list-card{background:var(--surface);border-radius:var(--r-md);padding:14px;margin-bottom:10px;box-shadow:var(--shadow);border-left:4px solid transparent;cursor:pointer;transition:transform .2s;}
+        .list-card:active{transform:scale(.98);}
+        .list-card.red{border-left-color:var(--red);}
+        .list-card.blue{border-left-color:var(--blue);}
+        .list-card.green{border-left-color:var(--green);}
+        .list-card.orange{border-left-color:var(--orange);}
+        .card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
+        .card-name{font-weight:700;font-size:.95rem;color:var(--text);}
+        .card-sub{font-size:.78rem;color:var(--muted);margin-top:2px;display:flex;align-items:center;gap:4px;}
+        .card-value{font-family:'Rajdhani',sans-serif;font-size:1.1rem;font-weight:700;color:var(--blue);margin-top:6px;}
+        .tag{font-size:.68rem;padding:3px 8px;border-radius:99px;font-weight:700;text-transform:uppercase;white-space:nowrap;}
+        .tag-pending{background:#fff7ed;color:#c2410c;}
+        .tag-accepted{background:var(--green-light);color:var(--green);}
+        .tag-rejected{background:#fef2f2;color:#b91c1c;}
+        .tag-draft{background:#f4f4f5;color:var(--muted);}
+        .action-row{display:flex;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+        .btn-sm{flex:1;padding:8px 6px;border-radius:8px;border:none;font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:5px;cursor:pointer;transition:.15s;}
+        .btn-sm:active{opacity:.8;}
+        .btn-light{background:#f4f4f5;color:var(--muted);}
+        .btn-red{background:var(--red-soft);color:var(--red);}
+        .btn-blue{background:var(--blue-light);color:var(--blue);}
+        .btn-green{background:var(--green-light);color:var(--green);}
+        .btn-dark{background:#1e1e1e;color:#fff;}
 
-        /* ─── BADGE ─── */
-        .badge {
-            background: var(--blue); color: var(--white);
-            border-radius: 20px; font-size: 0.72em;
-            padding: 1px 8px; font-weight: 700;
+        /* ─── BOTTOM NAV ─── */
+        .bottom-nav{
+            position:fixed;bottom:0;left:0;right:0;
+            height:var(--nav-h);
+            background:var(--dark);
+            border-top:1px solid #1e1e1e;
+            display:flex;justify-content:space-around;
+            padding-bottom:var(--safe-bottom);z-index:50;
         }
-        .badge.badge-red { background: var(--red); }
+        .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#555;text-decoration:none;font-size:.62rem;font-weight:600;gap:3px;cursor:pointer;transition:.2s;border:none;background:transparent;}
+        .nav-item i{font-size:1.1rem;}
+        .nav-item.active{color:var(--red);}
+        .nav-item:active{transform:scale(.92);}
 
-        /* ─── TABLE ─── */
-        .table-wrapper { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.88em; }
-        th {
-            padding: 11px 14px; text-align: left;
-            background: var(--gray-50); color: var(--gray-800);
-            font-weight: 600; font-size: 0.85em;
-            text-transform: uppercase; letter-spacing: 0.5px;
-            border-bottom: 2px solid var(--gray-200);
-            white-space: nowrap;
-        }
-        td { padding: 11px 14px; border-bottom: 1px solid var(--gray-100); color: var(--gray-800); }
-        tbody tr:hover { background: var(--gray-50); }
-        .btn-acao {
-            background: transparent; border: none; cursor: pointer;
-            font-size: 1em; color: var(--gray-400); margin-right: 4px;
-            padding: 4px; border-radius: 4px; transition: all 0.15s;
-        }
-        .btn-acao:hover { color: var(--red); background: var(--red-light); }
-        .btn-acao.view:hover { color: var(--blue); background: var(--blue-light); }
-        .btn-acao.hist:hover { color: var(--green); background: var(--green-light); }
+        /* ─── FAB ─── */
+        .fab{position:fixed;bottom:calc(var(--nav-h) + 14px);right:16px;width:54px;height:54px;background:var(--red);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.4rem;box-shadow:var(--shadow-float);z-index:40;border:none;cursor:pointer;transition:transform .2s;}
+        .fab:active{transform:scale(.9) rotate(90deg);}
 
-        /* ─── MODAL ─── */
-        .modal {
-            display: none; position: fixed; z-index: 1000;
-            left: 0; top: 0; width: 100%; height: 100%;
-            overflow-y: auto; background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(2px);
-        }
-        .modal-content {
-            background: var(--white); margin: 4% auto;
-            padding: 28px 32px; border-radius: 14px;
-            width: 92%; max-width: 600px;
-            position: relative; animation: slideDown 0.25s ease;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.35);
-        }
-        .modal-content.modal-wide { max-width: 920px; }
-        .modal-content.modal-financeiro { max-width: 1000px; }
-        .modal-content.modal-hist { max-width: 720px; }
-        @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .close-btn {
-            position: absolute; right: 20px; top: 16px;
-            font-size: 26px; cursor: pointer; color: var(--gray-400);
-            line-height: 1; font-weight: 300; transition: color 0.15s;
-        }
-        .close-btn:hover { color: var(--red); }
-        .modal-title {
-            font-family: 'Rajdhani', sans-serif; font-size: 1.4em; font-weight: 700;
-            color: var(--black); margin-bottom: 20px; padding-bottom: 14px;
-            border-bottom: 2px solid var(--gray-100);
-            display: flex; align-items: center; gap: 10px;
-        }
-        .modal-title i { color: var(--red); }
-        .modal-title.blue i { color: var(--blue); }
-        .modal-title.green i { color: var(--green); }
+        /* ─── MODAL SHEET ─── */
+        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);z-index:100;display:none;opacity:0;transition:opacity .3s;}
+        .modal-overlay.active{display:flex;opacity:1;}
+        .modal-sheet{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-radius:20px 20px 0 0;padding:20px 16px calc(20px + var(--safe-bottom));transform:translateY(100%);transition:transform .3s cubic-bezier(.16,1,.3,1);max-height:92vh;overflow-y:auto;z-index:101;display:flex;flex-direction:column;}
+        .modal-overlay.active+.modal-sheet{transform:translateY(0);}
+        .sheet-handle{width:36px;height:4px;background:#d4d4d8;border-radius:2px;margin:0 auto 18px;}
+        .sheet-title{font-family:'Rajdhani',sans-serif;font-size:1.25rem;font-weight:700;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+        .sheet-title i{color:var(--red);}
+        .sheet-title.blue i{color:var(--blue);}
+        .sheet-title.green i{color:var(--green);}
 
-        /* ─── FORM ─── */
-        .form-group { margin-bottom: 14px; }
-        .form-group label { display: block; font-weight: 600; font-size: 0.82em; color: var(--gray-800); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.4px; }
-        .form-group input, .form-group textarea, .form-group select {
-            width: 100%; padding: 10px 13px;
-            border: 1.5px solid var(--gray-200); border-radius: 7px;
-            font-family: 'Inter', sans-serif; font-size: 0.92em; color: var(--black);
-            transition: border 0.15s; background: var(--white);
-        }
-        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
-            outline: none; border-color: var(--red);
-        }
-        .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-        .form-full { grid-column: 1 / -1; }
+        /* ─── FORMS ─── */
+        .form-group{margin-bottom:14px;}
+        .form-label{display:block;font-size:.82rem;font-weight:700;margin-bottom:6px;color:var(--text);text-transform:uppercase;letter-spacing:.4px;}
+        .form-control{width:100%;padding:13px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:.95rem;background:#fafafa;color:var(--text);-webkit-appearance:none;transition:border .15s;}
+        .form-control:focus{background:#fff;border-color:var(--red);outline:none;}
+        textarea.form-control{min-height:80px;resize:none;}
+        .form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+        .btn-block{width:100%;padding:15px;border:none;border-radius:12px;font-family:'Inter',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;transition:.2s;}
+        .btn-block:active{opacity:.85;}
+        .btn-block.primary{background:var(--red);color:#fff;}
+        .btn-block.blue{background:var(--blue);color:#fff;}
+        .btn-block.ghost{background:#f4f4f5;color:var(--muted);}
 
-        .btn-primary {
-            background: var(--red); color: var(--white); border: none;
-            padding: 11px 22px; border-radius: 7px; font-family: 'Inter', sans-serif;
-            font-weight: 600; font-size: 0.9em; cursor: pointer;
-            transition: background 0.2s; display: flex; align-items: center; gap: 8px;
-        }
-        .btn-primary:hover { background: var(--red-dark); }
-        .btn-primary.blue { background: var(--blue); }
-        .btn-primary.blue:hover { background: var(--blue-dark); }
-        .btn-primary.green { background: var(--green); }
-        .btn-primary.green:hover { background: var(--green-dark); }
-        .btn-secondary {
-            background: var(--gray-100); color: var(--gray-800); border: none;
-            padding: 11px 22px; border-radius: 7px; font-family: 'Inter', sans-serif;
-            font-weight: 600; font-size: 0.9em; cursor: pointer;
-            transition: background 0.2s;
-        }
-        .btn-secondary:hover { background: var(--gray-200); }
-        .btn-row { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+        /* ─── SEARCH ─── */
+        .search-wrap{position:relative;margin-bottom:14px;}
+        .search-input{width:100%;padding:11px 14px 11px 38px;border:1.5px solid var(--border);border-radius:10px;font-size:.95rem;background:var(--surface);-webkit-appearance:none;outline:none;font-family:'Inter',sans-serif;}
+        .search-input:focus{border-color:var(--red);}
+        .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);}
 
-        /* ─── VEÍCULOS WIDGET ─── */
-        .veiculos-container { border: 1.5px solid var(--gray-200); border-radius: 8px; padding: 12px; margin-top: 6px; }
-        .veiculo-row {
-            display: grid; grid-template-columns: 1fr 1fr 1fr 36px; gap: 8px;
-            align-items: end; margin-bottom: 8px; padding-bottom: 8px;
-            border-bottom: 1px solid var(--gray-100);
-        }
-        .veiculo-row:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
-        .btn-add-small {
-            background: var(--green); color: var(--white); border: none;
-            padding: 7px 14px; border-radius: 6px; font-size: 0.82em;
-            font-weight: 600; cursor: pointer; margin-top: 8px;
-            display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s;
-        }
-        .btn-add-small:hover { background: var(--green-dark); }
-        .btn-rm-veiculo {
-            background: var(--red); color: var(--white); border: none;
-            border-radius: 6px; width: 32px; height: 32px; cursor: pointer;
-            font-size: 0.9em; display: flex; align-items: center; justify-content: center;
-            align-self: flex-end;
-        }
+        /* ─── FILTER CHIPS ─── */
+        .filter-row{display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;}
+        .filter-row::-webkit-scrollbar{display:none;}
+        .chip{padding:7px 14px;border-radius:99px;border:1.5px solid var(--border);background:var(--surface);color:var(--muted);font-size:.78rem;font-weight:700;white-space:nowrap;cursor:pointer;transition:.2s;}
+        .chip.active{background:var(--red);color:#fff;border-color:var(--red);}
+        .chip.active.blue{background:var(--blue);border-color:var(--blue);}
 
-        /* ─── RECIBO STYLES ─── */
-        #recibo-content {
-            padding: 20px; border: 1px solid #ddd;
-            background: var(--white); border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.08); overflow: hidden;
-            position: relative;
-        }
-        .recibo-bg-img {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: cover; opacity: 0.06; z-index: 0; pointer-events: none;
-        }
-        .recibo-inner { position: relative; z-index: 1; }
-        .recibo-header { text-align: center; margin-bottom: 16px; padding: 16px 0 8px; }
-        .recibo-header img { max-width: 110px; margin-bottom: 6px; }
-        .recibo-header h3 {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 1.3em; text-transform: uppercase; letter-spacing: 2px; color: var(--black);
-        }
-        .recibo-divider { height: 3px; background: linear-gradient(90deg, var(--red), transparent); margin: 8px 0; }
-        .recibo-body { padding: 14px 0; }
-        .recibo-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-        .recibo-info-box { background: var(--gray-50); border: 1px solid var(--gray-200); padding: 10px 14px; border-radius: 7px; }
-        .recibo-info-box h4 { font-size: 0.72em; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
-        .recibo-info-box p { font-weight: 600; color: var(--black); font-size: 0.92em; }
-        .recibo-assinatura { text-align: center; margin-top: 24px; }
-        .recibo-assinatura .linha { border-top: 1px solid var(--red); width: 240px; display: inline-block; margin-bottom: 6px; }
-        .recibo-assinatura p { font-size: 0.85em; color: var(--gray-600); }
-        .recibo-footer {
-            background: var(--dark); color: var(--white);
-            padding: 12px 16px; border-radius: 0 0 10px 10px;
-            text-align: center; margin-top: 18px;
-        }
-        .recibo-footer p { font-size: 0.78em; margin: 2px 0; }
-        .recibo-contatos { display: flex; justify-content: center; gap: 16px; margin-top: 6px; flex-wrap: wrap; }
-        .recibo-contato { display: flex; align-items: center; gap: 5px; font-size: 0.78em; }
+        /* ─── VEICULO ROWS ─── */
+        .veiculo-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;background:#fafafa;border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;position:relative;}
+        .veiculo-row .vr-full{grid-column:1/-1;}
+        .veiculo-rm{position:absolute;top:8px;right:8px;background:var(--red-soft);color:var(--red);border:none;border-radius:6px;width:26px;height:26px;font-size:.8rem;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+        .btn-add-small{background:var(--green-light);color:var(--green);border:none;padding:8px 14px;border-radius:8px;font-size:.8rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;margin-top:6px;}
 
-        /* ─── ORÇAMENTO STYLES ─── */
-        #orcamento-preview {
-            background: #fff; font-family: 'Inter', sans-serif;
-            font-size: 12.5px; color: #222;
-            max-width: 780px; margin: 0 auto;
-            padding: 32px 36px; position: relative; overflow: hidden;
-        }
-        .orc-bg-img {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: cover; opacity: 0.04; z-index: 0; pointer-events: none;
-        }
-        .orc-inner { position: relative; z-index: 1; }
-        .orc-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
-        .orc-logo-area img { max-height: 70px; max-width: 180px; }
-        .orc-empresa-nome { text-align: right; }
-        .orc-empresa-nome .nome-grande { font-family: 'Rajdhani', sans-serif; font-size: 30px; font-weight: 700; color: var(--blue); letter-spacing: 1px; line-height: 1; }
-        .orc-intro { text-align: justify; margin-bottom: 16px; font-size: 12.5px; line-height: 1.7; }
-        .orc-solicitante { margin-bottom: 14px; font-size: 12.5px; background: #f5f7fc; border-left: 3px solid var(--blue); padding: 10px 14px; border-radius: 0 6px 6px 0; }
-        .orc-solicitante p { margin: 2px 0; }
-        .orc-table-wrapper { border: 1px solid #ccc; margin-bottom: 14px; border-radius: 4px; overflow: hidden; }
-        .orc-table-title { background: var(--blue); color: #fff; text-align: center; font-weight: 700; font-size: 13px; letter-spacing: 2px; padding: 10px; }
-        .orc-table { width: 100%; border-collapse: collapse; }
-        .orc-table th { border: 1px solid #ddd; padding: 9px 12px; font-size: 11.5px; font-weight: 700; color: #333; text-align: left; background: #f8f8f8; }
-        .orc-table td { border: 1px solid #e8e8e8; padding: 10px 12px; vertical-align: middle; font-size: 12px; }
-        .orc-table td.col-img { text-align: center; width: 70px; }
-        .orc-table td.col-img img { max-width: 55px; max-height: 48px; object-fit: contain; }
-        .orc-table td.col-garantia { text-align: center; width: 90px; }
-        .orc-table td.col-valor { text-align: right; font-weight: 700; width: 120px; }
-        .orc-table .row-total td { background: #e8f0fb; font-weight: 700; text-align: center; font-size: 13px; border-top: 2px solid var(--blue); padding: 10px; color: var(--blue); }
-        .orc-veiculo-info { background: #f0f4ff; border-left: 3px solid var(--blue); padding: 8px 14px; border-radius: 0 6px 6px 0; margin-bottom: 14px; font-size: 12.5px; }
-        .orc-veiculo-info p { margin: 2px 0; }
-        .orc-obs { font-size: 12.5px; margin-bottom: 12px; line-height: 1.6; background: #fffbf0; border-left: 3px solid var(--orange); padding: 8px 14px; border-radius: 0 6px 6px 0; }
-        .orc-pagamento { font-size: 12.5px; margin-bottom: 20px; line-height: 1.8; }
-        .orc-footer-loc { text-align: right; font-size: 12px; margin-bottom: 30px; color: #555; }
-        .orc-assinatura .linha-ass { border-top: 1px solid #333; width: 250px; margin: 30px 0 5px 0; }
-        .orc-assinatura p { font-size: 12px; margin: 2px 0; }
+        /* ─── ITEMS ORÇAMENTO ─── */
+        .item-row{background:#fafafa;border:1.5px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px;}
+        .item-row-grid{display:grid;grid-template-columns:56px 1fr;gap:8px;margin-bottom:8px;}
+        .img-upload-label{display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:.7rem;color:var(--muted);cursor:pointer;padding:8px;background:#fff;border-radius:8px;border:1.5px dashed var(--border);min-height:52px;gap:3px;}
+        .img-upload-label:active{border-color:var(--blue);}
+        .item-img-prev{width:52px;height:46px;object-fit:contain;border:1px solid var(--border);border-radius:6px;display:none;}
+        .item-row-meta{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;}
+        .btn-rm-item{background:var(--red-soft);color:var(--red);border:none;border-radius:6px;padding:6px 10px;font-size:.78rem;font-weight:700;cursor:pointer;margin-top:6px;display:flex;align-items:center;gap:4px;}
 
-        /* ─── ITEM ORCAMENTO FORM ─── */
-        .item-orc-row {
-            display: grid; grid-template-columns: 70px 1fr 100px 120px 34px;
-            gap: 8px; align-items: start;
-            background: var(--gray-50); border: 1px solid var(--gray-200);
-            border-radius: 8px; padding: 10px; margin-bottom: 8px;
-        }
-        .item-orc-row textarea { resize: vertical; min-height: 58px; font-size: 0.88em; }
-        .item-orc-row input[type=text] { font-size: 0.88em; }
-        .img-upload-label {
-            display: block; font-size: 0.72em; color: var(--gray-600); cursor: pointer;
-            text-align: center; padding: 6px; background: var(--white);
-            border-radius: 6px; border: 1.5px dashed var(--gray-200);
-        }
-        .img-upload-label:hover { border-color: var(--blue); }
-        .item-img-preview { width: 55px; height: 48px; object-fit: contain; border: 1px solid var(--gray-200); border-radius: 4px; margin-top: 4px; display: none; }
-        .btn-rm-item { background: var(--red); color: var(--white); border: none; border-radius: 6px; cursor: pointer; width: 32px; height: 32px; font-size: 0.9em; align-self: flex-start; display: flex; align-items: center; justify-content: center; }
-        .btn-rm-item:hover { background: var(--red-dark); }
+        /* ─── RECIBO PREVIEW ─── */
+        #recibo-content{border:1px solid #ddd;border-radius:12px;overflow:hidden;background:#fff;position:relative;}
+        .r-bg{position:absolute;inset:0;object-fit:cover;opacity:.06;z-index:0;pointer-events:none;}
+        .r-inner{position:relative;z-index:1;padding:16px;}
+        .r-head{text-align:center;padding:14px 0 6px;}
+        .r-head img{max-width:80px;margin-bottom:6px;}
+        .r-head h3{font-family:'Rajdhani',sans-serif;font-size:1.1rem;text-transform:uppercase;letter-spacing:2px;}
+        .r-divider{height:2px;background:linear-gradient(90deg,var(--red),transparent);margin:8px 0;}
+        .r-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+        .r-box{background:#f9f9f9;border:1px solid #eee;padding:8px 10px;border-radius:8px;}
+        .r-box h4{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;}
+        .r-box p{font-weight:700;font-size:.85rem;}
+        .r-sign{text-align:center;margin-top:16px;}
+        .r-sign .linha{border-top:1px solid var(--red);width:200px;display:inline-block;margin-bottom:5px;}
+        .r-sign p{font-size:.78rem;color:var(--muted);}
+        .r-foot{background:var(--dark);color:#fff;padding:10px 14px;text-align:center;margin-top:12px;}
+        .r-foot p{font-size:.72rem;margin:2px 0;}
+        .r-contacts{display:flex;justify-content:center;gap:14px;margin-top:5px;flex-wrap:wrap;}
+        .r-contact{display:flex;align-items:center;gap:4px;font-size:.72rem;}
+
+        /* ─── ORC PREVIEW SHEET ─── */
+        #orc-preview-wrap{background:#fff;font-family:'Inter',sans-serif;font-size:11px;color:#222;padding:20px 18px;border:1px solid #ddd;border-radius:10px;overflow:hidden;position:relative;}
+        .orc-bg{position:absolute;inset:0;object-fit:cover;opacity:.04;z-index:0;pointer-events:none;}
+        .orc-inner{position:relative;z-index:1;}
+        .orc-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+        .orc-hdr img{max-height:50px;max-width:120px;}
+        .orc-empresa-nome{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:var(--blue);}
+        .orc-intro{font-size:11px;line-height:1.7;margin-bottom:12px;text-align:justify;}
+        .orc-sol{background:#f5f7fc;border-left:3px solid var(--blue);padding:8px 12px;border-radius:0 6px 6px 0;margin-bottom:10px;}
+        .orc-sol p{font-size:11px;margin:1px 0;}
+        .orc-veh{background:#f0f4ff;border-left:3px solid var(--blue);padding:8px 12px;border-radius:0 6px 6px 0;margin-bottom:10px;}
+        .orc-veh p{font-size:11px;margin:1px 0;}
+        .orc-tbl-wrap{border:1px solid #ccc;border-radius:4px;overflow:hidden;margin-bottom:10px;}
+        .orc-tbl-title{background:var(--blue);color:#fff;text-align:center;font-weight:700;font-size:12px;letter-spacing:2px;padding:8px;}
+        .orc-tbl{width:100%;border-collapse:collapse;}
+        .orc-tbl th{border:1px solid #ddd;padding:7px 8px;font-size:10px;font-weight:700;background:#f8f8f8;}
+        .orc-tbl td{border:1px solid #e8e8e8;padding:8px;vertical-align:middle;font-size:10.5px;}
+        .orc-tbl td.ci{text-align:center;width:56px;}
+        .orc-tbl td.ci img{max-width:44px;max-height:40px;object-fit:contain;}
+        .orc-tbl td.cg{text-align:center;width:70px;}
+        .orc-tbl td.cv{text-align:right;font-weight:700;width:90px;}
+        .orc-total td{background:#e8f0fb;font-weight:700;text-align:center;font-size:11px;border-top:2px solid var(--blue);padding:8px;color:var(--blue);}
+        .orc-obs{font-size:11px;background:#fffbf0;border-left:3px solid var(--orange);padding:7px 12px;border-radius:0 5px 5px 0;margin-bottom:10px;}
+        .orc-pag{font-size:11px;line-height:1.7;margin-bottom:14px;}
+        .orc-loc{text-align:right;font-size:11px;color:#555;margin-bottom:22px;}
+        .orc-ass .linha{border-top:1px solid #333;width:200px;margin:22px 0 4px;}
+        .orc-ass p{font-size:11px;margin:2px 0;}
 
         /* ─── STATUS BADGE ─── */
-        .status-badge {
-            display: inline-flex; align-items: center; gap: 4px;
-            padding: 3px 10px; border-radius: 20px; font-size: 0.75em; font-weight: 700;
-        }
-        .status-pendente { background: #fff4e5; color: var(--orange); border: 1px solid #f5c67b; }
-        .status-aceito { background: var(--green-light); color: var(--green); border: 1px solid #b2dfca; }
-        .status-recusado { background: #fdeaea; color: #b03020; border: 1px solid #f5b3b3; }
+        .s-badge{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:99px;font-size:.68rem;font-weight:700;}
+        .s-pendente{background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;}
+        .s-aceito{background:var(--green-light);color:var(--green);border:1px solid #bbf7d0;}
+        .s-recusado{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;}
 
-        /* ─── PAINEL FINANCEIRO ─── */
-        .fin-section { margin: 20px 0 10px; }
-        .fin-section h3 {
-            font-family: 'Rajdhani', sans-serif; font-size: 1.05em; font-weight: 700;
-            color: var(--green); border-bottom: 2px solid var(--green);
-            padding-bottom: 6px; text-transform: uppercase; letter-spacing: 1px;
-            display: flex; align-items: center; gap: 8px;
-        }
-        .fin-cards {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 12px; margin-top: 12px;
-        }
-        .fin-card {
-            padding: 14px 16px; border-radius: 10px; text-align: center;
-            box-shadow: 0 1px 6px rgba(0,0,0,0.06); border: 1px solid transparent;
-        }
-        .fin-card.verde { background: var(--green-light); border-color: #b2dfca; }
-        .fin-card.azul { background: var(--blue-light); border-color: #b3c7f0; }
-        .fin-card.laranja { background: var(--orange-light); border-color: #f5c67b; }
-        .fin-card-icon { font-size: 1.4em; margin-bottom: 5px; }
-        .fin-card-label { font-size: 0.72em; color: var(--gray-600); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
-        .fin-card-value { font-family: 'Rajdhani', sans-serif; font-size: 1.5em; font-weight: 700; color: #222; }
-        .fin-projecao {
-            background: linear-gradient(135deg, var(--green), #1a7c50);
-            color: #fff; border-radius: 12px; padding: 18px 20px; margin: 14px 0;
-        }
-        .fin-projecao h3 { color: rgba(255,255,255,0.85); border-color: rgba(255,255,255,0.3); font-size: 0.9em; }
-        .fin-proj-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 12px; }
-        .fin-proj-item { text-align: center; }
-        .fin-proj-item .val { font-family: 'Rajdhani', sans-serif; font-size: 1.5em; font-weight: 700; }
-        .fin-proj-item .lab { font-size: 0.7em; opacity: 0.8; }
-        .fin-alerta {
-            display: flex; align-items: flex-start; gap: 10px;
-            border-radius: 8px; padding: 12px 14px; margin: 10px 0;
-            font-size: 0.86em; line-height: 1.5;
-        }
-        .fin-alerta.info { background: #e8f4ff; border-left: 4px solid #2196F3; color: #0c4a80; }
-        .fin-alerta.sucesso { background: var(--green-light); border-left: 4px solid #28a745; color: #0a4a20; }
-        .fin-alerta.aviso { background: var(--orange-light); border-left: 4px solid #ff9800; color: #7a4400; }
-        .fin-alerta.perigo { background: #fdeaea; border-left: 4px solid #e53935; color: #7a1010; }
-        .fin-barra-container { background: #eee; border-radius: 20px; height: 12px; overflow: hidden; margin: 6px 0 4px; }
-        .fin-barra { height: 100%; border-radius: 20px; transition: width 0.8s ease; }
-        .fin-barra.verde { background: linear-gradient(90deg, #1a9955, var(--green)); }
-        .fin-barra.laranja { background: linear-gradient(90deg, #f5a623, var(--orange)); }
-        .fin-grafico-meses { display: flex; align-items: flex-end; gap: 8px; height: 84px; padding: 0 4px; border-bottom: 2px solid var(--gray-200); margin: 12px 0 6px; }
-        .fin-barra-mes { flex: 1; min-width: 28px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; cursor: default; }
-        .fin-barra-mes-fill { width: 100%; border-radius: 4px 4px 0 0; }
-        .fin-barra-mes-label { font-size: 0.62em; color: var(--gray-600); margin-top: 4px; }
-        .fin-barra-mes-val { font-size: 0.62em; color: #444; margin-bottom: 2px; }
-        .fin-cap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 12px; }
-        .fin-cap-card { border: 2px solid; border-radius: 10px; padding: 16px; }
-        .fin-cap-card.reserva { border-color: var(--orange); background: var(--orange-light); }
-        .fin-cap-card.capital { border-color: var(--blue); background: var(--blue-light); }
-        .fin-cap-card h4 { font-size: 0.92em; font-weight: 700; margin-bottom: 8px; }
-        .fin-cap-card.reserva h4 { color: var(--orange); }
-        .fin-cap-card.capital h4 { color: var(--blue); }
-        .fin-cap-valor { font-family: 'Rajdhani', sans-serif; font-size: 1.6em; font-weight: 700; margin: 4px 0; }
-        .fin-cap-card.reserva .fin-cap-valor { color: var(--orange); }
-        .fin-cap-card.capital .fin-cap-valor { color: var(--blue); }
-        .fin-slider-wrap { display: flex; align-items: center; gap: 10px; margin: 6px 0; }
-        .fin-slider-wrap input[type=range] { flex: 1; accent-color: var(--green); height: 6px; }
-        .fin-slider-wrap span { min-width: 38px; text-align: right; font-weight: 700; font-size: 0.88em; color: var(--green); }
-        .fin-orc-status-sel { padding: 4px 8px; border-radius: 6px; border: 1px solid var(--gray-200); font-size: 0.8em; cursor: pointer; }
+        /* ─── HIST CLIENTE ─── */
+        .hist-info{background:#fafafa;border-radius:10px;padding:12px 14px;margin-bottom:14px;}
+        .hist-info h3{font-size:1rem;font-weight:700;margin-bottom:3px;}
+        .hist-info p{font-size:.82rem;color:var(--muted);}
+        .hist-veiculo-chip{display:inline-flex;align-items:center;gap:5px;background:var(--dark);color:#fff;padding:4px 10px;border-radius:99px;font-size:.72rem;font-weight:700;margin:2px;}
+        .hist-item{background:var(--surface);border-radius:10px;padding:12px;margin-bottom:8px;box-shadow:var(--shadow);border-left:3px solid var(--red);}
+        .hist-item.blue{border-left-color:var(--blue);}
 
-        /* ─── HISTÓRICO CLIENTE ─── */
-        .hist-cliente-info { background: var(--gray-50); border-radius: 8px; padding: 14px 16px; margin-bottom: 16px; }
-        .hist-cliente-info h3 { font-size: 1.1em; font-weight: 700; margin-bottom: 4px; }
-        .hist-cliente-info p { font-size: 0.85em; color: var(--gray-600); }
-        .hist-veiculos { margin-bottom: 16px; }
-        .hist-veiculos h4 { font-size: 0.85em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gray-600); margin-bottom: 8px; }
-        .hist-veiculo-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--dark); color: var(--white); padding: 5px 12px; border-radius: 20px; font-size: 0.8em; font-weight: 600; margin: 3px; }
-        .hist-section { margin-bottom: 14px; }
-        .hist-section h4 { font-size: 0.9em; font-weight: 700; color: var(--gray-800); border-bottom: 1px solid var(--gray-100); padding-bottom: 6px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-        .hist-section h4 i { color: var(--red); }
+        /* ─── FINANCEIRO ─── */
+        .fin-card{padding:14px;border-radius:var(--r-md);box-shadow:var(--shadow);}
+        .fin-card.verde{background:var(--green-light);border:1px solid #bbf7d0;}
+        .fin-card.azul{background:var(--blue-light);border:1px solid #bfdbfe;}
+        .fin-card.laranja{background:var(--orange-light);border:1px solid #fcd34d;}
+        .fin-card-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:4px;}
+        .fin-card-value{font-family:'Rajdhani',sans-serif;font-size:1.5rem;font-weight:700;color:var(--text);}
+        .fin-proj{background:linear-gradient(135deg,var(--green),#1a7c50);color:#fff;border-radius:14px;padding:16px 18px;margin:14px 0;}
+        .fin-proj h3{font-family:'Rajdhani',sans-serif;font-size:.9rem;opacity:.85;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px;}
+        .fin-proj-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+        .fin-proj-item .val{font-family:'Rajdhani',sans-serif;font-size:1.3rem;font-weight:700;}
+        .fin-proj-item .lab{font-size:.62rem;opacity:.8;}
+        .fin-alerta{display:flex;align-items:flex-start;gap:8px;border-radius:8px;padding:10px 12px;margin:8px 0;font-size:.82rem;line-height:1.5;}
+        .fin-alerta.info{background:#e8f4ff;border-left:4px solid #2196F3;color:#0c4a80;}
+        .fin-alerta.sucesso{background:var(--green-light);border-left:4px solid #28a745;color:#0a4a20;}
+        .fin-alerta.aviso{background:var(--orange-light);border-left:4px solid #ff9800;color:#7a4400;}
+        .fin-alerta.perigo{background:#fdeaea;border-left:4px solid #e53935;color:#7a1010;}
+        .fin-graph{display:flex;align-items:flex-end;gap:6px;height:72px;border-bottom:2px solid var(--border);margin:10px 0 4px;}
+        .fin-bar-mes{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;}
+        .fin-bar-fill{width:100%;border-radius:4px 4px 0 0;}
+        .fin-bar-label{font-size:.6rem;color:var(--muted);margin-top:4px;}
+        .fin-bar-val{font-size:.58rem;color:#444;margin-bottom:2px;}
+        .fin-cap-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0;}
+        .fin-cap-card{border:2px solid;border-radius:10px;padding:12px;}
+        .fin-cap-card.res{border-color:var(--orange);background:var(--orange-light);}
+        .fin-cap-card.cap{border-color:var(--blue);background:var(--blue-light);}
+        .fin-cap-card h4{font-size:.82rem;font-weight:700;margin-bottom:6px;}
+        .fin-cap-card.res h4{color:var(--orange);}
+        .fin-cap-card.cap h4{color:var(--blue);}
+        .fin-cap-val{font-family:'Rajdhani',sans-serif;font-size:1.3rem;font-weight:700;margin:4px 0;}
+        .fin-cap-card.res .fin-cap-val{color:var(--orange);}
+        .fin-cap-card.cap .fin-cap-val{color:var(--blue);}
+        .slider-row{display:flex;align-items:center;gap:8px;margin:6px 0;}
+        .slider-row input[type=range]{flex:1;accent-color:var(--green);}
+        .slider-row span{min-width:34px;text-align:right;font-weight:700;font-size:.82rem;color:var(--green);}
+        .fin-orc-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);}
+        .fin-orc-row:last-child{border-bottom:none;}
 
-        /* ─── PDF DOWNLOAD BTN ─── */
-        .btn-download { background: var(--red); color: var(--white); border: none; padding: 11px 22px; border-radius: 7px; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.9em; cursor: pointer; transition: background 0.2s; margin-top: 12px; display: inline-flex; align-items: center; gap: 8px; }
-        .btn-download:hover { background: var(--red-dark); }
+        /* ─── TOAST ─── */
+        .toast{position:fixed;top:calc(var(--header-h) + 8px);left:50%;transform:translateX(-50%) translateY(-100px);background:var(--dark);color:#fff;padding:10px 20px;border-radius:99px;font-size:.85rem;font-weight:600;box-shadow:var(--shadow-md);z-index:200;transition:transform .4s cubic-bezier(.175,.885,.32,1.275);white-space:nowrap;display:flex;align-items:center;gap:8px;}
+        .toast.show{transform:translateX(-50%) translateY(0);}
 
-        /* ─── RESPONSIVO ─── */
-        @media (max-width: 900px) {
-            .modal-content.modal-wide, .modal-content.modal-financeiro { max-width: 98vw; }
-            .form-grid-2, .form-grid-3 { grid-template-columns: 1fr; }
-            .item-orc-row { grid-template-columns: 1fr 1fr; }
-        }
-        @media (max-width: 768px) {
-            header { padding: 14px; }
-            .header-buttons { justify-content: flex-start; }
-            .header-buttons button { padding: 8px 12px; font-size: 0.78em; }
-            .container { padding: 0 12px; margin: 12px auto; }
-            .card-grid { grid-template-columns: repeat(2, 1fr); }
-            .modal-content { margin: 2% auto; padding: 20px 16px; width: 96%; }
-            .recibo-info-grid { grid-template-columns: 1fr; }
-            .fin-proj-grid { grid-template-columns: 1fr 1fr; }
-            .fin-cap-grid { grid-template-columns: 1fr; }
-            .item-orc-row { grid-template-columns: 1fr; }
-            #orcamento-preview { padding: 16px 12px; font-size: 11px; }
-            .orc-header { flex-direction: column; align-items: flex-start; gap: 8px; }
-            .orc-empresa-nome { text-align: left; }
-            .veiculo-row { grid-template-columns: 1fr 1fr; }
-        }
-        @media (max-width: 480px) {
-            .card p { font-size: 1.3em; }
-            .header-title h1 { font-size: 1.4em; }
-        }
-        @media print {
-            body * { visibility: hidden; }
-            #modal-view-recibo, #modal-view-recibo * { visibility: visible; display: block; }
-            #modal-view-recibo { position: absolute; left: 0; top: 0; width: 100%; }
-            .btn-download, .close-btn { display: none !important; }
-            #modal-view-orcamento, #modal-view-orcamento * { visibility: visible; }
-            #modal-view-orcamento { position: absolute; left: 0; top: 0; width: 100%; }
-        }
+        /* ─── EMPTY STATE ─── */
+        .empty-state{text-align:center;padding:40px 20px;color:var(--muted);}
+        .empty-state i{font-size:2.8rem;margin-bottom:12px;opacity:.25;display:block;}
+        .empty-state p{font-size:.9rem;}
+
+        /* ─── DOWNLOAD BTN ─── */
+        .btn-dl{background:var(--red);color:#fff;border:none;padding:12px 20px;border-radius:10px;font-weight:700;font-size:.9rem;cursor:pointer;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:8px;width:100%;}
+        .btn-dl:active{opacity:.85;}
+
+        /* ─── CONFIGURAÇÕES ─── */
+        .config-section-title{font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:16px 0 8px;}
+        .logo-preview-wrap{display:flex;align-items:center;gap:12px;margin-top:8px;}
+        .logo-preview-img{width:64px;height:64px;border-radius:12px;object-fit:contain;border:2px dashed var(--border);background:#f9f9f9;}
+
+        /* ─── SCROLLBAR ─── */
+        .modal-sheet::-webkit-scrollbar{display:none;}
+        main::-webkit-scrollbar{display:none;}
     </style>
 </head>
 <body>
 
-<header id="header">
-    <img id="header-bg" src="" alt="" style="display:none;">
-    <div class="header-left">
-        <img id="logo" src="" alt="Logo">
-        <div class="header-title">
-            <h1 id="titulo-sistema">Tony Fumê</h1>
-            <span>Sistema de Recibos & Orçamentos</span>
+<!-- HEADER -->
+<header>
+    <div class="brand">
+        <img id="hdr-logo" class="brand-logo" src="" alt="">
+        <div>
+            <div class="brand-title"><span id="brand-name">Tony Fumê</span></div>
+            <div class="brand-sub">Recibos & Orçamentos</div>
         </div>
     </div>
-    <div class="header-buttons">
-        <button class="btn-config" id="btn-config"><i class="fas fa-cog"></i> Configurações</button>
-        <button class="btn-recibo" id="btn-add-recibo"><i class="fas fa-file-alt"></i> Criar Recibo</button>
-        <button class="btn-cliente" id="btn-add-cliente"><i class="fas fa-user-plus"></i> Cadastrar Cliente</button>
-        <button class="btn-orcamento" id="btn-add-orcamento"><i class="fas fa-file-invoice-dollar"></i> Criar Orçamento</button>
-        <button class="btn-financeiro" id="btn-painel-financeiro"><i class="fas fa-chart-line"></i> Painel Financeiro</button>
+    <div class="header-actions">
+        <button class="icon-btn" onclick="openSheet('config')"><i class="fas fa-cog"></i></button>
+        <button class="icon-btn" onclick="openSheet('painel-fin')"><i class="fas fa-chart-line"></i></button>
     </div>
 </header>
 
-<main class="container">
+<div class="toast" id="toast"><i class="fas fa-check-circle" style="color:var(--red)"></i> <span id="toast-msg">OK!</span></div>
 
-    <!-- RESUMO -->
-    <section id="sumario">
-        <div class="section-header">
-            <h2><i class="fas fa-tachometer-alt"></i> Resumo Geral</h2>
-        </div>
-        <div class="section-body">
-            <div class="card-grid">
-                <div class="card">
-                    <h3>Total de Recibos</h3>
-                    <p id="total-recibos">0</p>
-                </div>
-                <div class="card">
-                    <h3>Valor Total (Recibos)</h3>
-                    <p id="valor-total">R$ 0,00</p>
-                </div>
-                <div class="card card-orcamento">
-                    <h3>Total de Orçamentos</h3>
-                    <p id="total-orcamentos">0</p>
-                </div>
-                <div class="card card-orcamento">
-                    <h3>Valor Total (Orçamentos)</h3>
-                    <p id="valor-total-orcamentos">R$ 0,00</p>
-                </div>
-                <div class="card">
-                    <h3>Clientes Cadastrados</h3>
-                    <p id="total-clientes">0</p>
-                </div>
-                <div class="card card-financeiro" onclick="document.getElementById('btn-painel-financeiro').click()">
-                    <h3>Receita do Mês</h3>
-                    <p id="receita-mes-resumo">R$ 0,00</p>
-                    <small>Clique para ver o painel</small>
-                </div>
+<!-- MAIN -->
+<main>
+
+    <!-- DASHBOARD -->
+    <div id="view-dashboard" class="view active">
+        <div class="sec-title"><span><i class="fas fa-tachometer-alt"></i>Resumo Geral</span></div>
+        <div class="stats-grid">
+            <div class="stat-card red" onclick="navigate('recibos')">
+                <div class="stat-icon si-red"><i class="fas fa-file-alt"></i></div>
+                <div class="stat-value" id="d-recibos">0</div>
+                <div class="stat-label">Recibos</div>
             </div>
-        </div>
-    </section>
-
-    <!-- HISTÓRICO -->
-    <section id="historico">
-        <div class="tabs">
-            <button class="tab-btn active" onclick="trocarTab('tab-recibos', this)">
-                <i class="fas fa-file-alt"></i> Recibos
-            </button>
-            <button class="tab-btn" onclick="trocarTab('tab-orcamentos', this, true)">
-                <i class="fas fa-file-invoice-dollar"></i> Orçamentos
-                <span class="badge" id="badge-orcamentos">0</span>
-            </button>
-            <button class="tab-btn" onclick="trocarTab('tab-clientes', this)">
-                <i class="fas fa-users"></i> Clientes
-            </button>
-        </div>
-
-        <div id="tab-recibos" class="tab-content active">
-            <div class="section-body">
-                <div class="table-wrapper">
-                    <table id="tabela-recibos">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Cliente</th>
-                                <th>Veículo / Placa</th>
-                                <th>Película</th>
-                                <th>Valor</th>
-                                <th>Data</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
+            <div class="stat-card blue" onclick="navigate('orcamentos')">
+                <div class="stat-icon si-blue"><i class="fas fa-file-invoice-dollar"></i></div>
+                <div class="stat-value" id="d-orcamentos">0</div>
+                <div class="stat-label">Orçamentos</div>
+            </div>
+            <div class="stat-card green" onclick="navigate('clientes')">
+                <div class="stat-icon si-green"><i class="fas fa-users"></i></div>
+                <div class="stat-value" id="d-clientes">0</div>
+                <div class="stat-label">Clientes</div>
+            </div>
+            <div class="stat-card orange" onclick="openSheet('painel-fin')">
+                <div class="stat-icon si-orange"><i class="fas fa-wallet"></i></div>
+                <div class="stat-value" id="d-receita">R$0</div>
+                <div class="stat-label">Receita Mês</div>
             </div>
         </div>
 
-        <div id="tab-orcamentos" class="tab-content">
-            <div class="section-body">
-                <div class="table-wrapper">
-                    <table id="tabela-orcamentos">
-                        <thead>
-                            <tr>
-                                <th>Nº</th>
-                                <th>Empresa/Solicitante</th>
-                                <th>Veículo / Placa</th>
-                                <th>Película</th>
-                                <th>Valor Total</th>
-                                <th>Data</th>
-                                <th>Validade</th>
-                                <th>Status</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
+        <div class="stats-grid">
+            <div class="stat-card blue" onclick="navigate('orcamentos')">
+                <div class="stat-icon si-blue"><i class="fas fa-clock"></i></div>
+                <div class="stat-value" id="d-pendentes">0</div>
+                <div class="stat-label">Pendentes</div>
+            </div>
+            <div class="stat-card green" onclick="navigate('orcamentos')">
+                <div class="stat-icon si-green"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-value" id="d-aceitos">0</div>
+                <div class="stat-label">Aceitos</div>
+            </div>
+            <div class="stat-card" onclick="openSheet('painel-fin')">
+                <div class="stat-icon si-dark"><i class="fas fa-receipt"></i></div>
+                <div class="stat-value" id="d-total-recibos">R$0</div>
+                <div class="stat-label">Total Recibos</div>
+            </div>
+            <div class="stat-card" onclick="openSheet('painel-fin')">
+                <div class="stat-icon si-dark"><i class="fas fa-chart-bar"></i></div>
+                <div class="stat-value" id="d-ticket">R$0</div>
+                <div class="stat-label">Ticket Médio</div>
             </div>
         </div>
 
-        <div id="tab-clientes" class="tab-content">
-            <div class="section-body">
-                <div class="table-wrapper">
-                    <table id="tabela-clientes">
-                        <thead>
-                            <tr>
-                                <th>Nome</th>
-                                <th>Telefone</th>
-                                <th>CNPJ</th>
-                                <th>Veículos</th>
-                                <th>Recibos</th>
-                                <th>Orçamentos</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
+        <div class="sec-title"><span><i class="fas fa-star"></i>Recibos Recentes</span></div>
+        <div id="dash-recibos-list"></div>
+    </div>
+
+    <!-- RECIBOS -->
+    <div id="view-recibos" class="view">
+        <div class="search-wrap">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" class="search-input" placeholder="Buscar recibos..." oninput="renderRecibos(this.value)">
         </div>
-    </section>
+        <div id="recibos-list"></div>
+    </div>
+
+    <!-- ORÇAMENTOS -->
+    <div id="view-orcamentos" class="view">
+        <div class="search-wrap">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" class="search-input" placeholder="Buscar orçamentos..." oninput="renderOrcamentos(this.value)">
+        </div>
+        <div class="filter-row" id="filter-orc">
+            <span class="chip active" onclick="filterOrc('all',this)">Todos</span>
+            <span class="chip" onclick="filterOrc('pendente',this)">Pendentes</span>
+            <span class="chip" onclick="filterOrc('aceito',this)">Aceitos</span>
+            <span class="chip" onclick="filterOrc('recusado',this)">Recusados</span>
+        </div>
+        <div id="orcamentos-list"></div>
+    </div>
+
+    <!-- CLIENTES -->
+    <div id="view-clientes" class="view">
+        <div class="search-wrap">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" class="search-input" placeholder="Buscar clientes..." oninput="renderClientes(this.value)">
+        </div>
+        <div id="clientes-list"></div>
+    </div>
 
 </main>
 
-<footer style="text-align:center; padding:16px; background:var(--dark); color:var(--gray-600); border-top:3px solid var(--red); font-size:0.82em;">
-    <p>Tony Fumê — Sistema de Gestão &nbsp;|&nbsp; Desenvolvedor: Alex Peixoto (82)99662-2036</p>
-</footer>
+<!-- FAB -->
+<button class="fab" id="fab-btn" onclick="fabAction()"><i class="fas fa-plus"></i></button>
 
-<!-- ──────────── MODAL CONFIGURAÇÕES ──────────── -->
-<div id="modal-config" class="modal">
-    <div class="modal-content">
-        <span class="close-btn">&times;</span>
-        <div class="modal-title"><i class="fas fa-cog"></i> Configurações da Empresa</div>
-        <form id="form-config">
-            <div class="form-grid-2">
-                <div class="form-group">
-                    <label>Nome da Empresa</label>
-                    <input type="text" id="config-nome-empresa" placeholder="Ex: Tony Fumê">
-                </div>
-                <div class="form-group">
-                    <label>CNPJ</label>
-                    <input type="text" id="config-cnpj" value="13.949.583/0001-32">
-                </div>
-                <div class="form-group form-full">
-                    <label>Endereço Completo</label>
-                    <input type="text" id="config-endereco" value="Avenida Juca Sampaio, 1552, Jacintinho">
-                </div>
-                <div class="form-group">
-                    <label>Instagram</label>
-                    <input type="text" id="config-instagram" value="@tonyfume">
-                </div>
-                <div class="form-group">
-                    <label>WhatsApp</label>
-                    <input type="text" id="config-whatsapp" value="(82)99806-9585">
-                </div>
-                <div class="form-group">
-                    <label>Responsável Legal</label>
-                    <input type="text" id="config-responsavel" placeholder="Ex: Thiogo Jefferson">
-                </div>
-                <div class="form-group">
-                    <label>Cargo</label>
-                    <input type="text" id="config-cargo" placeholder="Ex: Responsável legal">
-                </div>
-                <div class="form-group form-full">
-                    <label>Chave Pix</label>
-                    <input type="text" id="config-pix" placeholder="CNPJ ou chave pix">
-                </div>
-            </div>
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+    <button class="nav-item active" id="nav-dashboard" onclick="navigate('dashboard')">
+        <i class="fas fa-home"></i>Dashboard
+    </button>
+    <button class="nav-item" id="nav-recibos" onclick="navigate('recibos')">
+        <i class="fas fa-file-alt"></i>Recibos
+    </button>
+    <button class="nav-item" id="nav-orcamentos" onclick="navigate('orcamentos')">
+        <i class="fas fa-file-invoice-dollar"></i>Orçamentos
+    </button>
+    <button class="nav-item" id="nav-clientes" onclick="navigate('clientes')">
+        <i class="fas fa-users"></i>Clientes
+    </button>
+</nav>
 
-            <div class="form-group" style="margin-top:6px;">
-                <label>Upload da Logo <small style="font-weight:400;color:#888;text-transform:none;">(recibos, orçamentos e header)</small></label>
-                <input type="file" id="config-logo" accept="image/*">
-                <div style="display:flex;align-items:center;gap:8px;margin-top:6px;">
-                    <input type="checkbox" id="config-logo-rembg" checked style="width:auto;margin:0;">
-                    <label for="config-logo-rembg" style="font-weight:400;font-size:0.83em;color:#666;text-transform:none;">Remover fundo branco/sólido automaticamente</label>
-                </div>
-                <p id="loading-message" style="display:none;color:#888;font-style:italic;margin-top:6px;font-size:0.85em;">Processando imagem...</p>
-                <div id="logo-preview-container" style="display:none;margin-top:8px;">
-                    <img id="logo-preview" style="max-height:80px;border:1px solid #eee;border-radius:6px;background:#f5f5f5;padding:4px;" alt="Preview">
-                    <button type="button" id="btn-remover-logo" style="display:block;margin-top:6px;padding:5px 12px;background:var(--red);color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:0.8em;font-weight:600;">Remover Logo</button>
-                </div>
-            </div>
-
+<!-- ═══════════════════════════════════════
+     SHEET: RECIBO FORM
+════════════════════════════════════════ -->
+<div class="modal-overlay" id="ov-recibo"></div>
+<div class="modal-sheet" id="sheet-recibo">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title"><i class="fas fa-file-alt"></i> <span id="recibo-form-title">Criar Recibo</span></div>
+    <form onsubmit="saveRecibo(event)">
+        <input type="hidden" id="r-id">
+        <div class="form-group">
+            <label class="form-label">Cliente</label>
+            <select id="r-cliente" class="form-control" required></select>
+        </div>
+        <div class="form-grid-2">
             <div class="form-group">
-                <label>Upload do Plano de Fundo</label>
-                <input type="file" id="config-background" accept="image/*">
-            </div>
-
-            <div class="btn-row">
-                <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Salvar Configurações</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- ──────────── MODAL RECIBO ──────────── -->
-<div id="modal-recibo" class="modal">
-    <div class="modal-content">
-        <span class="close-btn">&times;</span>
-        <div class="modal-title" id="modal-recibo-titulo-el"><i class="fas fa-file-alt"></i> Criar Novo Recibo</div>
-        <form id="form-recibo">
-            <input type="hidden" id="recibo-id-edicao">
-            <div class="form-group">
-                <label>Cliente</label>
-                <select id="recibo-cliente" required>
-                    <option value="" disabled selected>Selecione um cliente</option>
-                </select>
-            </div>
-            <div class="form-grid-2">
-                <div class="form-group">
-                    <label>Modelo do Veículo</label>
-                    <input type="text" id="recibo-modelo" placeholder="Ex: Honda Civic">
-                </div>
-                <div class="form-group">
-                    <label>Placa</label>
-                    <input type="text" id="recibo-placa" placeholder="Ex: ABC-1234">
-                </div>
+                <label class="form-label">Modelo Veículo</label>
+                <input type="text" id="r-modelo" class="form-control" placeholder="Ex: Honda Civic">
             </div>
             <div class="form-group">
-                <label>Tipo de Película</label>
-                <input type="text" id="recibo-pelicula" placeholder="Ex: Nano Cerâmica 5%">
+                <label class="form-label">Placa</label>
+                <input type="text" id="r-placa" class="form-control" placeholder="ABC-1234">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Tipo de Película</label>
+            <input type="text" id="r-pelicula" class="form-control" placeholder="Ex: Nano Cerâmica 5%">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Serviço Realizado</label>
+            <textarea id="r-servico" class="form-control" required placeholder="Descreva o serviço..."></textarea>
+        </div>
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label class="form-label">Valor (R$)</label>
+                <input type="number" id="r-valor" class="form-control" step="0.01" required placeholder="0,00">
             </div>
             <div class="form-group">
-                <label>Serviço</label>
-                <textarea id="recibo-servico" rows="3" required placeholder="Descreva o serviço realizado"></textarea>
-            </div>
-            <div class="form-grid-2">
-                <div class="form-group">
-                    <label>Valor (R$)</label>
-                    <input type="number" id="recibo-valor" step="0.01" required>
-                </div>
-                <div class="form-group">
-                    <label>Data</label>
-                    <input type="date" id="recibo-data" required>
-                </div>
-            </div>
-            <div class="btn-row">
-                <button type="submit" class="btn-primary" id="btn-salvar-recibo"><i class="fas fa-download"></i> Baixar Recibo</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- ──────────── MODAL CLIENTE ──────────── -->
-<div id="modal-cliente" class="modal">
-    <div class="modal-content">
-        <span class="close-btn">&times;</span>
-        <div class="modal-title" id="modal-cliente-titulo-el"><i class="fas fa-user-plus"></i> Cadastrar Cliente</div>
-        <form id="form-cliente">
-            <input type="hidden" id="cliente-id-edicao">
-            <div class="form-grid-2">
-                <div class="form-group form-full">
-                    <label>Nome Completo</label>
-                    <input type="text" id="cliente-nome" required placeholder="Nome do cliente">
-                </div>
-                <div class="form-group">
-                    <label>Telefone / WhatsApp</label>
-                    <input type="text" id="cliente-telefone" placeholder="(82) 99999-9999">
-                </div>
-                <div class="form-group">
-                    <label>CNPJ (opcional)</label>
-                    <input type="text" id="cliente-cnpj" placeholder="Ex: 79.379.491/0182-01">
-                </div>
-            </div>
-
-            <div class="form-group" style="margin-top:4px;">
-                <label>Veículos do Cliente</label>
-                <div class="veiculos-container" id="cliente-veiculos-container">
-                    <!-- veículos adicionados dinamicamente -->
-                </div>
-                <button type="button" class="btn-add-small" id="btn-add-veiculo-cliente">
-                    <i class="fas fa-plus"></i> Adicionar Veículo
-                </button>
-            </div>
-
-            <div class="btn-row">
-                <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Salvar Cliente</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- ──────────── MODAL VER RECIBO ──────────── -->
-<div id="modal-view-recibo" class="modal">
-    <div class="modal-content">
-        <span class="close-btn">&times;</span>
-        <div id="recibo-content"></div>
-        <button class="btn-download" id="btn-download-pdf"><i class="fas fa-download"></i> Baixar PDF</button>
-    </div>
-</div>
-
-<!-- ──────────── MODAL CRIAR ORÇAMENTO ──────────── -->
-<div id="modal-orcamento" class="modal">
-    <div class="modal-content modal-wide">
-        <span class="close-btn">&times;</span>
-        <div class="modal-title blue" id="modal-orcamento-titulo-el"><i class="fas fa-file-invoice-dollar"></i> Criar Orçamento</div>
-        <form id="form-orcamento">
-            <input type="hidden" id="orc-id-edicao">
-            <div class="form-grid-2">
-                <div class="form-group">
-                    <label>Empresa / Solicitante</label>
-                    <input type="text" id="orc-empresa" placeholder="Nome do cliente / empresa" required>
-                </div>
-                <div class="form-group">
-                    <label>CNPJ do Solicitante</label>
-                    <input type="text" id="orc-cnpj-solicitante" placeholder="Ex: 79.379.491/0182-01">
-                </div>
-                <div class="form-group">
-                    <label>Modelo do Veículo</label>
-                    <input type="text" id="orc-modelo" placeholder="Ex: Toyota Corolla">
-                </div>
-                <div class="form-group">
-                    <label>Placa do Veículo</label>
-                    <input type="text" id="orc-placa" placeholder="Ex: ABC-1234">
-                </div>
-                <div class="form-group form-full">
-                    <label>Tipo de Película</label>
-                    <input type="text" id="orc-pelicula" placeholder="Ex: Nano Cerâmica 35% — Insulfilm">
-                </div>
-                <div class="form-group">
-                    <label>Data do Orçamento</label>
-                    <input type="date" id="orc-data" required>
-                </div>
-                <div class="form-group">
-                    <label>Validade (dias)</label>
-                    <input type="number" id="orc-validade" value="30" min="1">
-                </div>
-                <div class="form-group form-full">
-                    <label>Observações</label>
-                    <textarea id="orc-obs" rows="2" placeholder="Ex: Orçamento inclui locação de andaimes e todas as despesas."></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Condições de Pagamento</label>
-                    <input type="text" id="orc-pagamento" placeholder="Ex: transferência ou Pix" value="transferência ou Pix">
-                </div>
-                <div class="form-group">
-                    <label>Cidade / UF</label>
-                    <input type="text" id="orc-cidade" placeholder="Ex: Maceió (AL)" value="Maceió (AL)">
-                </div>
-            </div>
-
-            <div style="margin-top:14px;">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-                    <label style="font-weight:700;font-size:0.85em;text-transform:uppercase;letter-spacing:0.4px;color:var(--blue);">Itens do Orçamento</label>
-                    <button type="button" id="btn-add-item" class="btn-add-small" style="background:var(--blue);margin:0;">
-                        <i class="fas fa-plus"></i> Adicionar Item
-                    </button>
-                </div>
-                <div style="font-size:0.75em;color:#999;margin-bottom:6px;">Foto | Descrição | Garantia | Valor | Remover</div>
-                <div id="itens-container"></div>
-            </div>
-
-            <div class="btn-row">
-                <button type="submit" class="btn-primary blue"><i class="fas fa-eye"></i> Gerar Pré-visualização</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- ──────────── MODAL VER ORÇAMENTO ──────────── -->
-<div id="modal-view-orcamento" class="modal">
-    <div class="modal-content modal-wide">
-        <span class="close-btn">&times;</span>
-        <div id="orcamento-preview"></div>
-        <button class="btn-download" id="btn-download-orc-pdf" style="margin-top:14px;"><i class="fas fa-download"></i> Baixar PDF</button>
-    </div>
-</div>
-
-<!-- ──────────── MODAL HISTÓRICO CLIENTE ──────────── -->
-<div id="modal-hist-cliente" class="modal">
-    <div class="modal-content modal-hist">
-        <span class="close-btn">&times;</span>
-        <div class="modal-title green"><i class="fas fa-history"></i> Histórico do Cliente</div>
-        <div id="hist-cliente-content"></div>
-    </div>
-</div>
-
-<!-- ──────────── MODAL PAINEL FINANCEIRO ──────────── -->
-<div id="modal-financeiro" class="modal">
-    <div class="modal-content modal-financeiro">
-        <span class="close-btn">&times;</span>
-        <div class="modal-title green"><i class="fas fa-chart-line"></i> Painel Financeiro</div>
-
-        <div class="fin-section">
-            <h3><i class="fas fa-calendar-alt"></i> Mês Atual</h3>
-            <div class="fin-cards" id="fin-cards-mes"></div>
-        </div>
-
-        <div id="fin-progresso-container" style="margin:14px 0;">
-            <div style="display:flex;justify-content:space-between;font-size:0.78em;color:#555;margin-bottom:4px;">
-                <span>Progresso do mês</span>
-                <span id="fin-progresso-label">0%</span>
-            </div>
-            <div class="fin-barra-container">
-                <div class="fin-barra verde" id="fin-progresso-barra" style="width:0%"></div>
-            </div>
-            <div style="font-size:0.73em;color:#888;margin-top:3px;" id="fin-progresso-text"></div>
-        </div>
-
-        <div class="fin-projecao" id="fin-projecao-box">
-            <h3><i class="fas fa-chart-bar"></i> PROJEÇÃO PARA O FINAL DO MÊS</h3>
-            <div class="fin-proj-grid" id="fin-projecao-grid"></div>
-        </div>
-
-        <div id="fin-alerta-tendencia"></div>
-
-        <div class="fin-section">
-            <h3><i class="fas fa-history"></i> Histórico dos Últimos 3 Meses</h3>
-            <div class="fin-grafico-meses" id="fin-grafico-meses"></div>
-        </div>
-
-        <div class="fin-section">
-            <h3><i class="fas fa-file-invoice-dollar"></i> Orçamentos em Aberto</h3>
-            <div class="table-wrapper">
-                <table style="margin-top:0;">
-                    <thead>
-                        <tr><th>Nº</th><th>Cliente</th><th>Valor</th><th>Data</th><th>Status</th><th>Ação</th></tr>
-                    </thead>
-                    <tbody id="fin-orc-abertos-body"></tbody>
-                </table>
-            </div>
-            <div id="fin-orc-abertos-total" style="margin-top:10px;font-size:0.88em;"></div>
-        </div>
-
-        <div class="fin-section">
-            <h3><i class="fas fa-piggy-bank"></i> Capitalização & Reserva</h3>
-        </div>
-        <div id="fin-alerta-cap"></div>
-        <div style="background:var(--gray-50);border-radius:8px;padding:14px;border:1px solid var(--gray-200);margin-bottom:14px;">
-            <div style="margin-bottom:10px;">
-                <label style="font-weight:700;font-size:0.82em;color:var(--orange);">🛡️ Reserva de Emergência — recomendado: 10-20%</label>
-                <div class="fin-slider-wrap">
-                    <input type="range" id="slider-reserva" min="0" max="40" value="15" step="1" oninput="atualizarCapitalizacao()">
-                    <span id="val-reserva">15%</span>
-                </div>
-            </div>
-            <div>
-                <label style="font-weight:700;font-size:0.82em;color:var(--blue);">🔄 Capital de Giro — recomendado: 10-30%</label>
-                <div class="fin-slider-wrap">
-                    <input type="range" id="slider-capital" min="0" max="50" value="20" step="1" oninput="atualizarCapitalizacao()">
-                    <span id="val-capital">20%</span>
-                </div>
+                <label class="form-label">Data</label>
+                <input type="date" id="r-data" class="form-control" required>
             </div>
         </div>
-        <div class="fin-cap-grid" id="fin-cap-grid"></div>
-        <div id="fin-cap-conselho" style="margin-top:14px;"></div>
-    </div>
+        <button type="submit" class="btn-block primary"><i class="fas fa-save"></i> Salvar e Gerar</button>
+        <button type="button" class="btn-block ghost" onclick="closeSheet('recibo')">Cancelar</button>
+    </form>
 </div>
 
-<!-- ─── SCRIPTS ─── -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<!-- ═══════════════════════════════════════
+     SHEET: VER RECIBO
+════════════════════════════════════════ -->
+<div class="modal-overlay" id="ov-ver-recibo"></div>
+<div class="modal-sheet" id="sheet-ver-recibo">
+    <div class="sheet-handle"></div>
+    <div id="recibo-content"></div>
+    <button class="btn-dl" id="btn-dl-recibo"><i class="fas fa-download"></i> Baixar PDF</button>
+    <button type="button" class="btn-block ghost" style="margin-top:8px;" onclick="closeSheet('ver-recibo')">Fechar</button>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SHEET: ORÇAMENTO FORM
+════════════════════════════════════════ -->
+<div class="modal-overlay" id="ov-orcamento"></div>
+<div class="modal-sheet" id="sheet-orcamento">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title blue"><i class="fas fa-file-invoice-dollar"></i> <span id="orc-form-title">Criar Orçamento</span></div>
+    <form onsubmit="saveOrcamento(event)">
+        <input type="hidden" id="o-id">
+        <div class="form-group">
+            <label class="form-label">Empresa / Solicitante</label>
+            <input type="text" id="o-empresa" class="form-control" required placeholder="Nome do cliente ou empresa">
+        </div>
+        <div class="form-group">
+            <label class="form-label">CNPJ do Solicitante</label>
+            <input type="text" id="o-cnpj" class="form-control" placeholder="Opcional">
+        </div>
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label class="form-label">Modelo Veículo</label>
+                <input type="text" id="o-modelo" class="form-control" placeholder="Ex: Corolla">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Placa</label>
+                <input type="text" id="o-placa" class="form-control" placeholder="ABC-1234">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Tipo de Película</label>
+            <input type="text" id="o-pelicula" class="form-control" placeholder="Ex: Nano Cerâmica 35%">
+        </div>
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label class="form-label">Data</label>
+                <input type="date" id="o-data" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Validade (dias)</label>
+                <input type="number" id="o-validade" class="form-control" value="30">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Observações</label>
+            <textarea id="o-obs" class="form-control" placeholder="Opcional..."></textarea>
+        </div>
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label class="form-label">Pagamento</label>
+                <input type="text" id="o-pagamento" class="form-control" value="transferência ou Pix">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Cidade / UF</label>
+                <input type="text" id="o-cidade" class="form-control" value="Maceió (AL)">
+            </div>
+        </div>
+        <div style="margin-bottom:14px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                <label class="form-label" style="margin:0;color:var(--blue);">Itens do Orçamento</label>
+                <button type="button" class="btn-add-small" onclick="addItemOrc()"><i class="fas fa-plus"></i> Item</button>
+            </div>
+            <div id="itens-container"></div>
+        </div>
+        <button type="submit" class="btn-block blue"><i class="fas fa-eye"></i> Pré-visualizar</button>
+        <button type="button" class="btn-block ghost" onclick="closeSheet('orcamento')">Cancelar</button>
+    </form>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SHEET: VER ORÇAMENTO
+════════════════════════════════════════ -->
+<div class="modal-overlay" id="ov-ver-orcamento"></div>
+<div class="modal-sheet" id="sheet-ver-orcamento">
+    <div class="sheet-handle"></div>
+    <div id="orc-preview-wrap"></div>
+    <button class="btn-dl" id="btn-dl-orc"><i class="fas fa-download"></i> Baixar PDF</button>
+    <button type="button" class="btn-block ghost" style="margin-top:8px;" onclick="closeSheet('ver-orcamento')">Fechar</button>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SHEET: CLIENTE FORM
+════════════════════════════════════════ -->
+<div class="modal-overlay" id="ov-cliente"></div>
+<div class="modal-sheet" id="sheet-cliente">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title green"><i class="fas fa-user"></i> <span id="cliente-form-title">Novo Cliente</span></div>
+    <form onsubmit="saveCliente(event)">
+        <input type="hidden" id="c-id">
+        <div class="form-group">
+            <label class="form-label">Nome Completo</label>
+            <input type="text" id="c-nome" class="form-control" required placeholder="Nome do cliente">
+        </div>
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label class="form-label">Telefone / WhatsApp</label>
+                <input type="text" id="c-telefone" class="form-control" placeholder="(82) 9...">
+            </div>
+            <div class="form-group">
+                <label class="form-label">CNPJ (opcional)</label>
+                <input type="text" id="c-cnpj" class="form-control" placeholder="00.000...">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Veículos</label>
+            <div id="veiculos-container"></div>
+            <button type="button" class="btn-add-small" onclick="addVeiculo()"><i class="fas fa-plus"></i> Veículo</button>
+        </div>
+        <button type="submit" class="btn-block primary"><i class="fas fa-save"></i> Salvar</button>
+        <button type="button" class="btn-block ghost" onclick="closeSheet('cliente')">Cancelar</button>
+    </form>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SHEET: HISTÓRICO CLIENTE
+════════════════════════════════════════ -->
+<div class="modal-overlay" id="ov-hist"></div>
+<div class="modal-sheet" id="sheet-hist">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title green"><i class="fas fa-history"></i> Histórico do Cliente</div>
+    <div id="hist-content"></div>
+    <button type="button" class="btn-block ghost" style="margin-top:8px;" onclick="closeSheet('hist')">Fechar</button>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SHEET: CONFIGURAÇÕES
+════════════════════════════════════════ -->
+<div class="modal-overlay" id="ov-config"></div>
+<div class="modal-sheet" id="sheet-config">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title"><i class="fas fa-cog"></i> Configurações da Empresa</div>
+    <form onsubmit="saveConfig(event)">
+        <div class="config-section-title">Dados da Empresa</div>
+        <div class="form-group">
+            <label class="form-label">Nome da Empresa</label>
+            <input type="text" id="cfg-nome" class="form-control" placeholder="Tony Fumê">
+        </div>
+        <div class="form-group">
+            <label class="form-label">CNPJ</label>
+            <input type="text" id="cfg-cnpj" class="form-control">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Endereço</label>
+            <input type="text" id="cfg-endereco" class="form-control">
+        </div>
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label class="form-label">WhatsApp</label>
+                <input type="text" id="cfg-whatsapp" class="form-control">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Instagram</label>
+                <input type="text" id="cfg-instagram" class="form-control">
+            </div>
+        </div>
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label class="form-label">Responsável</label>
+                <input type="text" id="cfg-responsavel" class="form-control">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Cargo</label>
+                <input type="text" id="cfg-cargo" class="form-control">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Chave Pix</label>
+            <input type="text" id="cfg-pix" class="form-control">
+        </div>
+
+        <div class="config-section-title">Identidade Visual</div>
+        <div class="form-group">
+            <label class="form-label">Logo</label>
+            <input type="file" id="cfg-logo" class="form-control" accept="image/*" onchange="handleLogoUpload(this)">
+            <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+                <input type="checkbox" id="cfg-rembg" checked style="width:auto;margin:0;">
+                <label for="cfg-rembg" style="font-size:.78rem;color:var(--muted);font-weight:400;">Remover fundo branco automaticamente</label>
+            </div>
+            <div id="logo-preview-area" class="logo-preview-wrap" style="display:none;">
+                <img id="logo-preview-img" class="logo-preview-img" src="" alt="">
+                <button type="button" onclick="removeLogo()" style="background:var(--red-soft);color:var(--red);border:none;padding:6px 12px;border-radius:8px;font-weight:700;font-size:.78rem;cursor:pointer;">Remover</button>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Plano de Fundo</label>
+            <input type="file" id="cfg-bg" class="form-control" accept="image/*" onchange="handleBgUpload(this)">
+        </div>
+        <button type="submit" class="btn-block primary"><i class="fas fa-save"></i> Salvar Configurações</button>
+        <button type="button" class="btn-block ghost" onclick="closeSheet('config')">Cancelar</button>
+    </form>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SHEET: PAINEL FINANCEIRO
+════════════════════════════════════════ -->
+<div class="modal-overlay" id="ov-painel-fin"></div>
+<div class="modal-sheet" id="sheet-painel-fin">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title green"><i class="fas fa-chart-line"></i> Painel Financeiro</div>
+    <div id="fin-content"></div>
+    <button type="button" class="btn-block ghost" style="margin-top:8px;" onclick="closeSheet('painel-fin')">Fechar</button>
+</div>
+
+<!-- ═══════════════════════════════════════ JS ════════════════════════════════════════ -->
 <script>
-// ╔══════════════════════════════════════════════════════╗
-// ║                      STATE                           ║
-// ╚══════════════════════════════════════════════════════╝
-let empresaConfig = JSON.parse(localStorage.getItem('empresaConfig')) || {
-    nomeEmpresa: 'Tony Fumê', cnpj: '13.949.583/0001-32',
-    instagram: '@tonyfume', endereco: 'Avenida Juca Sampaio, 1552, Jacintinho',
-    whatsapp: '(82)99806-9585', responsavel: '', cargo: '', pix: '',
-    logo: null, background: null
+// ╔══════════════════════════════╗
+// ║        STATE / STORAGE       ║
+// ╚══════════════════════════════╝
+let cfg = JSON.parse(localStorage.getItem('empresaConfig')) || {
+    nomeEmpresa:'Tony Fumê', cnpj:'13.949.583/0001-32',
+    instagram:'@tonyfume', endereco:'Avenida Juca Sampaio, 1552, Jacintinho',
+    whatsapp:'(82)99806-9585', responsavel:'', cargo:'', pix:'', logo:null, background:null
 };
-let recibos   = JSON.parse(localStorage.getItem('recibos'))   || [];
-let clientes  = JSON.parse(localStorage.getItem('clientes'))  || [];
-let orcamentos= JSON.parse(localStorage.getItem('orcamentos'))|| [];
-
-let nextReciboId  = recibos.length   ? Math.max(...recibos.map(r=>r.id))+1   : 1;
-let nextClienteId = clientes.length  ? Math.max(...clientes.map(c=>c.id))+1  : 1;
-let nextOrcId     = orcamentos.length? Math.max(...orcamentos.map(o=>o.id))+1 : 1;
-
+let recibos    = JSON.parse(localStorage.getItem('recibos'))    || [];
+let clientes   = JSON.parse(localStorage.getItem('clientes'))   || [];
+let orcamentos = JSON.parse(localStorage.getItem('orcamentos')) || [];
 let itensFotos = {};
 
-// ╔══════════════════════════════════════════════════════╗
-// ║                   MODAL HELPERS                      ║
-// ╚══════════════════════════════════════════════════════╝
-function abrirModal(m)  { m.style.display='block'; }
-function fecharModal(m) { m.style.display='none'; }
+let nextRId = recibos.length    ? Math.max(...recibos.map(r=>r.id))+1    : 1;
+let nextCId = clientes.length   ? Math.max(...clientes.map(c=>c.id))+1   : 1;
+let nextOId = orcamentos.length ? Math.max(...orcamentos.map(o=>o.id))+1 : 1;
 
-window.onclick = e => { if (e.target.classList.contains('modal')) fecharModal(e.target); };
-document.querySelectorAll('.close-btn').forEach(b => {
-    b.onclick = () => fecharModal(b.closest('.modal'));
+let currentView = 'dashboard';
+let orcFilter   = 'all';
+
+// ╔══════════════════════════════╗
+// ║      NAVIGATION              ║
+// ╚══════════════════════════════╝
+function navigate(view){
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    document.getElementById('view-'+view).classList.add('active');
+    document.getElementById('nav-'+view).classList.add('active');
+    currentView = view;
+    if(view==='recibos')    renderRecibos();
+    if(view==='orcamentos') renderOrcamentos();
+    if(view==='clientes')   renderClientes();
+    if(view==='dashboard')  renderDashboard();
+    document.querySelector('main').scrollTo(0,0);
+}
+
+function fabAction(){
+    if(currentView==='recibos')    openReciboForm();
+    else if(currentView==='orcamentos') openOrcamentoForm();
+    else if(currentView==='clientes')   openClienteForm();
+    else openReciboForm();
+}
+
+// ╔══════════════════════════════╗
+// ║       SHEETS                 ║
+// ╚══════════════════════════════╝
+function openSheet(name){
+    const ov=document.getElementById('ov-'+name);
+    const sh=document.getElementById('sheet-'+name);
+    if(!ov||!sh) return;
+    ov.classList.add('active');
+    setTimeout(()=>sh.style.transform='translateY(0)',10);
+    if(name==='painel-fin') renderPainelFinanceiro();
+    if(name==='config')     loadConfigForm();
+}
+function closeSheet(name){
+    const ov=document.getElementById('ov-'+name);
+    const sh=document.getElementById('sheet-'+name);
+    if(!ov||!sh) return;
+    sh.style.transform='translateY(100%)';
+    setTimeout(()=>ov.classList.remove('active'),300);
+}
+document.querySelectorAll('.modal-overlay').forEach(ov=>{
+    ov.addEventListener('click',e=>{
+        if(e.target===ov){
+            const id=ov.id.replace('ov-','');
+            closeSheet(id);
+        }
+    });
 });
 
-// ╔══════════════════════════════════════════════════════╗
-// ║                      TABS                            ║
-// ╚══════════════════════════════════════════════════════╝
-function trocarTab(tabId, btn, isBlue) {
-    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active','active-blue'); });
-    document.getElementById(tabId).classList.add('active');
-    btn.classList.add('active');
-    if (isBlue) btn.classList.add('active-blue');
+// ╔══════════════════════════════╗
+// ║       TOAST                  ║
+// ╚══════════════════════════════╝
+function toast(msg){
+    const t=document.getElementById('toast');
+    document.getElementById('toast-msg').textContent=msg;
+    t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),2200);
 }
 
-// ╔══════════════════════════════════════════════════════╗
-// ║                    FORMATAÇÃO                        ║
-// ╚══════════════════════════════════════════════════════╝
-function fmtMoeda(v) { return parseFloat(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
-function fmtData(ds) {
-    if (!ds) return '';
-    const [y,m,d] = ds.split('-');
-    return `${d}/${m}/${y}`;
+// ╔══════════════════════════════╗
+// ║       FORMAT HELPERS         ║
+// ╚══════════════════════════════╝
+function fmtM(v){ return parseFloat(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
+function fmtMShort(v){ const n=parseFloat(v||0); return n>=1000?'R$'+(n/1000).toFixed(1).replace('.',',')+'k':'R$'+n.toFixed(0).replace('.',','); }
+function fmtD(ds){ if(!ds) return ''; const[y,m,d]=ds.split('-'); return`${d}/${m}/${y}`; }
+function dataExtenso(ds){
+    if(!ds) return '';
+    const ms=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+    const[y,m,d]=ds.split('-');
+    return`${parseInt(d)} de ${ms[parseInt(m)-1]} de ${y}`;
 }
-function dataExtenso(ds) {
-    if (!ds) return '';
-    const meses=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
-    const [y,m,d] = ds.split('-');
-    return `${parseInt(d)} de ${meses[parseInt(m)-1]} de ${y}`;
-}
-function valorExtenso(v) {
-    const n=parseFloat(v); if(isNaN(n)) return '';
-    const inteiro=Math.floor(n), centavos=Math.round((n-inteiro)*100);
+function valorExtenso(v){
+    const n=parseFloat(v);if(isNaN(n))return'';
     const u=['','um','dois','três','quatro','cinco','seis','sete','oito','nove','dez','onze','doze','treze','quatorze','quinze','dezesseis','dezessete','dezoito','dezenove'];
     const d=['','','vinte','trinta','quarenta','cinquenta','sessenta','setenta','oitenta','noventa'];
     const c=['','cento','duzentos','trezentos','quatrocentos','quinhentos','seiscentos','setecentos','oitocentos','novecentos'];
-    function conv(num) {
-        if(!num) return '';
-        if(num===100) return 'cem';
-        let r=''; const cv=Math.floor(num/100), rest=num%100;
-        if(cv) r+=c[cv];
-        if(cv&&rest) r+=' e ';
-        if(rest>0&&rest<20) r+=u[rest];
-        else if(rest>=20) { r+=d[Math.floor(rest/10)]; if(rest%10) r+=' e '+u[rest%10]; }
+    function conv(num){
+        if(!num)return'';if(num===100)return'cem';
+        let r='';const cv=Math.floor(num/100),rest=num%100;
+        if(cv)r+=c[cv];if(cv&&rest)r+=' e ';
+        if(rest>0&&rest<20)r+=u[rest];
+        else if(rest>=20){r+=d[Math.floor(rest/10)];if(rest%10)r+=' e '+u[rest%10];}
         return r;
     }
-    let texto='';
-    if(inteiro===0) texto='zero';
-    else if(inteiro<1000) texto=conv(inteiro)+(inteiro===1?' real':' reais');
-    else if(inteiro<1000000) {
-        const mil=Math.floor(inteiro/1000), rest=inteiro%1000;
-        texto=(mil===1?'mil':conv(mil)+' mil');
-        if(rest) texto+=' e '+conv(rest);
-        texto+=' reais';
-    } else {
-        const m2=Math.floor(inteiro/1000000), rest=inteiro%1000000;
-        texto=conv(m2)+(m2===1?' milhão':' milhões');
-        if(rest) texto+=' e '+conv(rest);
-        texto+=' reais';
-    }
-    if(centavos>0) texto+=' e '+(centavos<20?u[centavos]:d[Math.floor(centavos/10)]+(centavos%10?' e '+u[centavos%10]:''))+(centavos===1?' centavo':' centavos');
-    return texto.charAt(0).toUpperCase()+texto.slice(1);
+    const inteiro=Math.floor(n),cents=Math.round((n-inteiro)*100);
+    let txt='';
+    if(!inteiro)txt='zero';
+    else if(inteiro<1000)txt=conv(inteiro)+(inteiro===1?' real':' reais');
+    else if(inteiro<1000000){const mil=Math.floor(inteiro/1000),rest=inteiro%1000;txt=(mil===1?'mil':conv(mil)+' mil');if(rest)txt+=' e '+conv(rest);txt+=' reais';}
+    else{const m2=Math.floor(inteiro/1e6),rest=inteiro%1e6;txt=conv(m2)+(m2===1?' milhão':' milhões');if(rest)txt+=' e '+conv(rest);txt+=' reais';}
+    if(cents>0)txt+=' e '+(cents<20?u[cents]:d[Math.floor(cents/10)]+(cents%10?' e '+u[cents%10]:''))+(cents===1?' centavo':' centavos');
+    return txt.charAt(0).toUpperCase()+txt.slice(1);
 }
 
-// ╔══════════════════════════════════════════════════════╗
-// ║               CONFIGURAÇÕES / LOGO                   ║
-// ╚══════════════════════════════════════════════════════╝
-function removerFundoCanvas(imgSrc) {
-    return new Promise(resolve => {
-        const img=new Image();
-        img.onload=()=>{
-            const canvas=document.createElement('canvas');
-            const W=img.naturalWidth, H=img.naturalHeight;
-            canvas.width=W; canvas.height=H;
-            const ctx=canvas.getContext('2d');
-            ctx.drawImage(img,0,0);
-            const imageData=ctx.getImageData(0,0,W,H);
-            const data=imageData.data;
-            const pts=[[0,0],[W-1,0],[0,H-1],[W-1,H-1],[Math.floor(W/2),0],[Math.floor(W/2),H-1],[0,Math.floor(H/2)],[W-1,Math.floor(H/2)]];
-            const am=pts.map(([x,y])=>{const i=(y*W+x)*4;return[data[i],data[i+1],data[i+2]];});
-            const bgR=Math.round(am.reduce((s,c)=>s+c[0],0)/am.length);
-            const bgG=Math.round(am.reduce((s,c)=>s+c[1],0)/am.length);
-            const bgB=Math.round(am.reduce((s,c)=>s+c[2],0)/am.length);
-            const TOL=40, SUV=22;
-            for(let i=0;i<data.length;i+=4){
-                const dist=Math.sqrt((data[i]-bgR)**2+(data[i+1]-bgG)**2+(data[i+2]-bgB)**2);
-                if(dist<=TOL) data[i+3]=0;
-                else if(dist<TOL+SUV) data[i+3]=Math.round(((dist-TOL)/SUV)*255);
-            }
-            ctx.putImageData(imageData,0,0);
-            resolve(canvas.toDataURL('image/png'));
-        };
-        img.onerror=()=>resolve(imgSrc);
-        img.src=imgSrc;
-    });
+function today(){
+    const d=new Date();
+    return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
-function aplicarIdentidadeVisual() {
-    const logoEl=document.getElementById('logo');
-    if(empresaConfig.logo){logoEl.src=empresaConfig.logo;logoEl.style.display='block';}
-    else logoEl.style.display='none';
-    const hbg=document.getElementById('header-bg');
-    if(empresaConfig.background){hbg.src=empresaConfig.background;hbg.style.display='block';}
-    else hbg.style.display='none';
-    if(empresaConfig.nomeEmpresa) document.getElementById('titulo-sistema').textContent=empresaConfig.nomeEmpresa;
-}
-
-function carregarConfiguracoes() {
-    document.getElementById('config-nome-empresa').value=empresaConfig.nomeEmpresa||'';
-    document.getElementById('config-cnpj').value=empresaConfig.cnpj||'';
-    document.getElementById('config-instagram').value=empresaConfig.instagram||'';
-    document.getElementById('config-endereco').value=empresaConfig.endereco||'';
-    document.getElementById('config-whatsapp').value=empresaConfig.whatsapp||'';
-    document.getElementById('config-responsavel').value=empresaConfig.responsavel||'';
-    document.getElementById('config-cargo').value=empresaConfig.cargo||'';
-    document.getElementById('config-pix').value=empresaConfig.pix||'';
-    aplicarIdentidadeVisual();
-    if(empresaConfig.logo) atualizarPreviewLogo(empresaConfig.logo);
-}
-
-function atualizarPreviewLogo(src) {
-    const c=document.getElementById('logo-preview-container');
-    const img=document.getElementById('logo-preview');
-    if(src){img.src=src;c.style.display='block';} else c.style.display='none';
-}
-
-document.getElementById('config-logo').addEventListener('change',async e=>{
-    const file=e.target.files[0]; if(!file) return;
-    const usarRembg=document.getElementById('config-logo-rembg').checked;
-    const reader=new FileReader();
-    reader.onload=async ev=>{
-        if(!usarRembg){
-            empresaConfig.logo=ev.target.result;
-            localStorage.setItem('empresaConfig',JSON.stringify(empresaConfig));
-            aplicarIdentidadeVisual(); atualizarPreviewLogo(ev.target.result); return;
-        }
-        const lm=document.getElementById('loading-message');
-        lm.style.display='block';
-        try{ empresaConfig.logo=await removerFundoCanvas(ev.target.result); }
-        catch(err){ empresaConfig.logo=ev.target.result; }
-        localStorage.setItem('empresaConfig',JSON.stringify(empresaConfig));
-        lm.style.display='none'; aplicarIdentidadeVisual(); atualizarPreviewLogo(empresaConfig.logo);
-    };
-    reader.readAsDataURL(file);
-});
-
-document.getElementById('config-background').addEventListener('change',e=>{
-    const file=e.target.files[0]; if(!file) return;
-    const reader=new FileReader();
-    reader.onload=ev=>{ empresaConfig.background=ev.target.result; localStorage.setItem('empresaConfig',JSON.stringify(empresaConfig)); aplicarIdentidadeVisual(); };
-    reader.readAsDataURL(file);
-});
-
-document.getElementById('btn-remover-logo').addEventListener('click',()=>{
-    empresaConfig.logo=null; localStorage.setItem('empresaConfig',JSON.stringify(empresaConfig));
-    aplicarIdentidadeVisual(); atualizarPreviewLogo(null);
-    document.getElementById('config-logo').value='';
-});
-
-document.getElementById('form-config').addEventListener('submit',e=>{
-    e.preventDefault();
-    empresaConfig.nomeEmpresa=document.getElementById('config-nome-empresa').value;
-    empresaConfig.cnpj=document.getElementById('config-cnpj').value;
-    empresaConfig.instagram=document.getElementById('config-instagram').value;
-    empresaConfig.endereco=document.getElementById('config-endereco').value;
-    empresaConfig.whatsapp=document.getElementById('config-whatsapp').value;
-    empresaConfig.responsavel=document.getElementById('config-responsavel').value;
-    empresaConfig.cargo=document.getElementById('config-cargo').value;
-    empresaConfig.pix=document.getElementById('config-pix').value;
-    localStorage.setItem('empresaConfig',JSON.stringify(empresaConfig));
-    carregarConfiguracoes(); fecharModal(document.getElementById('modal-config'));
-});
-
-document.getElementById('btn-config').addEventListener('click',()=>abrirModal(document.getElementById('modal-config')));
-
-// ╔══════════════════════════════════════════════════════╗
-// ║                VEÍCULOS (WIDGET)                     ║
-// ╚══════════════════════════════════════════════════════╝
-function adicionarVeiculoCliente(veiculo) {
-    const container=document.getElementById('cliente-veiculos-container');
-    const div=document.createElement('div');
-    div.className='veiculo-row';
-    div.innerHTML=`
-        <div class="form-group" style="margin:0;">
-            <label style="font-size:0.75em;">Modelo</label>
-            <input type="text" class="veiculo-modelo" placeholder="Ex: Honda Civic" value="${veiculo?veiculo.modelo:''}">
-        </div>
-        <div class="form-group" style="margin:0;">
-            <label style="font-size:0.75em;">Placa</label>
-            <input type="text" class="veiculo-placa" placeholder="ABC-1234" value="${veiculo?veiculo.placa:''}">
-        </div>
-        <div class="form-group" style="margin:0;">
-            <label style="font-size:0.75em;">Cor</label>
-            <input type="text" class="veiculo-cor" placeholder="Preto" value="${veiculo?veiculo.cor:''}">
-        </div>
-        <button type="button" class="btn-rm-veiculo" onclick="this.closest('.veiculo-row').remove()">
-            <i class="fas fa-times"></i>
-        </button>`;
-    container.appendChild(div);
-}
-
-function coletarVeiculosCliente() {
-    return Array.from(document.querySelectorAll('#cliente-veiculos-container .veiculo-row')).map(row=>({
-        modelo: row.querySelector('.veiculo-modelo').value.trim(),
-        placa: row.querySelector('.veiculo-placa').value.trim(),
-        cor: row.querySelector('.veiculo-cor').value.trim()
-    })).filter(v=>v.modelo||v.placa);
-}
-
-document.getElementById('btn-add-veiculo-cliente').addEventListener('click',()=>adicionarVeiculoCliente(null));
-
-// ╔══════════════════════════════════════════════════════╗
-// ║                    CLIENTES                          ║
-// ╚══════════════════════════════════════════════════════╝
-function renderizarClientes() {
-    const tbody=document.querySelector('#tabela-clientes tbody');
-    tbody.innerHTML='';
-    const selRecibo=document.getElementById('recibo-cliente');
-    selRecibo.innerHTML='<option value="" disabled selected>Selecione um cliente</option>';
-
-    clientes.forEach(c=>{
-        const recCli=recibos.filter(r=>r.clienteId===c.id).length;
-        const orcCli=orcamentos.filter(o=>o.clienteId===c.id||o.empresa===c.nome).length;
-        const veiculos=c.veiculos||[];
-        const veiculosHtml=veiculos.slice(0,2).map(v=>`<span style="background:#f0f0f0;border-radius:10px;padding:2px 8px;font-size:0.75em;margin:1px;display:inline-block;">${v.modelo||''} ${v.placa?'•'+v.placa:''}</span>`).join('')+(veiculos.length>2?`<span style="font-size:0.75em;color:#888;"> +${veiculos.length-2}</span>`:'');
-
-        const tr=document.createElement('tr');
-        tr.innerHTML=`
-            <td style="font-weight:600;">${c.nome}</td>
-            <td>${c.telefone||'—'}</td>
-            <td>${c.cnpj||'—'}</td>
-            <td>${veiculosHtml||'—'}</td>
-            <td><span class="badge badge-red">${recCli}</span></td>
-            <td><span class="badge">${orcCli}</span></td>
-            <td>
-                <button class="btn-acao hist" title="Histórico" onclick="verHistoricoCliente(${c.id})"><i class="fas fa-history"></i></button>
-                <button class="btn-acao" title="Editar" onclick="editarCliente(${c.id})"><i class="fas fa-edit"></i></button>
-                <button class="btn-acao" title="Excluir" onclick="excluirCliente(${c.id})"><i class="fas fa-trash-alt"></i></button>
-            </td>`;
-        tbody.appendChild(tr);
-
-        const opt=document.createElement('option');
-        opt.value=c.id; opt.textContent=c.nome;
-        selRecibo.appendChild(opt);
-    });
-
-    document.getElementById('total-clientes').textContent=clientes.length;
-}
-
-function salvarCliente(c) {
-    const idx=clientes.findIndex(x=>x.id===c.id);
-    if(idx>-1) clientes[idx]=c;
-    else { c.id=nextClienteId++; clientes.push(c); }
-    localStorage.setItem('clientes',JSON.stringify(clientes));
-    renderizarClientes(); fecharModal(document.getElementById('modal-cliente'));
-}
-
-function editarCliente(id) {
-    const c=clientes.find(x=>x.id===id); if(!c) return;
-    document.getElementById('modal-cliente-titulo-el').innerHTML='<i class="fas fa-edit"></i> Editar Cliente';
-    document.getElementById('cliente-id-edicao').value=c.id;
-    document.getElementById('cliente-nome').value=c.nome;
-    document.getElementById('cliente-telefone').value=c.telefone||'';
-    document.getElementById('cliente-cnpj').value=c.cnpj||'';
-    // Veículos
-    document.getElementById('cliente-veiculos-container').innerHTML='';
-    (c.veiculos||[]).forEach(v=>adicionarVeiculoCliente(v));
-    abrirModal(document.getElementById('modal-cliente'));
-}
-
-function excluirCliente(id) {
-    if(!confirm('Excluir este cliente?')) return;
-    clientes=clientes.filter(c=>c.id!==id);
-    localStorage.setItem('clientes',JSON.stringify(clientes));
-    renderizarClientes();
-}
-
-document.getElementById('form-cliente').addEventListener('submit',e=>{
-    e.preventDefault();
-    const c={
-        id: document.getElementById('cliente-id-edicao').value ? parseInt(document.getElementById('cliente-id-edicao').value) : null,
-        nome: document.getElementById('cliente-nome').value,
-        telefone: document.getElementById('cliente-telefone').value,
-        cnpj: document.getElementById('cliente-cnpj').value,
-        veiculos: coletarVeiculosCliente()
-    };
-    salvarCliente(c); e.target.reset();
-    document.getElementById('cliente-veiculos-container').innerHTML='';
-});
-
-document.getElementById('btn-add-cliente').addEventListener('click',()=>{
-    document.getElementById('modal-cliente-titulo-el').innerHTML='<i class="fas fa-user-plus"></i> Cadastrar Cliente';
-    document.getElementById('cliente-id-edicao').value='';
-    document.getElementById('form-cliente').reset();
-    document.getElementById('cliente-veiculos-container').innerHTML='';
-    abrirModal(document.getElementById('modal-cliente'));
-});
-
-// ╔══════════════════════════════════════════════════════╗
-// ║              HISTÓRICO POR CLIENTE                   ║
-// ╚══════════════════════════════════════════════════════╝
-function verHistoricoCliente(id) {
-    const c=clientes.find(x=>x.id===id); if(!c) return;
-    const recCli=recibos.filter(r=>r.clienteId===id);
-    const orcCli=orcamentos.filter(o=>o.clienteId===id||o.empresa===c.nome);
-    const veiculos=c.veiculos||[];
-    const totalRecibos=recCli.reduce((s,r)=>s+parseFloat(r.valor||0),0);
-
-    const veiculosHtml=veiculos.length
-        ? veiculos.map(v=>`<span class="hist-veiculo-chip"><i class="fas fa-car"></i> ${v.modelo||'Veículo'} ${v.placa?'• '+v.placa:''} ${v.cor?'• '+v.cor:''}</span>`).join('')
-        : '<span style="color:#999;font-size:0.85em;">Nenhum veículo cadastrado</span>';
-
-    const recibosHTML=recCli.length
-        ? `<table><thead><tr><th>ID</th><th>Veículo / Placa</th><th>Película</th><th>Serviço</th><th>Valor</th><th>Data</th><th>Ver</th></tr></thead><tbody>`
-          +recCli.map(r=>`<tr>
-            <td>#${r.id}</td>
-            <td>${r.modelo||'—'}${r.placa?' / '+r.placa:''}</td>
-            <td>${r.pelicula||'—'}</td>
-            <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${r.servico}">${r.servico}</td>
-            <td style="font-weight:700;">${fmtMoeda(r.valor)}</td>
-            <td>${fmtData(r.data)}</td>
-            <td><button class="btn-acao view" onclick="visualizarRecibo(${r.id})"><i class="fas fa-eye"></i></button></td>
-          </tr>`).join('')+'</tbody></table>'
-        : '<p style="color:#999;font-size:0.85em;">Nenhum recibo encontrado.</p>';
-
-    const orcamentosHTML=orcCli.length
-        ? `<table><thead><tr><th>Nº</th><th>Veículo / Placa</th><th>Película</th><th>Valor</th><th>Data</th><th>Status</th><th>Ver</th></tr></thead><tbody>`
-          +orcCli.map(o=>{
-            const t=calcularTotalOrcamento(o.itens);
-            const s=o.status||'pendente';
-            return `<tr>
-              <td>#${o.id}</td>
-              <td>${o.modelo||'—'}${o.placa?' / '+o.placa:''}</td>
-              <td>${o.pelicula||'—'}</td>
-              <td style="font-weight:700;">${fmtMoeda(t)}</td>
-              <td>${fmtData(o.data)}</td>
-              <td><span class="status-badge status-${s}">${s.charAt(0).toUpperCase()+s.slice(1)}</span></td>
-              <td><button class="btn-acao view" onclick="visualizarOrcamento(${o.id})"><i class="fas fa-eye"></i></button></td>
-            </tr>`;}).join('')+'</tbody></table>'
-        : '<p style="color:#999;font-size:0.85em;">Nenhum orçamento encontrado.</p>';
-
-    document.getElementById('hist-cliente-content').innerHTML=`
-        <div class="hist-cliente-info">
-            <h3>${c.nome}</h3>
-            <p>${c.telefone||''} ${c.cnpj?'| CNPJ: '+c.cnpj:''}</p>
-            <p style="margin-top:6px;font-weight:700;color:var(--green);">Total gasto: ${fmtMoeda(totalRecibos)}</p>
-        </div>
-        <div class="hist-veiculos">
-            <h4>Veículos Cadastrados</h4>
-            ${veiculosHtml}
-        </div>
-        <div class="hist-section">
-            <h4><i class="fas fa-file-alt"></i> Recibos (${recCli.length})</h4>
-            <div class="table-wrapper">${recibosHTML}</div>
-        </div>
-        <div class="hist-section">
-            <h4><i class="fas fa-file-invoice-dollar"></i> Orçamentos (${orcCli.length})</h4>
-            <div class="table-wrapper">${orcamentosHTML}</div>
-        </div>`;
-    abrirModal(document.getElementById('modal-hist-cliente'));
-}
-
-// ╔══════════════════════════════════════════════════════╗
-// ║                     RECIBOS                          ║
-// ╚══════════════════════════════════════════════════════╝
-function renderizarRecibos() {
-    const tbody=document.querySelector('#tabela-recibos tbody');
-    tbody.innerHTML=''; let total=0;
-
-    recibos.forEach(r=>{
-        const c=clientes.find(x=>x.id===r.clienteId); if(!c) return;
-        total+=parseFloat(r.valor);
-        const tr=document.createElement('tr');
-        tr.innerHTML=`
-            <td>#${r.id}</td>
-            <td style="font-weight:600;">${c.nome}</td>
-            <td>${r.modelo||'—'}${r.placa?' <span style="color:#888;font-size:0.85em;">/ '+r.placa+'</span>':''}</td>
-            <td>${r.pelicula||'—'}</td>
-            <td style="font-weight:700;">${fmtMoeda(r.valor)}</td>
-            <td>${fmtData(r.data)}</td>
-            <td>
-                <button class="btn-acao view" title="Visualizar" onclick="visualizarRecibo(${r.id})"><i class="fas fa-eye"></i></button>
-                <button class="btn-acao" title="Editar" onclick="editarRecibo(${r.id})"><i class="fas fa-edit"></i></button>
-                <button class="btn-acao" title="Excluir" onclick="excluirRecibo(${r.id})"><i class="fas fa-trash-alt"></i></button>
-            </td>`;
-        tbody.appendChild(tr);
-    });
-
-    document.getElementById('total-recibos').textContent=recibos.length;
-    document.getElementById('valor-total').textContent=fmtMoeda(total);
-
-    const hoje=new Date();
-    const receitaMes=recibos.filter(r=>{
-        const d=new Date(r.data+'T12:00:00');
-        return d.getMonth()===hoje.getMonth()&&d.getFullYear()===hoje.getFullYear();
-    }).reduce((s,r)=>s+parseFloat(r.valor),0);
-    document.getElementById('receita-mes-resumo').textContent=fmtMoeda(receitaMes);
-}
-
-function salvarRecibo(r) {
-    const idx=recibos.findIndex(x=>x.id===r.id);
-    if(idx>-1) recibos[idx]=r; else { r.id=nextReciboId++; recibos.push(r); }
-    localStorage.setItem('recibos',JSON.stringify(recibos));
-    renderizarRecibos(); return r.id;
-}
-
-function visualizarRecibo(id, baixarAuto=false) {
-    const r=recibos.find(x=>x.id===id); if(!r) return;
-    const c=clientes.find(x=>x.id===r.clienteId);
-    const nome=c?c.nome:'(cliente removido)';
-
-    const bgHtml=empresaConfig.background?`<img class="recibo-bg-img" src="${empresaConfig.background}" alt="">`:'';
-    const logoHtml=empresaConfig.logo?`<img src="${empresaConfig.logo}" alt="Logo">`:'';
-
-    const veiculoInfo=(r.modelo||r.placa)
-        ?`<div class="recibo-info-box"><h4>Veículo / Placa</h4><p>${r.modelo||''}${r.placa?' — '+r.placa:''}</p></div>`
-        :'';
-    const peliculaInfo=r.pelicula
-        ?`<div class="recibo-info-box"><h4>Tipo de Película</h4><p>${r.pelicula}</p></div>`:'';
-
-    document.getElementById('recibo-content').innerHTML=`
-        ${bgHtml}
-        <div class="recibo-inner">
-            <div class="recibo-header">
-                ${logoHtml}
-                <h3>Recibo de Serviço</h3>
-                <div class="recibo-divider"></div>
-            </div>
-            <div class="recibo-body">
-                <div class="recibo-info-grid">
-                    <div class="recibo-info-box"><h4>Recebemos de:</h4><p>${nome}</p></div>
-                    <div class="recibo-info-box"><h4>Valor:</h4><p style="color:var(--green);font-size:1.1em;">${fmtMoeda(r.valor)}</p></div>
-                    ${veiculoInfo}
-                    ${peliculaInfo}
-                    <div class="recibo-info-box" ${!r.modelo&&!r.placa?'style="grid-column:1/-1"':''}><h4>Serviço referente:</h4><p>${r.servico}</p></div>
-                    <div class="recibo-info-box"><h4>Data:</h4><p>${fmtData(r.data)}</p></div>
-                </div>
-                <div class="recibo-assinatura">
-                    <div class="linha"></div>
-                    <p>Assinatura do Responsável</p>
-                    <p style="font-weight:600;">${empresaConfig.instagram}</p>
-                </div>
-            </div>
-            <div class="recibo-footer">
-                <div class="recibo-contatos">
-                    <div class="recibo-contato"><i class="fas fa-phone"></i> ${empresaConfig.whatsapp}</div>
-                    ${empresaConfig.instagram?`<div class="recibo-contato"><i class="fab fa-instagram"></i> ${empresaConfig.instagram}</div>`:''}
-                </div>
-                <p><strong>CNPJ:</strong> ${empresaConfig.cnpj}</p>
-                <p>${empresaConfig.endereco}</p>
-            </div>
-        </div>`;
-    abrirModal(document.getElementById('modal-view-recibo'));
-    if(baixarAuto) setTimeout(baixarReciboPdf, 600);
-}
-
-function editarRecibo(id) {
-    const r=recibos.find(x=>x.id===id); if(!r) return;
-    document.getElementById('modal-recibo-titulo-el').innerHTML='<i class="fas fa-edit"></i> Editar Recibo';
-    document.getElementById('recibo-id-edicao').value=r.id;
-    document.getElementById('recibo-cliente').value=r.clienteId;
-    document.getElementById('recibo-modelo').value=r.modelo||'';
-    document.getElementById('recibo-placa').value=r.placa||'';
-    document.getElementById('recibo-pelicula').value=r.pelicula||'';
-    document.getElementById('recibo-servico').value=r.servico;
-    document.getElementById('recibo-valor').value=r.valor;
-    document.getElementById('recibo-data').value=r.data;
-    document.getElementById('btn-salvar-recibo').innerHTML='<i class="fas fa-save"></i> Salvar';
-    abrirModal(document.getElementById('modal-recibo'));
-}
-
-function excluirRecibo(id) {
-    if(!confirm('Excluir este recibo?')) return;
-    recibos=recibos.filter(r=>r.id!==id);
-    localStorage.setItem('recibos',JSON.stringify(recibos));
-    renderizarRecibos();
-}
-
-document.getElementById('form-recibo').addEventListener('submit',e=>{
-    e.preventDefault();
-    const r={
-        id: document.getElementById('recibo-id-edicao').value?parseInt(document.getElementById('recibo-id-edicao').value):null,
-        clienteId: parseInt(document.getElementById('recibo-cliente').value),
-        modelo: document.getElementById('recibo-modelo').value,
-        placa: document.getElementById('recibo-placa').value,
-        pelicula: document.getElementById('recibo-pelicula').value,
-        servico: document.getElementById('recibo-servico').value,
-        valor: parseFloat(document.getElementById('recibo-valor').value),
-        data: document.getElementById('recibo-data').value,
-    };
-    const newId=salvarRecibo(r);
-    e.target.reset();
-    document.getElementById('recibo-id-edicao').value='';
-    document.getElementById('btn-salvar-recibo').innerHTML='<i class="fas fa-download"></i> Baixar Recibo';
-    fecharModal(document.getElementById('modal-recibo'));
-    visualizarRecibo(newId, true);
-});
-
-document.getElementById('btn-add-recibo').addEventListener('click',()=>{
-    document.getElementById('modal-recibo-titulo-el').innerHTML='<i class="fas fa-file-alt"></i> Criar Novo Recibo';
-    document.getElementById('recibo-id-edicao').value='';
-    document.getElementById('btn-salvar-recibo').innerHTML='<i class="fas fa-download"></i> Baixar Recibo';
-    document.getElementById('form-recibo').reset();
-    abrirModal(document.getElementById('modal-recibo'));
-});
-
-// ─── PDF RECIBO ───
-function baixarReciboPdf() {
-    window.jsPDF=window.jspdf.jsPDF;
-    const doc=new jsPDF('p','mm','a5');
-    const el=document.getElementById('recibo-content');
-    html2canvas(el,{scale:2.5,useCORS:true,backgroundColor:'#ffffff'}).then(canvas=>{
-        const imgData=canvas.toDataURL('image/png');
-        const pageW=148.5, pageH=210;
-        const margin=8;
-        const usableW=pageW-2*margin;
-        const imgH=(canvas.height*(usableW))/canvas.width;
-        doc.addImage(imgData,'PNG',margin,margin,usableW,Math.min(imgH,pageH-2*margin));
-        doc.save(`recibo_${Date.now()}.pdf`);
-        fecharModal(document.getElementById('modal-view-recibo'));
-    });
-}
-document.getElementById('btn-download-pdf').onclick=baixarReciboPdf;
-
-// ╔══════════════════════════════════════════════════════╗
-// ║                   ORÇAMENTOS                         ║
-// ╚══════════════════════════════════════════════════════╝
-function adicionarItemOrcamento(item) {
-    const idx=document.getElementById('itens-container').children.length;
-    const div=document.createElement('div');
-    div.className='item-orc-row';
-    div.dataset.idx=idx;
-    div.innerHTML=`
-        <div>
-            <label class="img-upload-label" for="item-foto-${idx}"><i class="fas fa-image"></i><br>Foto</label>
-            <input type="file" id="item-foto-${idx}" accept="image/*" style="display:none;" onchange="carregarFotoItem(this,${idx})">
-            <img id="item-foto-prev-${idx}" class="item-img-preview" src="">
-        </div>
-        <textarea placeholder="Descrição&#10;Ex: Aplicação de película nano cerâmica&#10;Medidas: 8,80m x 2,65m">${item?item.descricao:''}</textarea>
-        <input type="text" placeholder="Garantia&#10;Ex: 10 anos" value="${item?item.garantia:''}">
-        <input type="text" placeholder="Valor&#10;Ex: R$ 1.500,00" value="${item?item.valor:''}">
-        <button type="button" class="btn-rm-item" onclick="removerItem(this)"><i class="fas fa-times"></i></button>`;
-    if(item&&item.foto){
-        itensFotos[idx]=item.foto;
-        const img=div.querySelector(`#item-foto-prev-${idx}`);
-        img.src=item.foto; img.style.display='block';
-    }
-    document.getElementById('itens-container').appendChild(div);
-}
-
-function carregarFotoItem(input,idx) {
-    if(!input.files[0]) return;
-    const reader=new FileReader();
-    reader.onload=e=>{
-        itensFotos[idx]=e.target.result;
-        const img=document.getElementById(`item-foto-prev-${idx}`);
-        img.src=e.target.result; img.style.display='block';
-    };
-    reader.readAsDataURL(input.files[0]);
-}
-
-function removerItem(btn) { btn.closest('.item-orc-row').remove(); }
-document.getElementById('btn-add-item').addEventListener('click',()=>adicionarItemOrcamento(null));
-
-function coletarItens() {
-    return Array.from(document.querySelectorAll('.item-orc-row')).map(row=>{
-        const idx=parseInt(row.dataset.idx);
-        return {
-            descricao: row.querySelector('textarea').value,
-            garantia: row.querySelectorAll('input[type=text]')[0].value,
-            valor: row.querySelectorAll('input[type=text]')[1].value,
-            foto: itensFotos[idx]||null
-        };
-    });
-}
-
-function calcularTotalOrcamento(itens) {
-    return (itens||[]).reduce((t,item)=>{
+function calcOrcTotal(itens){
+    return(itens||[]).reduce((t,item)=>{
         const v=parseFloat((item.valor||'').replace(/[R$\s.]/g,'').replace(',','.'));
         return t+(isNaN(v)?0:v);
     },0);
 }
 
-function gerarHTMLOrcamento(orc) {
-    const total=calcularTotalOrcamento(orc.itens);
-    const bgHtml=empresaConfig.background?`<img class="orc-bg-img" src="${empresaConfig.background}" alt="">`:'';
-    const logoHtml=empresaConfig.logo?`<img src="${empresaConfig.logo}" alt="Logo">`:`<div style="font-size:11px;color:#aaa;">(Logo)</div>`;
-    const pixInfo=empresaConfig.pix||empresaConfig.cnpj;
-    const nomeEmp=empresaConfig.nomeEmpresa||'Empresa';
-    const veiculoBlock=(orc.modelo||orc.placa||orc.pelicula)?`
-        <div class="orc-veiculo-info">
-            ${orc.modelo?`<p><strong>Veículo:</strong> ${orc.modelo}</p>`:''}
-            ${orc.placa?`<p><strong>Placa:</strong> ${orc.placa}</p>`:''}
-            ${orc.pelicula?`<p><strong>Película:</strong> ${orc.pelicula}</p>`:''}
-        </div>`:'';
+// ╔══════════════════════════════╗
+// ║    REMOVER FUNDO LOGO        ║
+// ╚══════════════════════════════╝
+function removerFundo(src){
+    return new Promise(res=>{
+        const img=new Image();
+        img.onload=()=>{
+            const c=document.createElement('canvas');
+            c.width=img.naturalWidth;c.height=img.naturalHeight;
+            const ctx=c.getContext('2d');ctx.drawImage(img,0,0);
+            const id=ctx.getImageData(0,0,c.width,c.height),data=id.data;
+            const W=c.width,H=c.height;
+            const pts=[[0,0],[W-1,0],[0,H-1],[W-1,H-1],[Math.floor(W/2),0],[Math.floor(W/2),H-1]];
+            const am=pts.map(([x,y])=>{const i=(y*W+x)*4;return[data[i],data[i+1],data[i+2]];});
+            const bgR=Math.round(am.reduce((s,c)=>s+c[0],0)/am.length);
+            const bgG=Math.round(am.reduce((s,c)=>s+c[1],0)/am.length);
+            const bgB=Math.round(am.reduce((s,c)=>s+c[2],0)/am.length);
+            const TOL=40,SUV=22;
+            for(let i=0;i<data.length;i+=4){
+                const dist=Math.sqrt((data[i]-bgR)**2+(data[i+1]-bgG)**2+(data[i+2]-bgB)**2);
+                if(dist<=TOL)data[i+3]=0;else if(dist<TOL+SUV)data[i+3]=Math.round(((dist-TOL)/SUV)*255);
+            }
+            ctx.putImageData(id,0,0);res(c.toDataURL('image/png'));
+        };
+        img.onerror=()=>res(src);img.src=src;
+    });
+}
 
-    const itensHTML=(orc.itens||[]).map(item=>{
-        const fotoCell=item.foto
-            ?`<img src="${item.foto}" style="max-width:55px;max-height:48px;object-fit:contain;">`
-            :`<div style="width:55px;height:40px;background:#f0f0f0;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;color:#bbb;">sem foto</div>`;
-        return `<tr>
-            <td class="col-img">${fotoCell}</td>
-            <td style="white-space:pre-line;">${item.descricao}</td>
-            <td class="col-garantia">${item.garantia}</td>
-            <td class="col-valor">${item.valor||'—'}</td>
-        </tr>`;
-    }).join('');
+// ╔══════════════════════════════╗
+// ║     CONFIGURAÇÕES            ║
+// ╚══════════════════════════════╝
+function applyBrand(){
+    document.getElementById('brand-name').textContent=cfg.nomeEmpresa||'Tony Fumê';
+    const logo=document.getElementById('hdr-logo');
+    if(cfg.logo){logo.src=cfg.logo;logo.style.display='block';}
+    else logo.style.display='none';
+}
+function loadConfigForm(){
+    document.getElementById('cfg-nome').value=cfg.nomeEmpresa||'';
+    document.getElementById('cfg-cnpj').value=cfg.cnpj||'';
+    document.getElementById('cfg-endereco').value=cfg.endereco||'';
+    document.getElementById('cfg-whatsapp').value=cfg.whatsapp||'';
+    document.getElementById('cfg-instagram').value=cfg.instagram||'';
+    document.getElementById('cfg-responsavel').value=cfg.responsavel||'';
+    document.getElementById('cfg-cargo').value=cfg.cargo||'';
+    document.getElementById('cfg-pix').value=cfg.pix||'';
+    if(cfg.logo){document.getElementById('logo-preview-img').src=cfg.logo;document.getElementById('logo-preview-area').style.display='flex';}
+    else document.getElementById('logo-preview-area').style.display='none';
+}
+async function handleLogoUpload(input){
+    const file=input.files[0];if(!file)return;
+    const rembg=document.getElementById('cfg-rembg').checked;
+    const reader=new FileReader();
+    reader.onload=async ev=>{
+        let src=ev.target.result;
+        if(rembg) src=await removerFundo(src);
+        cfg.logo=src;
+        document.getElementById('logo-preview-img').src=src;
+        document.getElementById('logo-preview-area').style.display='flex';
+    };
+    reader.readAsDataURL(file);
+}
+function handleBgUpload(input){
+    const file=input.files[0];if(!file)return;
+    const reader=new FileReader();
+    reader.onload=ev=>{cfg.background=ev.target.result;};
+    reader.readAsDataURL(file);
+}
+function removeLogo(){
+    cfg.logo=null;
+    document.getElementById('logo-preview-area').style.display='none';
+    document.getElementById('cfg-logo').value='';
+    applyBrand();
+}
+function saveConfig(e){
+    e.preventDefault();
+    cfg.nomeEmpresa=document.getElementById('cfg-nome').value;
+    cfg.cnpj=document.getElementById('cfg-cnpj').value;
+    cfg.endereco=document.getElementById('cfg-endereco').value;
+    cfg.whatsapp=document.getElementById('cfg-whatsapp').value;
+    cfg.instagram=document.getElementById('cfg-instagram').value;
+    cfg.responsavel=document.getElementById('cfg-responsavel').value;
+    cfg.cargo=document.getElementById('cfg-cargo').value;
+    cfg.pix=document.getElementById('cfg-pix').value;
+    localStorage.setItem('empresaConfig',JSON.stringify(cfg));
+    applyBrand();closeSheet('config');toast('Configurações salvas! ✅');
+}
 
-    return `
-    <div id="orcamento-preview">
-        ${bgHtml}
-        <div class="orc-inner">
-            <div class="orc-header">
-                <div class="orc-logo-area">${logoHtml}</div>
-                <div class="orc-empresa-nome">
-                    <div class="nome-grande">${nomeEmp.toUpperCase()}</div>
+// ╔══════════════════════════════╗
+// ║       VEÍCULOS WIDGET        ║
+// ╚══════════════════════════════╝
+function addVeiculo(v){
+    const c=document.getElementById('veiculos-container');
+    const div=document.createElement('div');
+    div.className='veiculo-row';
+    div.innerHTML=`
+        <div class="form-group" style="margin:0;">
+            <label class="form-label" style="font-size:.7rem;">Modelo</label>
+            <input type="text" class="form-control vr-modelo" placeholder="Honda Civic" value="${v?v.modelo:''}" style="padding:9px;">
+        </div>
+        <div class="form-group" style="margin:0;">
+            <label class="form-label" style="font-size:.7rem;">Placa</label>
+            <input type="text" class="form-control vr-placa" placeholder="ABC-1234" value="${v?v.placa:''}" style="padding:9px;">
+        </div>
+        <div class="form-group vr-full" style="margin:0;margin-top:6px;">
+            <input type="text" class="form-control vr-cor" placeholder="Cor (opcional)" value="${v?v.cor:''}" style="padding:9px;">
+        </div>
+        <button type="button" class="veiculo-rm" onclick="this.closest('.veiculo-row').remove()"><i class="fas fa-times"></i></button>`;
+    c.appendChild(div);
+}
+function getVeiculos(){
+    return Array.from(document.querySelectorAll('#veiculos-container .veiculo-row')).map(row=>({
+        modelo:row.querySelector('.vr-modelo').value.trim(),
+        placa:row.querySelector('.vr-placa').value.trim(),
+        cor:row.querySelector('.vr-cor').value.trim()
+    })).filter(v=>v.modelo||v.placa);
+}
+
+// ╔══════════════════════════════╗
+// ║       CLIENTES               ║
+// ╚══════════════════════════════╝
+function renderClientes(q=''){
+    const container=document.getElementById('clientes-list');
+    const list=clientes.filter(c=>!q||c.nome.toLowerCase().includes(q.toLowerCase())||c.telefone?.includes(q));
+    if(!list.length){container.innerHTML=`<div class="empty-state"><i class="fas fa-users"></i><p>Nenhum cliente cadastrado</p></div>`;return;}
+    container.innerHTML=list.map(c=>{
+        const rcs=recibos.filter(r=>r.clienteId===c.id).length;
+        const ocs=orcamentos.filter(o=>o.clienteId===c.id||o.empresa===c.nome).length;
+        const veiculos=(c.veiculos||[]).slice(0,2).map(v=>`<span class="hist-veiculo-chip" style="padding:2px 8px;font-size:.64rem;"><i class="fas fa-car"></i> ${v.modelo||''} ${v.placa?'• '+v.placa:''}</span>`).join('');
+        return`<div class="list-card green" onclick="verHistoricoCliente(${c.id})">
+            <div class="card-top">
+                <div>
+                    <div class="card-name">${c.nome}</div>
+                    <div class="card-sub"><i class="fas fa-phone"></i>${c.telefone||'—'}</div>
+                    <div style="margin-top:4px;">${veiculos||'<span style="font-size:.72rem;color:#aaa;">Sem veículo cadastrado</span>'}</div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-size:.72rem;color:var(--muted);">Recibos: <strong>${rcs}</strong></div>
+                    <div style="font-size:.72rem;color:var(--muted);">Orçamentos: <strong>${ocs}</strong></div>
                 </div>
             </div>
-            <p class="orc-intro">
-                A empresa ${nomeEmp}, com sede na ${empresaConfig.endereco}, inscrita no CNPJ sob o nº ${empresaConfig.cnpj},
-                envia o presente orçamento, com validade de até ${orc.validade||30} dias.
-            </p>
-            <div class="orc-solicitante">
-                <p><strong>Empresa/Solicitante:</strong> ${orc.empresa}</p>
-                ${orc.cnpjSolicitante?`<p><strong>CNPJ:</strong> ${orc.cnpjSolicitante}</p>`:''}
+            <div class="action-row">
+                <button class="btn-sm btn-green" onclick="event.stopPropagation();verHistoricoCliente(${c.id})"><i class="fas fa-history"></i> Histórico</button>
+                <button class="btn-sm btn-light" onclick="event.stopPropagation();editarCliente(${c.id})"><i class="fas fa-edit"></i> Editar</button>
+                <button class="btn-sm btn-red" onclick="event.stopPropagation();excluirCliente(${c.id})"><i class="fas fa-trash"></i></button>
             </div>
-            ${veiculoBlock}
-            <div class="orc-table-wrapper">
-                <div class="orc-table-title">ORÇAMENTO</div>
-                <table class="orc-table">
-                    <thead>
-                        <tr>
-                            <th style="width:70px;"></th>
-                            <th>Descrição dos produtos e serviços</th>
-                            <th style="width:90px;text-align:center;">Garantia</th>
-                            <th style="width:120px;text-align:right;">Valor</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${itensHTML}
-                        <tr class="row-total">
-                            <td colspan="4"><strong>Total: ${fmtMoeda(total)} (${valorExtenso(total)})</strong></td>
-                        </tr>
-                    </tbody>
-                </table>
+        </div>`;
+    }).join('');
+}
+
+function populateClienteSelect(){
+    const sel=document.getElementById('r-cliente');
+    sel.innerHTML='<option value="" disabled selected>Selecione...</option>';
+    clientes.forEach(c=>{
+        const o=document.createElement('option');
+        o.value=c.id;o.textContent=c.nome;
+        sel.appendChild(o);
+    });
+}
+
+function openClienteForm(id){
+    document.getElementById('c-id').value='';
+    document.getElementById('cliente-form-title').textContent='Novo Cliente';
+    document.getElementById('c-nome').value='';
+    document.getElementById('c-telefone').value='';
+    document.getElementById('c-cnpj').value='';
+    document.getElementById('veiculos-container').innerHTML='';
+    if(id){
+        const c=clientes.find(x=>x.id===id);if(!c)return;
+        document.getElementById('c-id').value=c.id;
+        document.getElementById('cliente-form-title').textContent='Editar Cliente';
+        document.getElementById('c-nome').value=c.nome;
+        document.getElementById('c-telefone').value=c.telefone||'';
+        document.getElementById('c-cnpj').value=c.cnpj||'';
+        (c.veiculos||[]).forEach(v=>addVeiculo(v));
+    }
+    openSheet('cliente');
+}
+function editarCliente(id){openClienteForm(id);}
+function excluirCliente(id){
+    if(!confirm('Excluir este cliente?'))return;
+    clientes=clientes.filter(c=>c.id!==id);
+    localStorage.setItem('clientes',JSON.stringify(clientes));
+    renderClientes();renderDashboard();toast('Cliente excluído');
+}
+function saveCliente(e){
+    e.preventDefault();
+    const id=document.getElementById('c-id').value;
+    const c={
+        id:id?parseInt(id):null,
+        nome:document.getElementById('c-nome').value,
+        telefone:document.getElementById('c-telefone').value,
+        cnpj:document.getElementById('c-cnpj').value,
+        veiculos:getVeiculos()
+    };
+    const idx=clientes.findIndex(x=>x.id===c.id);
+    if(idx>-1)clientes[idx]=c;else{c.id=nextCId++;clientes.push(c);}
+    localStorage.setItem('clientes',JSON.stringify(clientes));
+    renderClientes();populateClienteSelect();renderDashboard();
+    closeSheet('cliente');toast('Cliente salvo! ✅');
+}
+
+// ─── HISTÓRICO CLIENTE ───
+function verHistoricoCliente(id){
+    const c=clientes.find(x=>x.id===id);if(!c)return;
+    const rcs=recibos.filter(r=>r.clienteId===id);
+    const ocs=orcamentos.filter(o=>o.clienteId===id||o.empresa===c.nome);
+    const total=rcs.reduce((s,r)=>s+parseFloat(r.valor||0),0);
+    const veiculos=(c.veiculos||[]);
+    const vHtml=veiculos.length
+        ?veiculos.map(v=>`<span class="hist-veiculo-chip"><i class="fas fa-car"></i> ${v.modelo||'Veículo'} ${v.placa?'• '+v.placa:''} ${v.cor?'• '+v.cor:''}</span>`).join('')
+        :'<span style="font-size:.82rem;color:#aaa;">Nenhum veículo cadastrado</span>';
+
+    const rHtml=rcs.length
+        ?rcs.map(r=>`<div class="hist-item">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                <div>
+                    <div style="font-weight:700;font-size:.88rem;">#${r.id} — ${fmtD(r.data)}</div>
+                    <div style="font-size:.78rem;color:var(--muted);">${r.modelo||''}${r.placa?' • '+r.placa:''} ${r.pelicula?'• '+r.pelicula:''}</div>
+                    <div style="font-size:.78rem;color:var(--muted);">${r.servico}</div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-family:Rajdhani,sans-serif;font-size:1.1rem;font-weight:700;color:var(--green);">${fmtM(r.valor)}</div>
+                    <button class="btn-sm btn-blue" style="margin-top:4px;" onclick="verRecibo(${r.id})"><i class="fas fa-eye"></i></button>
+                </div>
             </div>
-            ${orc.obs?`<p class="orc-obs"><strong>Observação:</strong> ${orc.obs}</p>`:''}
-            <div class="orc-pagamento">
-                <strong>Condições de pagamento:</strong>
-                Forma de pagamento: ${orc.pagamento||'transferência ou Pix'}<br>
-                ${pixInfo?`Chave-Pix (CNPJ): ${pixInfo}`:''}
+        </div>`).join('')
+        :'<p style="color:#aaa;font-size:.85rem;text-align:center;padding:12px 0;">Nenhum recibo encontrado</p>';
+
+    const oHtml=ocs.length
+        ?ocs.map(o=>{
+            const t=calcOrcTotal(o.itens);const s=o.status||'pendente';
+            return`<div class="hist-item blue">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                    <div>
+                        <div style="font-weight:700;font-size:.88rem;">#${o.id} — ${fmtD(o.data)}</div>
+                        <div style="font-size:.78rem;color:var(--muted);">${o.modelo||''}${o.placa?' • '+o.placa:''} ${o.pelicula?'• '+o.pelicula:''}</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-family:Rajdhani,sans-serif;font-size:1rem;font-weight:700;color:var(--blue);">${fmtM(t)}</div>
+                        <span class="s-badge s-${s}" style="margin-top:4px;">${s.charAt(0).toUpperCase()+s.slice(1)}</span>
+                    </div>
+                </div>
+            </div>`;}).join('')
+        :'<p style="color:#aaa;font-size:.85rem;text-align:center;padding:12px 0;">Nenhum orçamento encontrado</p>';
+
+    document.getElementById('hist-content').innerHTML=`
+        <div class="hist-info">
+            <h3>${c.nome}</h3>
+            <p>${c.telefone||''} ${c.cnpj?'| CNPJ: '+c.cnpj:''}</p>
+            <p style="font-weight:700;color:var(--green);margin-top:6px;">Total pago: ${fmtM(total)}</p>
+        </div>
+        <div style="margin-bottom:14px;">
+            <div style="font-size:.8rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Veículos</div>
+            ${vHtml}
+        </div>
+        <div style="font-size:.88rem;font-weight:700;border-bottom:2px solid var(--border);padding-bottom:6px;margin-bottom:10px;display:flex;align-items:center;gap:6px;"><i class="fas fa-file-alt" style="color:var(--red)"></i> Recibos (${rcs.length})</div>
+        ${rHtml}
+        <div style="font-size:.88rem;font-weight:700;border-bottom:2px solid var(--border);padding-bottom:6px;margin:14px 0 10px;display:flex;align-items:center;gap:6px;"><i class="fas fa-file-invoice-dollar" style="color:var(--blue)"></i> Orçamentos (${ocs.length})</div>
+        ${oHtml}`;
+    openSheet('hist');
+}
+
+// ╔══════════════════════════════╗
+// ║       RECIBOS                ║
+// ╚══════════════════════════════╝
+function renderRecibos(q=''){
+    const container=document.getElementById('recibos-list');
+    let list=recibos.filter(r=>{
+        const c=clientes.find(x=>x.id===r.clienteId);
+        return !q||c?.nome.toLowerCase().includes(q.toLowerCase())||r.servico?.toLowerCase().includes(q.toLowerCase())||r.placa?.toLowerCase().includes(q.toLowerCase());
+    });
+    if(!list.length){container.innerHTML=`<div class="empty-state"><i class="fas fa-file-alt"></i><p>Nenhum recibo encontrado</p></div>`;return;}
+    container.innerHTML=list.map(r=>{
+        const c=clientes.find(x=>x.id===r.clienteId);
+        return`<div class="list-card red">
+            <div class="card-top">
+                <div>
+                    <div class="card-name">#${r.id} — ${c?c.nome:'(cliente)'}</div>
+                    <div class="card-sub"><i class="fas fa-calendar"></i>${fmtD(r.data)}</div>
+                    ${r.modelo||r.placa?`<div class="card-sub"><i class="fas fa-car"></i>${r.modelo||''}${r.placa?' • '+r.placa:''}</div>`:''}
+                    ${r.pelicula?`<div class="card-sub"><i class="fas fa-film"></i>${r.pelicula}</div>`:''}
+                </div>
+                <div style="font-family:Rajdhani,sans-serif;font-size:1.35rem;font-weight:700;color:var(--green);">${fmtM(r.valor)}</div>
             </div>
-            <p class="orc-footer-loc">${orc.cidade||'Maceió (AL)'}, ${dataExtenso(orc.data)}.</p>
-            <div class="orc-assinatura">
-                <p>Atenciosamente,</p>
-                <div class="linha-ass"></div>
-                ${empresaConfig.responsavel?`<p><strong>${empresaConfig.responsavel}</strong></p>`:''}
-                ${empresaConfig.cargo?`<p>${empresaConfig.cargo}</p>`:''}
+            <div class="action-row">
+                <button class="btn-sm btn-blue" onclick="verRecibo(${r.id})"><i class="fas fa-eye"></i> Ver</button>
+                <button class="btn-sm btn-light" onclick="editarRecibo(${r.id})"><i class="fas fa-edit"></i> Editar</button>
+                <button class="btn-sm btn-red" onclick="excluirRecibo(${r.id})"><i class="fas fa-trash"></i></button>
             </div>
+        </div>`;
+    }).join('');
+}
+
+function openReciboForm(id){
+    document.getElementById('r-id').value='';
+    document.getElementById('recibo-form-title').textContent='Criar Recibo';
+    document.getElementById('r-cliente').value='';
+    document.getElementById('r-modelo').value='';
+    document.getElementById('r-placa').value='';
+    document.getElementById('r-pelicula').value='';
+    document.getElementById('r-servico').value='';
+    document.getElementById('r-valor').value='';
+    document.getElementById('r-data').value=today();
+    populateClienteSelect();
+    if(id){
+        const r=recibos.find(x=>x.id===id);if(!r)return;
+        document.getElementById('r-id').value=r.id;
+        document.getElementById('recibo-form-title').textContent='Editar Recibo';
+        document.getElementById('r-cliente').value=r.clienteId;
+        document.getElementById('r-modelo').value=r.modelo||'';
+        document.getElementById('r-placa').value=r.placa||'';
+        document.getElementById('r-pelicula').value=r.pelicula||'';
+        document.getElementById('r-servico').value=r.servico;
+        document.getElementById('r-valor').value=r.valor;
+        document.getElementById('r-data').value=r.data;
+    }
+    openSheet('recibo');
+}
+function editarRecibo(id){openReciboForm(id);}
+function excluirRecibo(id){
+    if(!confirm('Excluir este recibo?'))return;
+    recibos=recibos.filter(r=>r.id!==id);
+    localStorage.setItem('recibos',JSON.stringify(recibos));
+    renderRecibos();renderDashboard();toast('Recibo excluído');
+}
+function saveRecibo(e){
+    e.preventDefault();
+    const id=document.getElementById('r-id').value;
+    const r={
+        id:id?parseInt(id):null,
+        clienteId:parseInt(document.getElementById('r-cliente').value),
+        modelo:document.getElementById('r-modelo').value,
+        placa:document.getElementById('r-placa').value,
+        pelicula:document.getElementById('r-pelicula').value,
+        servico:document.getElementById('r-servico').value,
+        valor:parseFloat(document.getElementById('r-valor').value),
+        data:document.getElementById('r-data').value,
+    };
+    const idx=recibos.findIndex(x=>x.id===r.id);
+    if(idx>-1)recibos[idx]=r;else{r.id=nextRId++;recibos.push(r);}
+    localStorage.setItem('recibos',JSON.stringify(recibos));
+    renderRecibos();renderDashboard();
+    closeSheet('recibo');
+    setTimeout(()=>verRecibo(r.id,true),350);
+    toast('Recibo salvo! ✅');
+}
+
+function gerarHTMLRecibo(r){
+    const c=clientes.find(x=>x.id===r.clienteId);
+    const nome=c?c.nome:'(cliente)';
+    const bgHtml=cfg.background?`<img class="r-bg" src="${cfg.background}" alt="">`:'';
+    const logoHtml=cfg.logo?`<img src="${cfg.logo}" alt="Logo">`:'';
+    const veiculoInfo=(r.modelo||r.placa)?`<div class="r-box"><h4>Veículo / Placa</h4><p>${r.modelo||''}${r.placa?' — '+r.placa:''}</p></div>`:'';
+    const peliculaInfo=r.pelicula?`<div class="r-box"><h4>Película</h4><p>${r.pelicula}</p></div>`:'';
+    return`${bgHtml}
+    <div class="r-inner">
+        <div class="r-head">${logoHtml}<h3>Recibo de Serviço</h3><div class="r-divider"></div></div>
+        <div>
+            <div class="r-grid">
+                <div class="r-box"><h4>Recebemos de:</h4><p>${nome}</p></div>
+                <div class="r-box"><h4>Valor:</h4><p style="color:var(--green);font-size:1em;">${fmtM(r.valor)}</p></div>
+                ${veiculoInfo}
+                ${peliculaInfo}
+                <div class="r-box" style="${!r.modelo&&!r.placa?'grid-column:1/-1':''};"><h4>Serviço:</h4><p style="font-weight:500;font-size:.82rem;">${r.servico}</p></div>
+                <div class="r-box"><h4>Data:</h4><p>${fmtD(r.data)}</p></div>
+            </div>
+            <div class="r-sign"><div class="linha"></div><p>Assinatura do Responsável</p><p style="font-weight:700;">${cfg.instagram}</p></div>
+        </div>
+        <div class="r-foot">
+            <div class="r-contacts">
+                <div class="r-contact"><i class="fas fa-phone"></i>${cfg.whatsapp}</div>
+                ${cfg.instagram?`<div class="r-contact"><i class="fab fa-instagram"></i>${cfg.instagram}</div>`:''}
+            </div>
+            <p><strong>CNPJ:</strong> ${cfg.cnpj}</p>
+            <p>${cfg.endereco}</p>
         </div>
     </div>`;
 }
 
-function renderizarOrcamentos() {
-    const tbody=document.querySelector('#tabela-orcamentos tbody');
-    tbody.innerHTML=''; let total=0;
+function verRecibo(id, baixar=false){
+    const r=recibos.find(x=>x.id===id);if(!r)return;
+    document.getElementById('recibo-content').innerHTML=gerarHTMLRecibo(r);
+    document.getElementById('btn-dl-recibo').onclick=()=>baixarRecibosPdf();
+    openSheet('ver-recibo');
+    if(baixar) setTimeout(baixarRecibosPdf,500);
+}
 
-    orcamentos.forEach(orc=>{
-        const t=calcularTotalOrcamento(orc.itens); total+=t;
-        const s=orc.status||'pendente';
-        const tr=document.createElement('tr');
-        tr.innerHTML=`
-            <td>#${orc.id}</td>
-            <td style="font-weight:600;">${orc.empresa}</td>
-            <td>${orc.modelo||'—'}${orc.placa?' <span style="color:#888;font-size:0.85em;">/ '+orc.placa+'</span>':''}</td>
-            <td>${orc.pelicula||'—'}</td>
-            <td style="font-weight:700;">${fmtMoeda(t)}</td>
-            <td>${fmtData(orc.data)}</td>
-            <td>${orc.validade||30} dias</td>
-            <td><span class="status-badge status-${s}">${s.charAt(0).toUpperCase()+s.slice(1)}</span></td>
-            <td>
-                <button class="btn-acao view" title="Visualizar" onclick="visualizarOrcamento(${orc.id})"><i class="fas fa-eye"></i></button>
-                <button class="btn-acao" title="Editar" onclick="editarOrcamento(${orc.id})"><i class="fas fa-edit"></i></button>
-                <button class="btn-acao" title="Excluir" onclick="excluirOrcamento(${orc.id})"><i class="fas fa-trash-alt"></i></button>
-            </td>`;
-        tbody.appendChild(tr);
+function baixarRecibosPdf(){
+    window.jsPDF=window.jspdf.jsPDF;
+    const el=document.getElementById('recibo-content');
+    const doc=new jsPDF('p','mm','a5');
+    html2canvas(el,{scale:2.5,useCORS:true,backgroundColor:'#ffffff'}).then(canvas=>{
+        const imgData=canvas.toDataURL('image/png');
+        const pageW=148.5,margin=8,usableW=pageW-2*margin;
+        const imgH=(canvas.height*usableW)/canvas.width;
+        doc.addImage(imgData,'PNG',margin,margin,usableW,Math.min(imgH,210-2*margin));
+        doc.save(`recibo_${Date.now()}.pdf`);
+        toast('PDF baixado! 📄');
     });
-
-    document.getElementById('total-orcamentos').textContent=orcamentos.length;
-    document.getElementById('valor-total-orcamentos').textContent=fmtMoeda(total);
-    document.getElementById('badge-orcamentos').textContent=orcamentos.length;
 }
 
-function salvarOrcamento(orc) {
-    const idx=orcamentos.findIndex(x=>x.id===orc.id);
-    if(idx>-1) orcamentos[idx]=orc; else { orc.id=nextOrcId++; orcamentos.push(orc); }
-    localStorage.setItem('orcamentos',JSON.stringify(orcamentos));
-    renderizarOrcamentos(); return orc.id;
+// ╔══════════════════════════════╗
+// ║       ORÇAMENTOS             ║
+// ╚══════════════════════════════╝
+function addItemOrc(item){
+    const idx=document.getElementById('itens-container').children.length;
+    const div=document.createElement('div');
+    div.className='item-row';
+    div.dataset.idx=idx;
+    div.innerHTML=`
+        <div class="item-row-grid">
+            <div>
+                <label class="img-upload-label" for="if-${idx}"><i class="fas fa-image"></i><span>Foto</span></label>
+                <input type="file" id="if-${idx}" accept="image/*" style="display:none;" onchange="loadItemFoto(this,${idx})">
+                <img id="ip-${idx}" class="item-img-prev" src="">
+            </div>
+            <textarea class="form-control" placeholder="Descrição do produto/serviço&#10;Ex: Aplicação de película nano cerâmica" style="padding:9px;font-size:.88rem;min-height:52px;">${item?item.descricao:''}</textarea>
+        </div>
+        <div class="item-row-meta">
+            <input type="text" class="form-control" placeholder="Garantia (ex: 10 anos)" value="${item?item.garantia:''}" style="padding:9px;font-size:.82rem;">
+            <input type="text" class="form-control" placeholder="Valor (ex: R$ 1.500,00)" value="${item?item.valor:''}" style="padding:9px;font-size:.82rem;">
+        </div>
+        <button type="button" class="btn-rm-item" onclick="this.closest('.item-row').remove()"><i class="fas fa-times"></i> Remover</button>`;
+    if(item&&item.foto){itensFotos[idx]=item.foto;const img=div.querySelector(`#ip-${idx}`);img.src=item.foto;img.style.display='block';}
+    document.getElementById('itens-container').appendChild(div);
+}
+function loadItemFoto(input,idx){
+    if(!input.files[0])return;
+    const reader=new FileReader();
+    reader.onload=e=>{
+        itensFotos[idx]=e.target.result;
+        const img=document.getElementById(`ip-${idx}`);
+        img.src=e.target.result;img.style.display='block';
+    };
+    reader.readAsDataURL(input.files[0]);
+}
+function getItens(){
+    return Array.from(document.querySelectorAll('.item-row')).map(row=>{
+        const idx=parseInt(row.dataset.idx);
+        return{
+            descricao:row.querySelector('textarea').value,
+            garantia:row.querySelectorAll('input[type=text]')[0].value,
+            valor:row.querySelectorAll('input[type=text]')[1].value,
+            foto:itensFotos[idx]||null
+        };
+    });
 }
 
-function visualizarOrcamento(id) {
-    const orc=orcamentos.find(x=>x.id===id); if(!orc) return;
-    const container=document.querySelector('#modal-view-orcamento .modal-content');
-    const existing=container.querySelector('#orcamento-preview');
-    const newHTML=gerarHTMLOrcamento(orc);
-    const tmp=document.createElement('div'); tmp.innerHTML=newHTML;
-    if(existing) existing.replaceWith(tmp.firstElementChild);
-    else container.insertBefore(tmp.firstElementChild,document.getElementById('btn-download-orc-pdf'));
-    abrirModal(document.getElementById('modal-view-orcamento'));
+function renderOrcamentos(q=''){
+    const container=document.getElementById('orcamentos-list');
+    let list=orcamentos.filter(o=>{
+        const s=o.status||'pendente';
+        const matchQ=!q||o.empresa?.toLowerCase().includes(q.toLowerCase())||o.placa?.toLowerCase().includes(q.toLowerCase());
+        const matchF=orcFilter==='all'||s===orcFilter;
+        return matchQ&&matchF;
+    });
+    if(!list.length){container.innerHTML=`<div class="empty-state"><i class="fas fa-file-invoice-dollar"></i><p>Nenhum orçamento encontrado</p></div>`;return;}
+    container.innerHTML=list.map(o=>{
+        const t=calcOrcTotal(o.itens);
+        const s=o.status||'pendente';
+        return`<div class="list-card blue">
+            <div class="card-top">
+                <div>
+                    <div class="card-name">#${o.id} — ${o.empresa}</div>
+                    <div class="card-sub"><i class="fas fa-calendar"></i>${fmtD(o.data)}</div>
+                    ${o.modelo||o.placa?`<div class="card-sub"><i class="fas fa-car"></i>${o.modelo||''}${o.placa?' • '+o.placa:''}</div>`:''}
+                    ${o.pelicula?`<div class="card-sub"><i class="fas fa-film"></i>${o.pelicula}</div>`:''}
+                </div>
+                <div style="text-align:right;">
+                    <span class="s-badge s-${s}">${s.charAt(0).toUpperCase()+s.slice(1)}</span>
+                    <div class="card-value">${fmtM(t)}</div>
+                </div>
+            </div>
+            <div class="action-row">
+                <button class="btn-sm btn-blue" onclick="verOrcamento(${o.id})"><i class="fas fa-eye"></i> Ver</button>
+                <button class="btn-sm btn-light" onclick="editarOrcamento(${o.id})"><i class="fas fa-edit"></i> Editar</button>
+                <button class="btn-sm btn-red" onclick="excluirOrcamento(${o.id})"><i class="fas fa-trash"></i></button>
+            </div>
+            <div style="display:flex;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);">
+                <button class="btn-sm btn-green ${s==='aceito'?'btn-dark':''}" onclick="alterarStatusOrc(${o.id},'aceito')" style="font-size:.72rem;">✓ Aceito</button>
+                <button class="btn-sm btn-light ${s==='pendente'?'btn-dark':''}" onclick="alterarStatusOrc(${o.id},'pendente')" style="font-size:.72rem;">⏳ Pendente</button>
+                <button class="btn-sm btn-red ${s==='recusado'?'btn-dark':''}" onclick="alterarStatusOrc(${o.id},'recusado')" style="font-size:.72rem;">✗ Recusado</button>
+            </div>
+        </div>`;
+    }).join('');
 }
 
-function editarOrcamento(id) {
-    const orc=orcamentos.find(x=>x.id===id); if(!orc) return;
-    preencherFormOrcamento(orc);
-    document.getElementById('modal-orcamento-titulo-el').innerHTML='<i class="fas fa-edit"></i> Editar Orçamento';
-    abrirModal(document.getElementById('modal-orcamento'));
+function filterOrc(filter, btn){
+    orcFilter=filter;
+    document.querySelectorAll('#filter-orc .chip').forEach(c=>{c.classList.remove('active');});
+    btn.classList.add('active');
+    renderOrcamentos();
 }
 
-function excluirOrcamento(id) {
-    if(!confirm('Excluir este orçamento?')) return;
+function openOrcamentoForm(id){
+    document.getElementById('o-id').value='';
+    document.getElementById('orc-form-title').textContent='Criar Orçamento';
+    document.getElementById('o-empresa').value='';
+    document.getElementById('o-cnpj').value='';
+    document.getElementById('o-modelo').value='';
+    document.getElementById('o-placa').value='';
+    document.getElementById('o-pelicula').value='';
+    document.getElementById('o-data').value=today();
+    document.getElementById('o-validade').value='30';
+    document.getElementById('o-obs').value='';
+    document.getElementById('o-pagamento').value='transferência ou Pix';
+    document.getElementById('o-cidade').value='Maceió (AL)';
+    document.getElementById('itens-container').innerHTML='';
+    itensFotos={};
+    if(id){
+        const o=orcamentos.find(x=>x.id===id);if(!o)return;
+        document.getElementById('o-id').value=o.id;
+        document.getElementById('orc-form-title').textContent='Editar Orçamento';
+        document.getElementById('o-empresa').value=o.empresa||'';
+        document.getElementById('o-cnpj').value=o.cnpjSolicitante||'';
+        document.getElementById('o-modelo').value=o.modelo||'';
+        document.getElementById('o-placa').value=o.placa||'';
+        document.getElementById('o-pelicula').value=o.pelicula||'';
+        document.getElementById('o-data').value=o.data||'';
+        document.getElementById('o-validade').value=o.validade||30;
+        document.getElementById('o-obs').value=o.obs||'';
+        document.getElementById('o-pagamento').value=o.pagamento||'transferência ou Pix';
+        document.getElementById('o-cidade').value=o.cidade||'Maceió (AL)';
+        (o.itens||[]).forEach(item=>addItemOrc(item));
+    } else {
+        addItemOrc(null);
+    }
+    openSheet('orcamento');
+}
+function editarOrcamento(id){openOrcamentoForm(id);}
+function excluirOrcamento(id){
+    if(!confirm('Excluir este orçamento?'))return;
     orcamentos=orcamentos.filter(o=>o.id!==id);
     localStorage.setItem('orcamentos',JSON.stringify(orcamentos));
-    renderizarOrcamentos();
+    renderOrcamentos();renderDashboard();toast('Orçamento excluído');
 }
-
-function alterarStatusOrcamento(id,status) {
-    const orc=orcamentos.find(x=>x.id===id); if(!orc) return;
-    orc.status=status;
+function alterarStatusOrc(id,status){
+    const o=orcamentos.find(x=>x.id===id);if(!o)return;
+    o.status=status;
     localStorage.setItem('orcamentos',JSON.stringify(orcamentos));
-    renderizarOrcamentos();
-    renderizarPainelFinanceiro();
+    renderOrcamentos();renderDashboard();toast('Status atualizado');
 }
-
-function preencherFormOrcamento(orc) {
-    document.getElementById('orc-id-edicao').value=orc.id||'';
-    document.getElementById('orc-empresa').value=orc.empresa||'';
-    document.getElementById('orc-cnpj-solicitante').value=orc.cnpjSolicitante||'';
-    document.getElementById('orc-modelo').value=orc.modelo||'';
-    document.getElementById('orc-placa').value=orc.placa||'';
-    document.getElementById('orc-pelicula').value=orc.pelicula||'';
-    document.getElementById('orc-data').value=orc.data||'';
-    document.getElementById('orc-validade').value=orc.validade||30;
-    document.getElementById('orc-obs').value=orc.obs||'';
-    document.getElementById('orc-pagamento').value=orc.pagamento||'transferência ou Pix';
-    document.getElementById('orc-cidade').value=orc.cidade||'Maceió (AL)';
-    document.getElementById('itens-container').innerHTML='';
-    itensFotos={};
-    (orc.itens||[]).forEach(item=>adicionarItemOrcamento(item));
-}
-
-document.getElementById('form-orcamento').addEventListener('submit',e=>{
+function saveOrcamento(e){
     e.preventDefault();
-    const itens=coletarItens();
-    if(!itens.length){ alert('Adicione pelo menos um item.'); return; }
-    const orc={
-        id: document.getElementById('orc-id-edicao').value?parseInt(document.getElementById('orc-id-edicao').value):null,
-        empresa: document.getElementById('orc-empresa').value,
-        cnpjSolicitante: document.getElementById('orc-cnpj-solicitante').value,
-        modelo: document.getElementById('orc-modelo').value,
-        placa: document.getElementById('orc-placa').value,
-        pelicula: document.getElementById('orc-pelicula').value,
-        data: document.getElementById('orc-data').value,
-        validade: document.getElementById('orc-validade').value,
-        obs: document.getElementById('orc-obs').value,
-        pagamento: document.getElementById('orc-pagamento').value,
-        cidade: document.getElementById('orc-cidade').value,
-        status: document.getElementById('orc-id-edicao').value
-            ? (orcamentos.find(o=>o.id===parseInt(document.getElementById('orc-id-edicao').value))||{}).status||'pendente'
-            : 'pendente',
+    const itens=getItens();
+    if(!itens.length){alert('Adicione pelo menos um item.');return;}
+    const id=document.getElementById('o-id').value;
+    const existente=id?orcamentos.find(x=>x.id===parseInt(id)):null;
+    const o={
+        id:id?parseInt(id):null,
+        empresa:document.getElementById('o-empresa').value,
+        cnpjSolicitante:document.getElementById('o-cnpj').value,
+        modelo:document.getElementById('o-modelo').value,
+        placa:document.getElementById('o-placa').value,
+        pelicula:document.getElementById('o-pelicula').value,
+        data:document.getElementById('o-data').value,
+        validade:document.getElementById('o-validade').value,
+        obs:document.getElementById('o-obs').value,
+        pagamento:document.getElementById('o-pagamento').value,
+        cidade:document.getElementById('o-cidade').value,
+        status:existente?existente.status:'pendente',
         itens
     };
-    const newId=salvarOrcamento(orc);
-    fecharModal(document.getElementById('modal-orcamento'));
-    visualizarOrcamento(newId);
-});
+    const idx=orcamentos.findIndex(x=>x.id===o.id);
+    if(idx>-1)orcamentos[idx]=o;else{o.id=nextOId++;orcamentos.push(o);}
+    localStorage.setItem('orcamentos',JSON.stringify(orcamentos));
+    renderOrcamentos();renderDashboard();
+    closeSheet('orcamento');
+    setTimeout(()=>verOrcamento(o.id),350);
+    toast('Orçamento salvo! ✅');
+}
 
-document.getElementById('btn-add-orcamento').addEventListener('click',()=>{
-    document.getElementById('modal-orcamento-titulo-el').innerHTML='<i class="fas fa-file-invoice-dollar"></i> Criar Orçamento';
-    document.getElementById('orc-id-edicao').value='';
-    document.getElementById('form-orcamento').reset();
-    document.getElementById('itens-container').innerHTML='';
-    itensFotos={};
-    adicionarItemOrcamento(null);
-    abrirModal(document.getElementById('modal-orcamento'));
-});
+function gerarHTMLOrcamento(o){
+    const total=calcOrcTotal(o.itens);
+    const bgHtml=cfg.background?`<img class="orc-bg" src="${cfg.background}" alt="">`:'';
+    const logoHtml=cfg.logo?`<img src="${cfg.logo}" alt="Logo">`:'';
+    const pixInfo=cfg.pix||cfg.cnpj;
+    const nomeEmp=cfg.nomeEmpresa||'Empresa';
+    const veiculoBlock=(o.modelo||o.placa||o.pelicula)
+        ?`<div class="orc-veh">${o.modelo?`<p><strong>Veículo:</strong> ${o.modelo}</p>`:''}${o.placa?`<p><strong>Placa:</strong> ${o.placa}</p>`:''}${o.pelicula?`<p><strong>Película:</strong> ${o.pelicula}</p>`:''}</div>`:'';
+    const itensHTML=(o.itens||[]).map(item=>{
+        const fotoCell=item.foto?`<img src="${item.foto}" style="max-width:44px;max-height:38px;object-fit:contain;">`:`<div style="width:44px;height:36px;background:#f0f0f0;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;color:#bbb;">sem foto</div>`;
+        return`<tr><td class="ci">${fotoCell}</td><td style="white-space:pre-line;">${item.descricao}</td><td class="cg">${item.garantia}</td><td class="cv">${item.valor||'—'}</td></tr>`;
+    }).join('');
+    return`${bgHtml}
+    <div class="orc-inner">
+        <div class="orc-hdr"><div>${logoHtml}</div><div class="orc-empresa-nome">${nomeEmp.toUpperCase()}</div></div>
+        <p class="orc-intro">A empresa ${nomeEmp}, com sede na ${cfg.endereco}, inscrita no CNPJ sob o nº ${cfg.cnpj}, envia o presente orçamento, com validade de até ${o.validade||30} dias.</p>
+        <div class="orc-sol"><p><strong>Empresa/Solicitante:</strong> ${o.empresa}</p>${o.cnpjSolicitante?`<p><strong>CNPJ:</strong> ${o.cnpjSolicitante}</p>`:''}</div>
+        ${veiculoBlock}
+        <div class="orc-tbl-wrap">
+            <div class="orc-tbl-title">ORÇAMENTO</div>
+            <table class="orc-tbl">
+                <thead><tr><th style="width:56px;"></th><th>Descrição</th><th style="width:70px;text-align:center;">Garantia</th><th style="width:90px;text-align:right;">Valor</th></tr></thead>
+                <tbody>${itensHTML}<tr class="orc-total"><td colspan="4"><strong>Total: ${fmtM(total)} (${valorExtenso(total)})</strong></td></tr></tbody>
+            </table>
+        </div>
+        ${o.obs?`<p class="orc-obs"><strong>Obs:</strong> ${o.obs}</p>`:''}
+        <div class="orc-pag"><strong>Condições de pagamento:</strong><br>Forma de pagamento: ${o.pagamento||'transferência ou Pix'}${pixInfo?`<br>Chave-Pix (CNPJ): ${pixInfo}`:''}</div>
+        <p class="orc-loc">${o.cidade||'Maceió (AL)'}, ${dataExtenso(o.data)}.</p>
+        <div class="orc-ass"><p>Atenciosamente,</p><div class="linha"></div>${cfg.responsavel?`<p><strong>${cfg.responsavel}</strong></p>`:''}${cfg.cargo?`<p>${cfg.cargo}</p>`:''}</div>
+    </div>`;
+}
 
-// ─── PDF ORÇAMENTO ───
-document.getElementById('btn-download-orc-pdf').onclick=function(){
+function verOrcamento(id){
+    const o=orcamentos.find(x=>x.id===id);if(!o)return;
+    document.getElementById('orc-preview-wrap').innerHTML=gerarHTMLOrcamento(o);
+    document.getElementById('btn-dl-orc').onclick=()=>baixarOrcPdf();
+    openSheet('ver-orcamento');
+}
+
+function baixarOrcPdf(){
     window.jsPDF=window.jspdf.jsPDF;
-    const el=document.getElementById('orcamento-preview');
-    if(!el){ alert('Gere a pré-visualização primeiro.'); return; }
+    const el=document.getElementById('orc-preview-wrap');
+    if(!el)return;
     const doc=new jsPDF('p','mm','a4');
-    const pageW=210, pageH=297, margin=10, usableW=pageW-2*margin;
+    const pageW=210,margin=10,usableW=pageW-2*margin,pageH=297;
     html2canvas(el,{scale:2.5,useCORS:true,backgroundColor:'#ffffff',logging:false}).then(canvas=>{
         const imgData=canvas.toDataURL('image/png');
         const imgH=(canvas.height*usableW)/canvas.width;
         if(imgH<=pageH-2*margin){
             doc.addImage(imgData,'PNG',margin,margin,usableW,imgH);
         } else {
-            // Divide em páginas
             const ratio=usableW/canvas.width;
-            const pageHeightPx=(pageH-2*margin)/ratio;
-            let yPos=0, pageNum=0;
+            const phPx=(pageH-2*margin)/ratio;
+            let yPos=0,pn=0;
             while(yPos<canvas.height){
-                if(pageNum>0) doc.addPage();
-                const sliceH=Math.min(pageHeightPx,canvas.height-yPos);
-                const sliceCanvas=document.createElement('canvas');
-                sliceCanvas.width=canvas.width; sliceCanvas.height=sliceH;
-                sliceCanvas.getContext('2d').drawImage(canvas,0,-yPos);
-                doc.addImage(sliceCanvas.toDataURL('image/png'),'PNG',margin,margin,usableW,sliceH*ratio);
-                yPos+=sliceH; pageNum++;
+                if(pn>0)doc.addPage();
+                const sliceH=Math.min(phPx,canvas.height-yPos);
+                const sc=document.createElement('canvas');
+                sc.width=canvas.width;sc.height=sliceH;
+                sc.getContext('2d').drawImage(canvas,0,-yPos);
+                doc.addImage(sc.toDataURL('image/png'),'PNG',margin,margin,usableW,sliceH*ratio);
+                yPos+=sliceH;pn++;
             }
         }
         doc.save(`orcamento_${Date.now()}.pdf`);
+        toast('PDF baixado! 📄');
     });
-};
+}
 
-// ╔══════════════════════════════════════════════════════╗
-// ║               PAINEL FINANCEIRO                      ║
-// ╚══════════════════════════════════════════════════════╝
-function getReceitaMes(ano,mes){
+// ╔══════════════════════════════╗
+// ║       DASHBOARD              ║
+// ╚══════════════════════════════╝
+function renderDashboard(){
+    const hoje=new Date();
+    const mesMes=hoje.getMonth(),anoMes=hoje.getFullYear();
+    const receitaMes=recibos.filter(r=>{
+        const d=new Date(r.data+'T12:00:00');
+        return d.getMonth()===mesMes&&d.getFullYear()===anoMes;
+    }).reduce((s,r)=>s+parseFloat(r.valor||0),0);
+    const totalRecibos=recibos.reduce((s,r)=>s+parseFloat(r.valor||0),0);
+    const ticket=recibos.length?totalRecibos/recibos.length:0;
+    const pendentes=orcamentos.filter(o=>!o.status||o.status==='pendente').length;
+    const aceitos=orcamentos.filter(o=>o.status==='aceito').length;
+
+    document.getElementById('d-recibos').textContent=recibos.length;
+    document.getElementById('d-orcamentos').textContent=orcamentos.length;
+    document.getElementById('d-clientes').textContent=clientes.length;
+    document.getElementById('d-receita').textContent=fmtMShort(receitaMes);
+    document.getElementById('d-pendentes').textContent=pendentes;
+    document.getElementById('d-aceitos').textContent=aceitos;
+    document.getElementById('d-total-recibos').textContent=fmtMShort(totalRecibos);
+    document.getElementById('d-ticket').textContent=fmtMShort(ticket);
+
+    // Últimos 5 recibos
+    const recent=recibos.slice(-5).reverse();
+    const dash=document.getElementById('dash-recibos-list');
+    if(!recent.length){dash.innerHTML=`<div class="empty-state"><i class="fas fa-file-alt"></i><p>Nenhum recibo ainda</p></div>`;return;}
+    dash.innerHTML=recent.map(r=>{
+        const c=clientes.find(x=>x.id===r.clienteId);
+        return`<div class="list-card red" onclick="verRecibo(${r.id})">
+            <div class="card-top">
+                <div>
+                    <div class="card-name">${c?c.nome:'(cliente)'}</div>
+                    <div class="card-sub"><i class="fas fa-calendar"></i>${fmtD(r.data)} ${r.modelo?'• '+r.modelo:''}</div>
+                </div>
+                <div style="font-family:Rajdhani,sans-serif;font-size:1.2rem;font-weight:700;color:var(--green);">${fmtM(r.valor)}</div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// ╔══════════════════════════════╗
+// ║    PAINEL FINANCEIRO         ║
+// ╚══════════════════════════════╝
+function getMesReceita(ano,mes){
     return recibos.filter(r=>{
         const d=new Date(r.data+'T12:00:00');
         return d.getFullYear()===ano&&d.getMonth()===mes;
     }).reduce((s,r)=>s+parseFloat(r.valor||0),0);
 }
 
-function renderizarPainelFinanceiro(){
+function renderPainelFinanceiro(){
     const hoje=new Date();
-    const mesAtual=hoje.getMonth(), anoAtual=hoje.getFullYear();
-    const diaAtual=hoje.getDate(), diasNoMes=new Date(anoAtual,mesAtual+1,0).getDate();
-    const receitaMesAtual=getReceitaMes(anoAtual,mesAtual);
-    const totalOrcamentos=calcularTotalOrcamento(orcamentos.flatMap(o=>o.itens));
+    const mesAtual=hoje.getMonth(),anoAtual=hoje.getFullYear();
+    const dia=hoje.getDate(),diasMes=new Date(anoAtual,mesAtual+1,0).getDate();
+    const receitaMes=getMesReceita(anoAtual,mesAtual);
+    const projecao=dia>0?(receitaMes/dia)*diasMes:0;
     const orcAceitos=orcamentos.filter(o=>o.status==='aceito');
     const orcPendentes=orcamentos.filter(o=>!o.status||o.status==='pendente');
-    const totalOrcAceito=orcAceitos.reduce((s,o)=>s+calcularTotalOrcamento(o.itens),0);
-    const totalOrcPendente=orcPendentes.reduce((s,o)=>s+calcularTotalOrcamento(o.itens),0);
-    const ticketMedio=recibos.length?recibos.reduce((s,r)=>s+parseFloat(r.valor||0),0)/recibos.length:0;
+    const totalAceito=orcAceitos.reduce((s,o)=>s+calcOrcTotal(o.itens),0);
+    const totalPendente=orcPendentes.reduce((s,o)=>s+calcOrcTotal(o.itens),0);
+    const ticket=recibos.length?recibos.reduce((s,r)=>s+parseFloat(r.valor||0),0)/recibos.length:0;
 
-    // Cards
-    document.getElementById('fin-cards-mes').innerHTML=`
-        <div class="fin-card verde"><div class="fin-card-icon">💰</div><div class="fin-card-label">Receita Realizada</div><div class="fin-card-value">${fmtMoeda(receitaMesAtual)}</div></div>
-        <div class="fin-card azul"><div class="fin-card-icon">📋</div><div class="fin-card-label">Orçamentos Aceitos</div><div class="fin-card-value">${fmtMoeda(totalOrcAceito)}</div></div>
-        <div class="fin-card laranja"><div class="fin-card-icon">⏳</div><div class="fin-card-label">Em Aberto</div><div class="fin-card-value">${fmtMoeda(totalOrcPendente)}</div></div>
-        <div class="fin-card verde"><div class="fin-card-icon">🎯</div><div class="fin-card-label">Ticket Médio</div><div class="fin-card-value">${fmtMoeda(ticketMedio)}</div></div>`;
-
-    // Progresso
-    const pct=Math.round((diaAtual/diasNoMes)*100);
-    document.getElementById('fin-progresso-label').textContent=pct+'%';
-    document.getElementById('fin-progresso-barra').style.width=pct+'%';
-    document.getElementById('fin-progresso-text').textContent=`Dia ${diaAtual} de ${diasNoMes} — ${diasNoMes-diaAtual} dias restantes`;
-
-    // Projeção
-    const projecaoRitmo=diaAtual>0?(receitaMesAtual/diaAtual)*diasNoMes:0;
-    const projecaoComAceitos=projecaoRitmo+totalOrcAceito;
-    function getMes(delta){ const d=new Date(anoAtual,mesAtual+delta,1); return {mes:d.getMonth(),ano:d.getFullYear(),nome:d.toLocaleString('pt-BR',{month:'short'})}; }
+    function getMes(delta){const d=new Date(anoAtual,mesAtual+delta,1);return{mes:d.getMonth(),ano:d.getFullYear(),nome:d.toLocaleString('pt-BR',{month:'short'})};}
     const m3=getMes(-3),m2=getMes(-2),m1=getMes(-1);
-    const r3=getReceitaMes(m3.ano,m3.mes),r2=getReceitaMes(m2.ano,m2.mes),r1=getReceitaMes(m1.ano,m1.mes);
-    const mediaUltimos3=(r3+r2+r1)/3||1;
-    const projecaoHistorica=mediaUltimos3;
-    document.getElementById('fin-projecao-grid').innerHTML=`
-        <div class="fin-proj-item"><div class="val">${fmtMoeda(projecaoRitmo)}</div><div class="lab">Projeção pelo ritmo atual</div></div>
-        <div class="fin-proj-item"><div class="val">${fmtMoeda(projecaoHistorica)}</div><div class="lab">Média histórica (3 meses)</div></div>
-        <div class="fin-proj-item"><div class="val">${fmtMoeda(projecaoComAceitos)}</div><div class="lab">Com orçamentos aceitos</div></div>`;
+    const r3=getMesReceita(m3.ano,m3.mes),r2=getMesReceita(m2.ano,m2.mes),r1=getMesReceita(m1.ano,m1.mes);
+    const media=(r3+r2+r1)/3||1;
 
-    // Alerta tendência
-    let alertaHTML='';
-    if(diaAtual<5) alertaHTML=`<div class="fin-alerta info"><i class="fas fa-info-circle"></i><span>Início do mês — a projeção ficará mais precisa ao longo do mês.</span></div>`;
-    else if(projecaoRitmo>=mediaUltimos3*1.1) alertaHTML=`<div class="fin-alerta sucesso"><i class="fas fa-arrow-trend-up"></i><span><strong>Acima da média!</strong> Ritmo <strong>${Math.round((projecaoRitmo/mediaUltimos3-1)*100)}% superior</strong> à média histórica. Excelente momento!</span></div>`;
-    else if(projecaoRitmo<mediaUltimos3*0.7) alertaHTML=`<div class="fin-alerta perigo"><i class="fas fa-exclamation-triangle"></i><span><strong>Atenção:</strong> Ritmo <strong>${Math.round((1-projecaoRitmo/mediaUltimos3)*100)}% abaixo</strong> da média histórica. Intensifique as prospecções.</span></div>`;
-    else alertaHTML=`<div class="fin-alerta sucesso"><i class="fas fa-check-circle"></i><span>Você está no ritmo esperado para o mês. Continue assim!</span></div>`;
-    document.getElementById('fin-alerta-tendencia').innerHTML=alertaHTML;
+    let alerta='';
+    if(dia<5) alerta=`<div class="fin-alerta info"><i class="fas fa-info-circle"></i><span>Início do mês — projeção ficará mais precisa ao longo do mês.</span></div>`;
+    else if(projecao>=media*1.1) alerta=`<div class="fin-alerta sucesso"><i class="fas fa-arrow-trend-up"></i><span><strong>Acima da média!</strong> Ritmo ${Math.round((projecao/media-1)*100)}% superior à média histórica.</span></div>`;
+    else if(projecao<media*0.7) alerta=`<div class="fin-alerta perigo"><i class="fas fa-exclamation-triangle"></i><span><strong>Atenção:</strong> Ritmo ${Math.round((1-projecao/media)*100)}% abaixo da média histórica.</span></div>`;
+    else alerta=`<div class="fin-alerta sucesso"><i class="fas fa-check-circle"></i><span>Você está no ritmo esperado para o mês!</span></div>`;
 
-    // Gráfico
-    const vals=[r3,r2,r1,receitaMesAtual], maxVal=Math.max(...vals,1);
-    document.getElementById('fin-grafico-meses').innerHTML=[m3,m2,m1,{nome:'Atual'}].map((m,i)=>{
-        const h=Math.max(6,Math.round((vals[i]/maxVal)*70));
+    const pct=Math.round((dia/diasMes)*100);
+    const vals=[r3,r2,r1,receitaMes],maxV=Math.max(...vals,1);
+    const barras=[m3,m2,m1,{nome:'Atual'}].map((m,i)=>{
+        const h=Math.max(6,Math.round((vals[i]/maxV)*62));
         const cor=i===3?'var(--green)':'var(--blue)';
-        return `<div class="fin-barra-mes" title="${m.nome}: ${fmtMoeda(vals[i])}">
-            <div class="fin-barra-mes-val">${fmtMoeda(vals[i])}</div>
-            <div class="fin-barra-mes-fill" style="height:${h}px;background:${cor};"></div>
-            <div class="fin-barra-mes-label">${m.nome}</div>
-        </div>`;
+        return`<div class="fin-bar-mes"><div class="fin-bar-val" style="font-size:.55rem;color:#666;">${fmtMShort(vals[i])}</div><div class="fin-bar-fill" style="height:${h}px;background:${cor};width:100%;border-radius:3px 3px 0 0;"></div><div class="fin-bar-label">${m.nome}</div></div>`;
     }).join('');
 
-    // Orçamentos abertos
     const orcAbertos=orcamentos.filter(o=>!o.status||o.status==='pendente'||o.status==='aceito');
-    const tbody=document.getElementById('fin-orc-abertos-body');
-    tbody.innerHTML='';
-    if(!orcAbertos.length){
-        tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:#999;">Nenhum orçamento em aberto</td></tr>';
-    } else {
-        orcAbertos.forEach(orc=>{
-            const t=calcularTotalOrcamento(orc.itens);
-            const s=orc.status||'pendente';
-            const tr=document.createElement('tr');
-            tr.innerHTML=`
-                <td>#${orc.id}</td>
-                <td>${orc.empresa}</td>
-                <td style="font-weight:700;">${fmtMoeda(t)}</td>
-                <td>${fmtData(orc.data)}</td>
-                <td><span class="status-badge status-${s}">${s.charAt(0).toUpperCase()+s.slice(1)}</span></td>
-                <td><select class="fin-orc-status-sel" onchange="alterarStatusOrcamento(${orc.id},this.value)">
-                    <option value="pendente" ${s==='pendente'?'selected':''}>Pendente</option>
-                    <option value="aceito" ${s==='aceito'?'selected':''}>Aceito</option>
-                    <option value="recusado" ${s==='recusado'?'selected':''}>Recusado</option>
-                </select></td>`;
-            tbody.appendChild(tr);
-        });
-    }
-    const totalAberto=orcAbertos.reduce((s,o)=>s+calcularTotalOrcamento(o.itens),0);
-    document.getElementById('fin-orc-abertos-total').innerHTML=`Total em aberto: <strong>${fmtMoeda(totalAberto)}</strong> — Aceitos: <strong style="color:var(--green)">${fmtMoeda(totalOrcAceito)}</strong> — Pendentes: <strong style="color:var(--orange)">${fmtMoeda(totalOrcPendente)}</strong>`;
+    const orcRows=orcAbertos.length
+        ?orcAbertos.map(o=>{
+            const t=calcOrcTotal(o.itens);const s=o.status||'pendente';
+            return`<div class="fin-orc-row">
+                <div>
+                    <div style="font-weight:700;font-size:.85rem;">#${o.id} — ${o.empresa}</div>
+                    <div style="font-size:.75rem;color:var(--muted);">${fmtD(o.data)}</div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-weight:700;font-size:.9rem;color:var(--blue);">${fmtM(t)}</div>
+                    <select style="font-size:.72rem;border:1px solid var(--border);border-radius:6px;padding:3px 6px;margin-top:3px;" onchange="alterarStatusOrc(${o.id},this.value)">
+                        <option value="pendente" ${s==='pendente'?'selected':''}>Pendente</option>
+                        <option value="aceito" ${s==='aceito'?'selected':''}>Aceito</option>
+                        <option value="recusado" ${s==='recusado'?'selected':''}>Recusado</option>
+                    </select>
+                </div>
+            </div>`;}).join('')
+        :'<p style="color:#aaa;font-size:.82rem;text-align:center;padding:12px 0;">Nenhum orçamento em aberto</p>';
 
-    // Capitalização
-    const alertaCapHTML=receitaMesAtual>0
-        ?`<div class="fin-alerta sucesso"><i class="fas fa-piggy-bank"></i><span>Receita realizada: <strong>${fmtMoeda(receitaMesAtual)}</strong>. Configure os percentuais abaixo para calcular os aportes sugeridos.</span></div>`
-        :`<div class="fin-alerta info"><i class="fas fa-info-circle"></i><span>Registre recibos para receber recomendações de capitalização.</span></div>`;
-    document.getElementById('fin-alerta-cap').innerHTML=alertaCapHTML;
-    atualizarCapitalizacao();
-}
-
-function atualizarCapitalizacao(){
-    const hoje=new Date();
-    const receitaMes=getReceitaMes(hoje.getFullYear(),hoje.getMonth());
-    const pctRes=parseInt(document.getElementById('slider-reserva').value);
-    const pctCap=parseInt(document.getElementById('slider-capital').value);
-    document.getElementById('val-reserva').textContent=pctRes+'%';
-    document.getElementById('val-capital').textContent=pctCap+'%';
-    const vRes=receitaMes*pctRes/100, vCap=receitaMes*pctCap/100;
-    const total=vRes+vCap, restante=receitaMes-total;
-    const pctTotal=Math.min(100,pctRes+pctCap);
-    let cap=JSON.parse(localStorage.getItem('capitalizacao'))||{reserva:0,capital:0};
-    document.getElementById('fin-cap-grid').innerHTML=`
-        <div class="fin-cap-card reserva">
-            <h4>🛡️ Reserva de Emergência</h4>
-            <p style="font-size:0.82em;color:#555;line-height:1.5;margin-bottom:8px;">Protege o negócio em meses com baixa receita.</p>
-            <div class="fin-cap-valor">${fmtMoeda(vRes)}</div>
-            <div style="font-size:0.75em;color:#777;">Sugerido este mês (${pctRes}%)</div>
-            <div style="font-size:0.73em;color:#999;margin-top:4px;">Acumulado: ${fmtMoeda(cap.reserva)}</div>
-            <button onclick="registrarAporte('reserva',${vRes})" style="margin-top:8px;padding:6px 12px;background:var(--orange);color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:0.8em;font-weight:700;">✔ Registrar Aporte</button>
+    document.getElementById('fin-content').innerHTML=`
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+            <div class="fin-card verde"><div class="fin-card-label">Receita do Mês</div><div class="fin-card-value">${fmtM(receitaMes)}</div></div>
+            <div class="fin-card azul"><div class="fin-card-label">Aceitos</div><div class="fin-card-value">${fmtM(totalAceito)}</div></div>
+            <div class="fin-card laranja"><div class="fin-card-label">Em Aberto</div><div class="fin-card-value">${fmtM(totalPendente)}</div></div>
+            <div class="fin-card verde"><div class="fin-card-label">Ticket Médio</div><div class="fin-card-value">${fmtM(ticket)}</div></div>
         </div>
-        <div class="fin-cap-card capital">
-            <h4>🔄 Capital de Giro</h4>
-            <p style="font-size:0.82em;color:#555;line-height:1.5;margin-bottom:8px;">Garante a continuidade das operações.</p>
-            <div class="fin-cap-valor">${fmtMoeda(vCap)}</div>
-            <div style="font-size:0.75em;color:#777;">Sugerido este mês (${pctCap}%)</div>
-            <div style="font-size:0.73em;color:#999;margin-top:4px;">Acumulado: ${fmtMoeda(cap.capital)}</div>
-            <button onclick="registrarAporte('capital',${vCap})" style="margin-top:8px;padding:6px 12px;background:var(--blue);color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:0.8em;font-weight:700;">✔ Registrar Aporte</button>
-        </div>`;
-    let conselho='';
-    if(receitaMes>0){
-        if(pctTotal>50) conselho=`<div class="fin-alerta aviso"><i class="fas fa-exclamation-circle"></i><span>Você está alocando <strong>${pctTotal}%</strong> em aportes. Certifique-se que o restante <strong>(${fmtMoeda(restante)})</strong> cobre os custos operacionais.</span></div>`;
-        else if(pctTotal<10) conselho=`<div class="fin-alerta aviso"><i class="fas fa-lightbulb"></i><span>Percentual de aporte baixo. Recomenda-se pelo menos <strong>20-30%</strong> da receita.</span></div>`;
-        else conselho=`<div class="fin-alerta sucesso"><i class="fas fa-check-circle"></i><span>Boa estratégia! Destinando <strong>${pctTotal}%</strong> (${fmtMoeda(total)}) para capitalização, sobrando <strong>${fmtMoeda(restante)}</strong> para operações.</span></div>`;
-    }
-    document.getElementById('fin-cap-conselho').innerHTML=conselho;
+
+        <div style="margin-bottom:6px;display:flex;justify-content:space-between;font-size:.75rem;color:var(--muted);">
+            <span>Progresso do mês</span><span>${pct}%</span>
+        </div>
+        <div style="background:#e4e4e7;border-radius:99px;height:10px;overflow:hidden;margin-bottom:14px;">
+            <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--red),#ff4444);border-radius:99px;transition:width .8s;"></div>
+        </div>
+
+        <div class="fin-proj">
+            <h3><i class="fas fa-chart-bar"></i> Projeção para o Final do Mês</h3>
+            <div class="fin-proj-grid">
+                <div class="fin-proj-item"><div class="val">${fmtM(projecao)}</div><div class="lab">Pelo ritmo atual</div></div>
+                <div class="fin-proj-item"><div class="val">${fmtM(media)}</div><div class="lab">Média histórica</div></div>
+                <div class="fin-proj-item"><div class="val">${fmtM(projecao+totalAceito)}</div><div class="lab">Com aceitos</div></div>
+            </div>
+        </div>
+        ${alerta}
+
+        <div style="font-size:.88rem;font-weight:700;border-bottom:2px solid var(--border);padding-bottom:6px;margin:16px 0 8px;display:flex;align-items:center;gap:6px;"><i class="fas fa-history" style="color:var(--green)"></i> Últimos 4 Meses</div>
+        <div class="fin-graph">${barras}</div>
+
+        <div style="font-size:.88rem;font-weight:700;border-bottom:2px solid var(--border);padding-bottom:6px;margin:16px 0 8px;display:flex;align-items:center;gap:6px;"><i class="fas fa-file-invoice-dollar" style="color:var(--blue)"></i> Orçamentos em Aberto</div>
+        ${orcRows}
+        <div style="font-size:.78rem;color:var(--muted);margin-top:8px;">Aceitos: <strong style="color:var(--green)">${fmtM(totalAceito)}</strong> — Pendentes: <strong style="color:var(--orange)">${fmtM(totalPendente)}</strong></div>
+
+        <div style="font-size:.88rem;font-weight:700;border-bottom:2px solid var(--border);padding-bottom:6px;margin:16px 0 8px;display:flex;align-items:center;gap:6px;"><i class="fas fa-piggy-bank" style="color:var(--orange)"></i> Capitalização</div>
+        <div id="fin-slider-area">
+            <div style="background:#fafafa;border-radius:10px;padding:12px;border:1px solid var(--border);">
+                <label style="font-size:.78rem;font-weight:700;color:var(--orange);">🛡️ Reserva de Emergência (recomendado 10-20%)</label>
+                <div class="slider-row"><input type="range" id="sl-res" min="0" max="40" value="15" step="1" oninput="calcCapitalizacao()"><span id="vl-res">15%</span></div>
+                <label style="font-size:.78rem;font-weight:700;color:var(--blue);">🔄 Capital de Giro (recomendado 10-30%)</label>
+                <div class="slider-row"><input type="range" id="sl-cap" min="0" max="50" value="20" step="1" oninput="calcCapitalizacao()"><span id="vl-cap">20%</span></div>
+            </div>
+        </div>
+        <div class="fin-cap-grid" id="fin-cap-grid"></div>
+        <div id="fin-cap-conselho" style="margin-top:10px;"></div>`;
+
+    calcCapitalizacao();
 }
 
+function calcCapitalizacao(){
+    const hoje=new Date();
+    const rec=getMesReceita(hoje.getFullYear(),hoje.getMonth());
+    const pRes=parseInt(document.getElementById('sl-res')?.value||15);
+    const pCap=parseInt(document.getElementById('sl-cap')?.value||20);
+    if(document.getElementById('vl-res')) document.getElementById('vl-res').textContent=pRes+'%';
+    if(document.getElementById('vl-cap')) document.getElementById('vl-cap').textContent=pCap+'%';
+    const vRes=rec*pRes/100,vCap=rec*pCap/100;
+    const total=vRes+vCap,pTotal=Math.min(100,pRes+pCap);
+    let cap=JSON.parse(localStorage.getItem('capitalizacao'))||{reserva:0,capital:0};
+    const grid=document.getElementById('fin-cap-grid');
+    if(!grid)return;
+    grid.innerHTML=`
+        <div class="fin-cap-card res">
+            <h4>🛡️ Reserva</h4>
+            <div class="fin-cap-val">${fmtM(vRes)}</div>
+            <div style="font-size:.72rem;color:#777;">Sugerido (${pRes}%)</div>
+            <div style="font-size:.7rem;color:#aaa;margin-top:3px;">Acumulado: ${fmtM(cap.reserva)}</div>
+            <button onclick="registrarAporte('reserva',${vRes})" style="margin-top:7px;padding:5px 10px;background:var(--orange);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:.72rem;font-weight:700;width:100%;">✔ Registrar</button>
+        </div>
+        <div class="fin-cap-card cap">
+            <h4>🔄 Capital</h4>
+            <div class="fin-cap-val">${fmtM(vCap)}</div>
+            <div style="font-size:.72rem;color:#777;">Sugerido (${pCap}%)</div>
+            <div style="font-size:.7rem;color:#aaa;margin-top:3px;">Acumulado: ${fmtM(cap.capital)}</div>
+            <button onclick="registrarAporte('capital',${vCap})" style="margin-top:7px;padding:5px 10px;background:var(--blue);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:.72rem;font-weight:700;width:100%;">✔ Registrar</button>
+        </div>`;
+    const conselho=document.getElementById('fin-cap-conselho');
+    if(!conselho)return;
+    let msg='';
+    if(rec>0){
+        if(pTotal>50) msg=`<div class="fin-alerta aviso"><i class="fas fa-exclamation-circle"></i><span>Alocando <strong>${pTotal}%</strong> em aportes. Verifique se o restante cobre os custos.</span></div>`;
+        else if(pTotal<10) msg=`<div class="fin-alerta aviso"><i class="fas fa-lightbulb"></i><span>Percentual baixo. Recomenda-se pelo menos <strong>20-30%</strong>.</span></div>`;
+        else msg=`<div class="fin-alerta sucesso"><i class="fas fa-check-circle"></i><span>Boa estratégia! Destinando <strong>${pTotal}%</strong> para capitalização.</span></div>`;
+    }
+    conselho.innerHTML=msg;
+}
 function registrarAporte(tipo,valor){
     let cap=JSON.parse(localStorage.getItem('capitalizacao'))||{reserva:0,capital:0};
     cap[tipo]=(cap[tipo]||0)+valor;
     localStorage.setItem('capitalizacao',JSON.stringify(cap));
-    alert(`Aporte de ${fmtMoeda(valor)} registrado em ${tipo==='reserva'?'Reserva de Emergência':'Capital de Giro'}!`);
-    atualizarCapitalizacao();
+    toast(`Aporte de ${fmtM(valor)} registrado! 💰`);
+    calcCapitalizacao();
 }
 
-document.getElementById('btn-painel-financeiro').addEventListener('click',()=>{
-    renderizarPainelFinanceiro();
-    abrirModal(document.getElementById('modal-financeiro'));
-});
-
-// ╔══════════════════════════════════════════════════════╗
-// ║                      INIT                            ║
-// ╚══════════════════════════════════════════════════════╝
-carregarConfiguracoes();
-renderizarClientes();
-renderizarRecibos();
-renderizarOrcamentos();
+// ╔══════════════════════════════╗
+// ║         INIT                 ║
+// ╚══════════════════════════════╝
+applyBrand();
+populateClienteSelect();
+renderDashboard();
 </script>
 </body>
 </html>
