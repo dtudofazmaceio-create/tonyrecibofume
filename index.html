@@ -140,6 +140,71 @@ textarea.form-control{min-height:80px;resize:vertical;}
 .orc-loc{text-align:right;font-size:11px;color:#555;margin-bottom:22px;}
 .orc-ass .linha{border-top:1px solid #333;width:200px;margin:22px 0 4px;}
 .orc-ass p{font-size:11px;margin:2px 0;}
+
+/* ============================================================
+   TEMPLATES PROFISSIONAIS PARA PDF (renderizados fora da tela,
+   em tamanho real de página — independentes do preview mobile)
+   ============================================================ */
+.pdfdoc-recibo{width:148mm;min-height:210mm;background:#fff;font-family:'Inter',sans-serif;color:#1a1a1a;position:relative;box-sizing:border-box;}
+.pdfr-topbar{background:var(--dark);color:#fff;padding:9mm 10mm 7mm;display:flex;justify-content:space-between;align-items:center;border-bottom:1.2mm solid var(--red);box-sizing:border-box;}
+.pdfr-brand{display:flex;align-items:center;gap:3mm;}
+.pdfr-brand img{max-height:14mm;max-width:26mm;object-fit:contain;background:#fff;border-radius:1mm;padding:1mm;}
+.pdfr-brand-name{font-family:'Rajdhani',sans-serif;font-size:15pt;font-weight:700;letter-spacing:.4px;}
+.pdfr-doctype{text-align:right;}
+.pdfr-doctype .lab{font-family:'Rajdhani',sans-serif;font-size:12.5pt;font-weight:700;color:#ff5c5c;letter-spacing:2px;}
+.pdfr-doctype .num{font-size:8pt;color:#999;margin-top:1mm;}
+.pdfr-body{padding:9mm 10mm 30mm;box-sizing:border-box;}
+.pdfr-grid{display:grid;grid-template-columns:1fr 1fr;gap:4mm;margin-bottom:5mm;}
+.pdfr-box{background:#f7f7f8;border:.25mm solid #e8e8e8;border-radius:1.5mm;padding:3mm 4mm;box-sizing:border-box;}
+.pdfr-box h4{font-size:7pt;text-transform:uppercase;letter-spacing:.6px;color:#8a8a8f;margin:0 0 1.2mm;font-weight:700;}
+.pdfr-box p{font-size:10pt;font-weight:600;color:#1a1a1a;margin:0;line-height:1.35;}
+.pdfr-servico{background:#f7f7f8;border:.25mm solid #e8e8e8;border-radius:1.5mm;padding:3.5mm 4mm;margin-bottom:5mm;box-sizing:border-box;}
+.pdfr-servico p{font-size:9.5pt;font-weight:400;line-height:1.5;color:#333;margin:0;}
+.pdfr-valor{background:var(--red-soft);border:.25mm solid #ffd2d2;border-radius:2mm;padding:5mm;text-align:center;margin-bottom:9mm;box-sizing:border-box;}
+.pdfr-valor h4{font-size:7.5pt;text-transform:uppercase;letter-spacing:1px;color:var(--red-dark);font-weight:700;margin:0 0 2mm;}
+.pdfr-valor .val{font-family:'Rajdhani',sans-serif;font-size:21pt;font-weight:700;color:var(--red);}
+.pdfr-sign{text-align:center;margin:11mm 0 4mm;}
+.pdfr-sign .linha{border-top:.3mm solid #999;width:70mm;margin:0 auto 2.5mm;}
+.pdfr-sign p{font-size:9pt;color:#555;margin:0;}
+.pdfr-sign p strong{color:#1a1a1a;}
+.pdfr-footer{position:absolute;left:0;right:0;bottom:0;background:var(--dark);color:#fff;padding:5mm 10mm;text-align:center;box-sizing:border-box;}
+.pdfr-footer p{font-size:8pt;margin:0 0 .8mm;color:#eee;}
+.pdfr-footer .contacts{display:flex;justify-content:center;gap:5mm;margin-top:1.5mm;font-size:7.8pt;color:#bbb;}
+.pdfr-footer .contacts span{display:flex;align-items:center;gap:1.3mm;}
+
+.pdfdoc-orc{width:210mm;background:#fff;font-family:'Inter',sans-serif;color:#1a1a1a;box-sizing:border-box;}
+.pdfo-topbar{background:var(--dark);color:#fff;padding:11mm 14mm 9mm;display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1.3mm solid var(--red);box-sizing:border-box;}
+.pdfo-brand{display:flex;align-items:center;gap:4mm;}
+.pdfo-brand img{max-height:16mm;max-width:34mm;object-fit:contain;background:#fff;border-radius:1mm;padding:1.2mm;}
+.pdfo-brand-info .name{font-family:'Rajdhani',sans-serif;font-size:18pt;font-weight:700;letter-spacing:.3px;}
+.pdfo-brand-info .sub{font-size:8pt;color:#aaa;margin-top:1mm;}
+.pdfo-doctype{text-align:right;}
+.pdfo-doctype .lab{font-family:'Rajdhani',sans-serif;font-size:14.5pt;font-weight:700;color:#ff5c5c;letter-spacing:2px;}
+.pdfo-doctype .num{font-size:8pt;color:#ccc;margin-top:1.5mm;}
+.pdfo-doctype .data{font-size:8pt;color:#ccc;margin-top:.5mm;}
+.pdfo-body{padding:10mm 14mm 12mm;box-sizing:border-box;}
+.pdfo-intro{font-size:10pt;line-height:1.6;color:#333;margin-bottom:6mm;text-align:justify;}
+.pdfo-infogrid{display:grid;grid-template-columns:1fr 1fr;gap:5mm;margin-bottom:7mm;}
+.pdfo-infobox{background:#f5f7fb;border-left:1mm solid var(--blue);border-radius:0 1.5mm 1.5mm 0;padding:4mm 5mm;box-sizing:border-box;}
+.pdfo-infobox h4{font-size:7.5pt;text-transform:uppercase;letter-spacing:.6px;color:var(--blue);font-weight:700;margin:0 0 1.8mm;}
+.pdfo-infobox p{font-size:9.5pt;color:#222;margin:.6mm 0;}
+.pdfo-tbl-wrap{border:.3mm solid #e0e0e0;border-radius:1.5mm;overflow:hidden;margin-bottom:6mm;}
+.pdfo-tbl{width:100%;border-collapse:collapse;}
+.pdfo-tbl thead th{background:var(--dark);color:#fff;font-size:8.3pt;text-transform:uppercase;letter-spacing:.5px;padding:3.8mm 4mm;text-align:left;font-weight:700;}
+.pdfo-tbl thead th.r{text-align:right;} .pdfo-tbl thead th.c{text-align:center;}
+.pdfo-tbl tbody td{font-size:9.5pt;padding:3.6mm 4mm;border-top:.25mm solid #eee;color:#222;vertical-align:top;}
+.pdfo-tbl tbody tr:nth-child(even){background:#fafafa;}
+.pdfo-tbl tfoot td{background:var(--blue-light);font-weight:700;font-size:10.5pt;color:var(--blue);padding:4.2mm;border-top:.5mm solid var(--blue);}
+.pdfo-obs{font-size:9.5pt;line-height:1.5;background:#fffbf0;border-left:1mm solid var(--orange);border-radius:0 1.5mm 1.5mm 0;padding:3.6mm 5mm;margin-bottom:6mm;color:#333;box-sizing:border-box;}
+.pdfo-pag{font-size:9.5pt;line-height:1.75;margin-bottom:9mm;color:#333;}
+.pdfo-loc{text-align:right;font-size:9.5pt;color:#555;margin-bottom:15mm;}
+.pdfo-sign{margin-top:2mm;}
+.pdfo-sign .linha{border-top:.3mm solid #333;width:72mm;margin-bottom:2.5mm;}
+.pdfo-sign p{font-size:9.5pt;margin:.6mm 0;color:#222;}
+.pdfo-sign p.role{color:#777;font-size:8.8pt;}
+.pdfo-footer{margin-top:11mm;border-top:.3mm solid #eee;padding-top:4mm;display:flex;justify-content:space-between;align-items:center;font-size:8pt;color:#999;}
+.pdfo-footer .fcontacts{display:flex;gap:5mm;}
+.pdfo-footer .fcontacts span{display:flex;align-items:center;gap:1.3mm;}
 .s-badge{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:99px;font-size:.68rem;font-weight:700;}
 .s-pendente{background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;}
 .s-aceito{background:var(--green-light);color:var(--green);border:1px solid #bbf7d0;}
@@ -200,6 +265,8 @@ textarea.form-control{min-height:80px;resize:vertical;}
 </header>
 
 <div class="toast" id="toast"><i class="fas fa-check-circle" style="color:var(--red)"></i> <span id="toast-msg">OK!</span></div>
+
+<div id="pdf-render-zone" style="position:fixed;top:0;left:-99999px;z-index:-1;"></div>
 
 <main>
   <div id="view-dashboard" class="view active">
@@ -751,7 +818,46 @@ function buildReciboHTML(r){
     </div>`;
 }
 
-let CURRENT_RECIBO_ID = null;
+function buildReciboPrintHTML(r){
+  const cli = CLIENTES.find(c => c.id === r.clienteId);
+  const nomeCliente = cli ? cli.nome : 'Cliente';
+  const logoImg = CONFIG.logo ? `<img src="${CONFIG.logo}" alt="logo">` : '';
+  const veiculoInfo = (r.modelo || r.placa) ? `${escapeHtml(r.modelo||'')}${r.placa ? ' • '+escapeHtml(r.placa):''}` : '—';
+  const peliculaInfo = r.pelicula ? escapeHtml(r.pelicula) : '—';
+  const numDoc = String(r.id||'').slice(-6);
+  return `
+    <div class="pdfdoc-recibo">
+      <div class="pdfr-topbar">
+        <div class="pdfr-brand">${logoImg}<div class="pdfr-brand-name">${escapeHtml(CONFIG.nome||'Tony Fumê')}</div></div>
+        <div class="pdfr-doctype"><div class="lab">RECIBO</div><div class="num">Nº ${numDoc} • ${fmtDate(r.data)}</div></div>
+      </div>
+      <div class="pdfr-body">
+        <div class="pdfr-grid">
+          <div class="pdfr-box"><h4>Cliente</h4><p>${escapeHtml(nomeCliente)}</p></div>
+          <div class="pdfr-box"><h4>Data</h4><p>${fmtDate(r.data)}</p></div>
+          <div class="pdfr-box"><h4>Veículo</h4><p>${veiculoInfo}</p></div>
+          <div class="pdfr-box"><h4>Película</h4><p>${peliculaInfo}</p></div>
+        </div>
+        <div class="pdfr-servico"><h4 style="font-size:7pt;text-transform:uppercase;letter-spacing:.6px;color:#8a8a8f;font-weight:700;margin:0 0 1.5mm;">Serviço Realizado</h4><p>${escapeHtml(r.servico||'—')}</p></div>
+        <div class="pdfr-valor"><h4>Valor Total Recebido</h4><div class="val">${fmtMoney(r.valor)}</div></div>
+        <div class="pdfr-sign">
+          <div class="linha"></div>
+          <p><strong>${escapeHtml(CONFIG.responsavel || CONFIG.nome || '')}</strong></p>
+          <p>Assinatura do responsável</p>
+        </div>
+      </div>
+      <div class="pdfr-footer">
+        <p><strong>${escapeHtml(CONFIG.nome||'')}</strong>${CONFIG.cnpj ? ' — '+escapeHtml(CONFIG.cnpj) : ''}</p>
+        ${CONFIG.endereco ? `<p>${escapeHtml(CONFIG.endereco)}</p>` : ''}
+        <div class="contacts">
+          ${CONFIG.whatsapp ? `<span><i class="fab fa-whatsapp"></i>${escapeHtml(CONFIG.whatsapp)}</span>`:''}
+          ${CONFIG.instagram ? `<span><i class="fab fa-instagram"></i>${escapeHtml(CONFIG.instagram)}</span>`:''}
+        </div>
+      </div>
+    </div>`;
+}
+
+
 function verRecibo(id){
   const r = RECIBOS.find(x => x.id === id);
   if (!r) return;
@@ -761,10 +867,16 @@ function verRecibo(id){
 }
 
 async function exportReciboPDF(){
+  const zone = document.getElementById('pdf-render-zone');
   try {
+    const r = RECIBOS.find(x => x.id === CURRENT_RECIBO_ID);
+    if (!r){ alert('Recibo não encontrado.'); return; }
     const { jsPDF } = window.jspdf;
-    const el = document.getElementById('recibo-content');
-    const canvas = await html2canvas(el, { scale:2.5, useCORS:true, backgroundColor:'#ffffff' });
+    zone.innerHTML = buildReciboPrintHTML(r);
+    const el = zone.querySelector('.pdfdoc-recibo');
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    await new Promise(res => setTimeout(res, 50));
+    const canvas = await html2canvas(el, { scale:3, useCORS:true, backgroundColor:'#ffffff', width:el.offsetWidth, windowWidth:el.offsetWidth });
     const pdf = new jsPDF('p','mm','a5');
     const pageW = pdf.internal.pageSize.getWidth();
     const pageH = pdf.internal.pageSize.getHeight();
@@ -788,6 +900,8 @@ async function exportReciboPDF(){
   } catch (err){
     console.error('Erro ao gerar PDF do recibo:', err);
     alert('Erro ao gerar o PDF: ' + err.message);
+  } finally {
+    zone.innerHTML = '';
   }
 }
 
@@ -1010,7 +1124,61 @@ function buildOrcamentoHTML(o){
     </div>`;
 }
 
-let CURRENT_ORC_ID = null;
+function buildOrcamentoPrintHTML(o){
+  const total = (o.itens||[]).reduce((s,it) => s + (parseFloat(it.valor)||0), 0);
+  const logoImg = CONFIG.logo ? `<img src="${CONFIG.logo}" alt="logo">` : '';
+  const numDoc = String(o.id||'').slice(-6);
+  const linhas = (o.itens||[]).map(it => `
+    <tr>
+      <td>${escapeHtml(it.descricao||'')}</td>
+      <td style="text-align:center;">${escapeHtml(it.garantia||'—')}</td>
+      <td style="text-align:right;font-weight:700;">${fmtMoney(it.valor)}</td>
+    </tr>`).join('');
+  const veiculoBox = (o.modelo || o.placa || o.pelicula) ? `
+    <div class="pdfo-infobox">
+      <h4>Veículo</h4>
+      ${(o.modelo||o.placa) ? `<p><strong>Modelo:</strong> ${escapeHtml(o.modelo||'')}${o.placa?' • '+escapeHtml(o.placa):''}</p>`:''}
+      ${o.pelicula ? `<p><strong>Película:</strong> ${escapeHtml(o.pelicula)}</p>`:''}
+    </div>` : `<div class="pdfo-infobox"><h4>Veículo</h4><p>—</p></div>`;
+  return `
+    <div class="pdfdoc-orc">
+      <div class="pdfo-topbar">
+        <div class="pdfo-brand">${logoImg}<div class="pdfo-brand-info"><div class="name">${escapeHtml(CONFIG.nome||'')}</div>${CONFIG.cnpj?`<div class="sub">${escapeHtml(CONFIG.cnpj)}</div>`:''}</div></div>
+        <div class="pdfo-doctype"><div class="lab">ORÇAMENTO</div><div class="num">Nº ${numDoc}</div><div class="data">${fmtDate(o.data)}</div></div>
+      </div>
+      <div class="pdfo-body">
+        <div class="pdfo-intro">Prezado(a) <strong>${escapeHtml(o.empresa||'')}</strong>, apresentamos abaixo o orçamento solicitado para o serviço de aplicação de película automotiva, com base nas especificações informadas.</div>
+        <div class="pdfo-infogrid">
+          <div class="pdfo-infobox"><h4>Solicitante</h4><p><strong>${escapeHtml(o.empresa||'')}</strong></p>${o.cnpjSolicitante ? `<p>CNPJ: ${escapeHtml(o.cnpjSolicitante)}</p>`:''}</div>
+          ${veiculoBox}
+        </div>
+        <div class="pdfo-tbl-wrap">
+          <table class="pdfo-tbl">
+            <thead><tr><th>Descrição</th><th class="c">Garantia</th><th class="r">Valor</th></tr></thead>
+            <tbody>${linhas}</tbody>
+            <tfoot><tr><td colspan="2">TOTAL</td><td style="text-align:right;">${fmtMoney(total)}</td></tr></tfoot>
+          </table>
+        </div>
+        ${o.obs ? `<div class="pdfo-obs"><strong>Observações:</strong> ${escapeHtml(o.obs)}</div>` : ''}
+        <div class="pdfo-pag"><strong>Forma de pagamento:</strong> ${escapeHtml(o.pagamento||'A combinar')}${CONFIG.pix?` — Pix: ${escapeHtml(CONFIG.pix)}`:''}<br><strong>Validade da proposta:</strong> ${o.validade||30} dias.</div>
+        <div class="pdfo-loc">${escapeHtml(o.cidade||'')}, ${fmtDateExtenso(o.data)}</div>
+        <div class="pdfo-sign">
+          <div class="linha"></div>
+          <p><strong>${escapeHtml(CONFIG.responsavel||CONFIG.nome||'')}</strong></p>
+          ${CONFIG.cargo ? `<p class="role">${escapeHtml(CONFIG.cargo)}</p>` : ''}
+        </div>
+        <div class="pdfo-footer">
+          <div><strong>${escapeHtml(CONFIG.nome||'')}</strong>${CONFIG.endereco ? ' — '+escapeHtml(CONFIG.endereco) : ''}</div>
+          <div class="fcontacts">
+            ${CONFIG.whatsapp ? `<span><i class="fab fa-whatsapp"></i>${escapeHtml(CONFIG.whatsapp)}</span>`:''}
+            ${CONFIG.instagram ? `<span><i class="fab fa-instagram"></i>${escapeHtml(CONFIG.instagram)}</span>`:''}
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+
 function verOrcamento(id){
   const o = ORCAMENTOS.find(x => x.id === id);
   if (!o) return;
@@ -1020,25 +1188,31 @@ function verOrcamento(id){
 }
 
 async function exportOrcamentoPDF(){
+  const zone = document.getElementById('pdf-render-zone');
   try {
+    const o = ORCAMENTOS.find(x => x.id === CURRENT_ORC_ID);
+    if (!o){ alert('Orçamento não encontrado.'); return; }
     const { jsPDF } = window.jspdf;
-    const el = document.getElementById('orc-preview-wrap');
-    const canvas = await html2canvas(el, { scale:2.5, useCORS:true, backgroundColor:'#ffffff' });
+    zone.innerHTML = buildOrcamentoPrintHTML(o);
+    const el = zone.querySelector('.pdfdoc-orc');
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    await new Promise(res => setTimeout(res, 50));
+    const canvas = await html2canvas(el, { scale:3, useCORS:true, backgroundColor:'#ffffff', width:el.offsetWidth, windowWidth:el.offsetWidth });
     const pdf = new jsPDF('p','mm','a4');
-    const margin = 8, pageW = pdf.internal.pageSize.getWidth() - margin*2;
-    const pageH = pdf.internal.pageSize.getHeight() - margin*2;
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
     const imgH = canvas.height * pageW / canvas.width;
     const imgData = canvas.toDataURL('image/png');
     if (imgH <= pageH){
-      pdf.addImage(imgData, 'PNG', margin, margin, pageW, imgH);
+      pdf.addImage(imgData, 'PNG', 0, 0, pageW, imgH);
     } else {
-      let heightLeft = imgH, position = margin;
-      pdf.addImage(imgData, 'PNG', margin, position, pageW, imgH);
+      let heightLeft = imgH, position = 0;
+      pdf.addImage(imgData, 'PNG', 0, position, pageW, imgH);
       heightLeft -= pageH;
       while (heightLeft > 0){
         position -= pageH;
         pdf.addPage();
-        pdf.addImage(imgData, 'PNG', margin, position, pageW, imgH);
+        pdf.addImage(imgData, 'PNG', 0, position, pageW, imgH);
         heightLeft -= pageH;
       }
     }
@@ -1047,6 +1221,8 @@ async function exportOrcamentoPDF(){
   } catch (err){
     console.error('Erro ao gerar PDF do orçamento:', err);
     alert('Erro ao gerar o PDF: ' + err.message);
+  } finally {
+    zone.innerHTML = '';
   }
 }
 
