@@ -858,6 +858,7 @@ function buildReciboPrintHTML(r){
 }
 
 
+let CURRENT_RECIBO_ID = null;
 function verRecibo(id){
   const r = RECIBOS.find(x => x.id === id);
   if (!r) return;
@@ -1179,6 +1180,7 @@ function buildOrcamentoPrintHTML(o){
 }
 
 
+let CURRENT_ORC_ID = null;
 function verOrcamento(id){
   const o = ORCAMENTOS.find(x => x.id === id);
   if (!o) return;
