@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -19,6 +20,7 @@
   --blue:#1a3a6b; --blue-light:#e8f0fb;
   --green:#0a6640; --green-light:#e8f5ee;
   --orange:#c97d00; --orange-light:#fff9ef;
+  --purple:#6d28d9; --purple-light:#f3ecfe;
   --safe-top:env(safe-area-inset-top); --safe-bottom:env(safe-area-inset-bottom);
   --header-h:calc(58px + var(--safe-top)); --nav-h:calc(62px + var(--safe-bottom));
   --r-lg:18px; --r-md:12px; --r-sm:8px;
@@ -49,12 +51,12 @@ main{flex:1;overflow-y:auto;padding-top:calc(var(--header-h) + 14px);padding-bot
 .stat-card.blue::before{background:var(--blue);} .stat-card.green::before{background:var(--green);} .stat-card.orange::before{background:var(--orange);}
 .stat-card:active{transform:scale(.97);}
 .stat-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.85rem;}
-.si-red{background:var(--red-soft);color:var(--red);} .si-blue{background:var(--blue-light);color:var(--blue);} .si-green{background:var(--green-light);color:var(--green);} .si-orange{background:var(--orange-light);color:var(--orange);} .si-dark{background:#f4f4f5;color:#333;}
+.si-red{background:var(--red-soft);color:var(--red);} .si-blue{background:var(--blue-light);color:var(--blue);} .si-green{background:var(--green-light);color:var(--green);} .si-orange{background:var(--orange-light);color:var(--orange);} .si-dark{background:#f4f4f5;color:#333;} .si-purple{background:var(--purple-light);color:var(--purple);}
 .stat-value{font-family:'Rajdhani',sans-serif;font-size:1.6rem;font-weight:700;color:var(--text);line-height:1;}
 .stat-label{font-size:.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;}
 .list-card{background:var(--surface);border-radius:var(--r-md);padding:14px;margin-bottom:10px;box-shadow:var(--shadow);border-left:4px solid transparent;cursor:pointer;transition:transform .2s;}
 .list-card:active{transform:scale(.98);}
-.list-card.red{border-left-color:var(--red);} .list-card.blue{border-left-color:var(--blue);} .list-card.green{border-left-color:var(--green);} .list-card.orange{border-left-color:var(--orange);}
+.list-card.red{border-left-color:var(--red);} .list-card.blue{border-left-color:var(--blue);} .list-card.green{border-left-color:var(--green);} .list-card.orange{border-left-color:var(--orange);} .list-card.purple{border-left-color:var(--purple);}
 .card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
 .card-name{font-weight:700;font-size:.95rem;color:var(--text);}
 .card-sub{font-size:.78rem;color:var(--muted);margin-top:2px;display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
@@ -94,6 +96,18 @@ textarea.form-control{min-height:80px;resize:vertical;}
 .filter-row{display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;padding-bottom:4px;}
 .chip{padding:7px 14px;border-radius:99px;border:1.5px solid var(--border);background:var(--surface);color:var(--muted);font-size:.78rem;font-weight:700;white-space:nowrap;cursor:pointer;transition:.2s;}
 .chip.active{background:var(--red);color:#fff;border-color:var(--red);}
+.chip.purple.active{background:var(--purple);border-color:var(--purple);}
+.tipo-toggle{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.tipo-opt{border:1.5px solid var(--border);background:#fafafa;border-radius:10px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;transition:.15s;}
+.tipo-opt i{font-size:1.15rem;color:var(--muted);}
+.tipo-opt span{font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;}
+.tipo-opt.active{border-color:var(--red);background:var(--red-soft);}
+.tipo-opt.active i, .tipo-opt.active span{color:var(--red);}
+.tipo-opt.residencial.active{border-color:var(--purple);background:var(--purple-light);}
+.tipo-opt.residencial.active i, .tipo-opt.residencial.active span{color:var(--purple);}
+.tipo-tag{font-size:.68rem;padding:3px 8px;border-radius:99px;font-weight:700;text-transform:uppercase;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;}
+.tipo-tag.automotivo{background:var(--red-soft);color:var(--red);}
+.tipo-tag.residencial{background:var(--purple-light);color:var(--purple);}
 .veiculo-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;background:#fafafa;border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;position:relative;}
 .veiculo-row .vr-full{grid-column:1/-1;}
 .veiculo-rm{position:absolute;top:8px;right:8px;background:var(--red-soft);color:var(--red);border:none;border-radius:6px;width:26px;height:26px;font-size:.8rem;display:flex;align-items:center;justify-content:center;cursor:pointer;}
@@ -219,6 +233,12 @@ textarea.form-control{min-height:80px;resize:vertical;}
 .fin-card.verde{background:var(--green-light);border:1px solid #bbf7d0;}
 .fin-card.azul{background:var(--blue-light);border:1px solid #bfdbfe;}
 .fin-card.laranja{background:var(--orange-light);border:1px solid #fcd34d;}
+.fin-card.roxo{background:var(--purple-light);border:1px solid #ddd6fe;}
+.fin-split{display:flex;gap:10px;margin:10px 0;}
+.fin-split-item{flex:1;background:#fafafa;border:1px solid var(--border);border-radius:10px;padding:10px 12px;}
+.fin-split-item .lab{font-size:.68rem;font-weight:700;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:5px;margin-bottom:4px;}
+.fin-split-item .val{font-family:'Rajdhani',sans-serif;font-size:1.15rem;font-weight:700;}
+.fin-split-bar{height:6px;border-radius:3px;background:var(--border);overflow:hidden;margin-top:6px;display:flex;}
 .fin-card-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:4px;}
 .fin-card-value{font-family:'Rajdhani',sans-serif;font-size:1.5rem;font-weight:700;color:var(--text);}
 .fin-proj{background:linear-gradient(135deg,var(--green),#1a7c50);color:#fff;border-radius:14px;padding:16px 18px;margin:14px 0;}
@@ -289,11 +309,21 @@ textarea.form-control{min-height:80px;resize:vertical;}
 
   <div id="view-recibos" class="view">
     <div class="search-wrap"><i class="fas fa-search search-icon"></i><input type="text" class="search-input" placeholder="Buscar recibos..." oninput="renderRecibos(this.value)"></div>
+    <div class="filter-row" id="filter-recibos">
+      <span class="chip active" onclick="filterRecibos('all',this)">Todos</span>
+      <span class="chip" onclick="filterRecibos('automotivo',this)"><i class="fas fa-car"></i> Automotivo</span>
+      <span class="chip purple" onclick="filterRecibos('residencial',this)"><i class="fas fa-home"></i> Residencial</span>
+    </div>
     <div id="recibos-list"></div>
   </div>
 
   <div id="view-orcamentos" class="view">
     <div class="search-wrap"><i class="fas fa-search search-icon"></i><input type="text" class="search-input" placeholder="Buscar orçamentos..." oninput="renderOrcamentos(this.value)"></div>
+    <div class="filter-row" id="filter-orc-tipo">
+      <span class="chip active" onclick="filterOrcTipo('all',this)">Todos</span>
+      <span class="chip" onclick="filterOrcTipo('automotivo',this)"><i class="fas fa-car"></i> Automotivo</span>
+      <span class="chip purple" onclick="filterOrcTipo('residencial',this)"><i class="fas fa-home"></i> Residencial</span>
+    </div>
     <div class="filter-row" id="filter-orc">
       <span class="chip active" onclick="filterOrc('all',this)">Todos</span>
       <span class="chip" onclick="filterOrc('pendente',this)">Pendentes</span>
@@ -331,10 +361,23 @@ textarea.form-control{min-height:80px;resize:vertical;}
   <div class="sheet-title"><i class="fas fa-file-alt"></i> <span id="recibo-form-title">Criar Recibo</span></div>
   <form onsubmit="saveRecibo(event)">
     <input type="hidden" id="r-id">
-    <div class="form-group"><label class="form-label">Cliente</label><select id="r-cliente" class="form-control" required></select></div>
-    <div class="form-grid-2">
+    <input type="hidden" id="r-tipo" value="automotivo">
+    <div class="form-group"><label class="form-label">Cliente</label><select id="r-cliente" class="form-control" required onchange="preencherClienteRecibo()"></select></div>
+    <div class="form-group">
+      <label class="form-label">Tipo de Serviço</label>
+      <div class="tipo-toggle">
+        <div class="tipo-opt active" id="r-tipo-automotivo" onclick="setTipoServico('r','automotivo')"><i class="fas fa-car"></i><span>Automotivo</span></div>
+        <div class="tipo-opt residencial" id="r-tipo-residencial" onclick="setTipoServico('r','residencial')"><i class="fas fa-home"></i><span>Residencial</span></div>
+      </div>
+    </div>
+    <div id="r-campos-automotivo" class="form-grid-2">
       <div class="form-group"><label class="form-label">Modelo Veículo</label><input type="text" id="r-modelo" class="form-control" placeholder="Ex: Honda Civic"></div>
       <div class="form-group"><label class="form-label">Placa</label><input type="text" id="r-placa" class="form-control" placeholder="ABC-1234"></div>
+    </div>
+    <div id="r-campos-residencial" class="form-grid-2" style="display:none;">
+      <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Endereço</label><input type="text" id="r-endereco" class="form-control" placeholder="Ex: Rua das Flores, 123 - Bairro"></div>
+      <div class="form-group"><label class="form-label">Ambiente</label><input type="text" id="r-ambiente" class="form-control" placeholder="Ex: Sala, Fachada, Janelas"></div>
+      <div class="form-group"><label class="form-label">Área (m²)</label><input type="number" id="r-area" class="form-control" step="0.01" min="0" placeholder="0,00"></div>
     </div>
     <div class="form-group"><label class="form-label">Tipo de Película</label><input type="text" id="r-pelicula" class="form-control" placeholder="Ex: Nano Cerâmica 5%"></div>
     <div class="form-group"><label class="form-label">Serviço Realizado</label><textarea id="r-servico" class="form-control" required placeholder="Descreva o serviço..."></textarea></div>
@@ -363,12 +406,25 @@ textarea.form-control{min-height:80px;resize:vertical;}
   <div class="sheet-title blue"><i class="fas fa-file-invoice-dollar"></i> <span id="orc-form-title">Criar Orçamento</span></div>
   <form onsubmit="saveOrcamento(event)">
     <input type="hidden" id="o-id">
+    <input type="hidden" id="o-tipo" value="automotivo">
     <div class="form-group"><label class="form-label">Cliente vinculado (opcional)</label><select id="o-cliente-vinc" class="form-control" onchange="preencherClienteOrc()"><option value="">— Nenhum —</option></select></div>
     <div class="form-group"><label class="form-label">Empresa / Solicitante</label><input type="text" id="o-empresa" class="form-control" required placeholder="Nome do cliente ou empresa"></div>
     <div class="form-group"><label class="form-label">CNPJ do Solicitante</label><input type="text" id="o-cnpj" class="form-control" placeholder="Opcional"></div>
-    <div class="form-grid-2">
+    <div class="form-group">
+      <label class="form-label">Tipo de Serviço</label>
+      <div class="tipo-toggle">
+        <div class="tipo-opt active" id="o-tipo-automotivo" onclick="setTipoServico('o','automotivo')"><i class="fas fa-car"></i><span>Automotivo</span></div>
+        <div class="tipo-opt residencial" id="o-tipo-residencial" onclick="setTipoServico('o','residencial')"><i class="fas fa-home"></i><span>Residencial</span></div>
+      </div>
+    </div>
+    <div id="o-campos-automotivo" class="form-grid-2">
       <div class="form-group"><label class="form-label">Modelo Veículo</label><input type="text" id="o-modelo" class="form-control" placeholder="Ex: Corolla"></div>
       <div class="form-group"><label class="form-label">Placa</label><input type="text" id="o-placa" class="form-control" placeholder="ABC-1234"></div>
+    </div>
+    <div id="o-campos-residencial" class="form-grid-2" style="display:none;">
+      <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Endereço</label><input type="text" id="o-endereco" class="form-control" placeholder="Ex: Rua das Flores, 123 - Bairro"></div>
+      <div class="form-group"><label class="form-label">Ambiente</label><input type="text" id="o-ambiente" class="form-control" placeholder="Ex: Sala, Fachada, Janelas"></div>
+      <div class="form-group"><label class="form-label">Área (m²)</label><input type="number" id="o-area" class="form-control" step="0.01" min="0" placeholder="0,00"></div>
     </div>
     <div class="form-group"><label class="form-label">Tipo de Película</label><input type="text" id="o-pelicula" class="form-control" placeholder="Ex: Nano Cerâmica 35%"></div>
     <div class="form-grid-2">
@@ -413,7 +469,14 @@ textarea.form-control{min-height:80px;resize:vertical;}
       <div class="form-group"><label class="form-label">Telefone / WhatsApp</label><input type="text" id="c-telefone" class="form-control" placeholder="(82) 9..."></div>
       <div class="form-group"><label class="form-label">CNPJ (opcional)</label><input type="text" id="c-cnpj" class="form-control" placeholder="00.000..."></div>
     </div>
-    <div class="form-group"><label class="form-label">Veículos</label><div id="veiculos-container"></div><button type="button" class="btn-add-small" onclick="addVeiculo()"><i class="fas fa-plus"></i> Veículo</button></div>
+    <div class="form-group">
+      <label class="form-label">Veículos / Imóveis</label>
+      <div id="veiculos-container"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button type="button" class="btn-add-small" onclick="addVeiculo()"><i class="fas fa-car"></i> Veículo</button>
+        <button type="button" class="btn-add-small" style="background:var(--purple-light);color:var(--purple);" onclick="addImovel()"><i class="fas fa-home"></i> Imóvel</button>
+      </div>
+    </div>
     <button type="submit" class="btn-block primary"><i class="fas fa-save"></i> Salvar</button>
     <button type="button" class="btn-block ghost" onclick="closeSheet('cliente')">Cancelar</button>
   </form>
@@ -581,6 +644,8 @@ function deleteItem(store, id){
 let CONFIG = { id:'cfg', nome:'Tony Fumê', cnpj:'', endereco:'', whatsapp:'', instagram:'', responsavel:'', cargo:'', pix:'', logo:null };
 let RECIBOS = [], CLIENTES = [], ORCAMENTOS = [], MATERIAIS = [];
 let ORC_FILTER = 'all';
+let TIPO_FILTER_RECIBOS = 'all';
+let TIPO_FILTER_ORC = 'all';
 let CURRENT_VIEW = 'dashboard';
 
 /* ============================================================
@@ -609,6 +674,31 @@ function showToast(msg){
   document.getElementById('toast-msg').textContent = msg;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+/* ============================================================
+   TIPO DE SERVIÇO (Automotivo / Residencial)
+   ============================================================ */
+function tipoLabel(tipo){ return tipo === 'residencial' ? 'Residencial' : 'Automotivo'; }
+function tipoIcon(tipo){ return tipo === 'residencial' ? 'fa-home' : 'fa-car'; }
+function tipoTag(tipo){
+  const t = tipo === 'residencial' ? 'residencial' : 'automotivo';
+  return `<span class="tipo-tag ${t}"><i class="fas ${tipoIcon(t)}"></i>${tipoLabel(t)}</span>`;
+}
+function localResumo(obj){
+  if ((obj.tipo||'automotivo') === 'residencial'){
+    const partes = [obj.endereco, obj.ambiente].filter(Boolean);
+    return partes.length ? partes.join(' • ') : '';
+  }
+  const partes = [obj.modelo, obj.placa].filter(Boolean);
+  return partes.length ? partes.join(' • ') : '';
+}
+function setTipoServico(prefix, tipo){
+  document.getElementById(prefix + '-tipo').value = tipo;
+  document.getElementById(prefix + '-tipo-automotivo').classList.toggle('active', tipo === 'automotivo');
+  document.getElementById(prefix + '-tipo-residencial').classList.toggle('active', tipo === 'residencial');
+  document.getElementById(prefix + '-campos-automotivo').style.display = tipo === 'automotivo' ? 'grid' : 'none';
+  document.getElementById(prefix + '-campos-residencial').style.display = tipo === 'residencial' ? 'grid' : 'none';
 }
 
 /* ============================================================
@@ -681,9 +771,10 @@ function renderDashboard(){
   }
   list.innerHTML = recentes.map(r => {
     const cli = CLIENTES.find(c => c.id === r.clienteId);
-    return `<div class="list-card red" onclick="verRecibo(${r.id})">
+    const tipo = r.tipoServico || 'automotivo';
+    return `<div class="list-card ${tipo==='residencial'?'purple':'red'}" onclick="verRecibo(${r.id})">
       <div class="card-top"><span class="card-name">${escapeHtml(cli ? cli.nome : 'Cliente')}</span><span class="tag" style="background:var(--red-soft);color:var(--red);">${fmtDate(r.data)}</span></div>
-      <div class="card-sub"><i class="fas fa-car"></i> ${escapeHtml(r.modelo||'')} ${r.placa ? '• '+escapeHtml(r.placa) : ''}</div>
+      <div class="card-sub"><i class="fas ${tipoIcon(tipo)}"></i> ${escapeHtml(localResumo(tipo==='residencial'?{tipo,endereco:r.endereco,ambiente:r.ambiente}:{tipo,modelo:r.modelo,placa:r.placa})||'—')}</div>
       <div class="card-value">${fmtMoney(r.valor)}</div>
     </div>`;
   }).join('');
@@ -702,8 +793,12 @@ function openReciboForm(id){
   document.getElementById('r-id').value = '';
   document.getElementById('recibo-form-title').textContent = 'Criar Recibo';
   populateClienteSelect('r-cliente', null);
+  setTipoServico('r','automotivo');
   document.getElementById('r-modelo').value = '';
   document.getElementById('r-placa').value = '';
+  document.getElementById('r-endereco').value = '';
+  document.getElementById('r-ambiente').value = '';
+  document.getElementById('r-area').value = '';
   document.getElementById('r-pelicula').value = '';
   document.getElementById('r-servico').value = '';
   document.getElementById('r-valor').value = '';
@@ -715,8 +810,12 @@ function openReciboForm(id){
     document.getElementById('r-id').value = r.id;
     document.getElementById('recibo-form-title').textContent = 'Editar Recibo';
     populateClienteSelect('r-cliente', r.clienteId);
+    setTipoServico('r', r.tipoServico || 'automotivo');
     document.getElementById('r-modelo').value = r.modelo || '';
     document.getElementById('r-placa').value = r.placa || '';
+    document.getElementById('r-endereco').value = r.endereco || '';
+    document.getElementById('r-ambiente').value = r.ambiente || '';
+    document.getElementById('r-area').value = r.area ?? '';
     document.getElementById('r-pelicula').value = r.pelicula || '';
     document.getElementById('r-servico').value = r.servico || '';
     document.getElementById('r-valor').value = r.valor;
@@ -725,15 +824,37 @@ function openReciboForm(id){
   openSheet('recibo');
 }
 
+function preencherClienteRecibo(){
+  const id = parseInt(document.getElementById('r-cliente').value);
+  const cli = CLIENTES.find(c => c.id === id);
+  if (!cli) return;
+  const local = (cli.veiculos||[])[0];
+  if (!local) return;
+  const tipo = local.tipo === 'residencial' ? 'residencial' : 'automotivo';
+  setTipoServico('r', tipo);
+  if (tipo === 'residencial'){
+    document.getElementById('r-endereco').value = local.endereco || '';
+    document.getElementById('r-ambiente').value = local.ambiente || '';
+  } else {
+    document.getElementById('r-modelo').value = local.modelo || '';
+    document.getElementById('r-placa').value = local.placa || '';
+  }
+}
+
 async function saveRecibo(e){
   e.preventDefault();
   const id = document.getElementById('r-id').value;
   const clienteId = parseInt(document.getElementById('r-cliente').value);
   if (!clienteId){ showToast('Selecione um cliente'); return; }
+  const tipoServico = document.getElementById('r-tipo').value || 'automotivo';
   const data = {
     clienteId,
+    tipoServico,
     modelo: document.getElementById('r-modelo').value,
     placa: document.getElementById('r-placa').value,
+    endereco: document.getElementById('r-endereco').value,
+    ambiente: document.getElementById('r-ambiente').value,
+    area: document.getElementById('r-area').value ? parseFloat(document.getElementById('r-area').value) : null,
     pelicula: document.getElementById('r-pelicula').value,
     servico: document.getElementById('r-servico').value,
     valor: parseFloat(document.getElementById('r-valor').value) || 0,
@@ -749,15 +870,27 @@ async function saveRecibo(e){
   setTimeout(() => verRecibo(data.id || savedId), 300);
 }
 
+function filterRecibos(tipo, el){
+  TIPO_FILTER_RECIBOS = tipo;
+  document.querySelectorAll('#filter-recibos .chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderRecibos(document.querySelector('#view-recibos .search-input').value);
+}
+
 function renderRecibos(filtro=''){
   const list = document.getElementById('recibos-list');
   const f = filtro.trim().toLowerCase();
   const filtrados = RECIBOS.filter(r => {
+    const tipo = r.tipoServico || 'automotivo';
+    const matchTipo = TIPO_FILTER_RECIBOS === 'all' || tipo === TIPO_FILTER_RECIBOS;
+    if (!matchTipo) return false;
     if (!f) return true;
     const cli = CLIENTES.find(c => c.id === r.clienteId);
     return (cli?.nome || '').toLowerCase().includes(f) ||
            (r.modelo||'').toLowerCase().includes(f) ||
-           (r.placa||'').toLowerCase().includes(f);
+           (r.placa||'').toLowerCase().includes(f) ||
+           (r.endereco||'').toLowerCase().includes(f) ||
+           (r.ambiente||'').toLowerCase().includes(f);
   }).sort((a,b) => b.id - a.id);
 
   if (!filtrados.length){
@@ -766,9 +899,11 @@ function renderRecibos(filtro=''){
   }
   list.innerHTML = filtrados.map(r => {
     const cli = CLIENTES.find(c => c.id === r.clienteId);
-    return `<div class="list-card red">
+    const tipo = r.tipoServico || 'automotivo';
+    const resumo = localResumo(tipo==='residencial'?{tipo,endereco:r.endereco,ambiente:r.ambiente}:{tipo,modelo:r.modelo,placa:r.placa});
+    return `<div class="list-card ${tipo==='residencial'?'purple':'red'}">
       <div class="card-top"><span class="card-name">${escapeHtml(cli ? cli.nome : 'Cliente removido')}</span><span class="tag" style="background:var(--red-soft);color:var(--red);">${fmtDate(r.data)}</span></div>
-      <div class="card-sub"><i class="fas fa-car"></i> ${escapeHtml(r.modelo||'')} ${r.placa ? '• '+escapeHtml(r.placa):''} ${r.pelicula ? '• '+escapeHtml(r.pelicula):''}</div>
+      <div class="card-sub">${tipoTag(tipo)} <i class="fas ${tipoIcon(tipo)}"></i> ${escapeHtml(resumo||'—')} ${r.pelicula ? '• '+escapeHtml(r.pelicula):''}</div>
       <div class="card-value">${fmtMoney(r.valor)}</div>
       <div class="action-row">
         <button class="btn-sm btn-blue" onclick="verRecibo(${r.id})"><i class="fas fa-eye"></i>Ver</button>
@@ -792,7 +927,11 @@ function buildReciboHTML(r){
   const cli = CLIENTES.find(c => c.id === r.clienteId);
   const nomeCliente = cli ? cli.nome : 'Cliente';
   const logoImg = CONFIG.logo ? `<img src="${CONFIG.logo}" alt="logo">` : '';
-  const veiculoInfo = (r.modelo || r.placa) ? `<p>${escapeHtml(r.modelo||'')} ${r.placa ? '• '+escapeHtml(r.placa):''}</p>` : '';
+  const tipo = r.tipoServico || 'automotivo';
+  const localLabel = tipo === 'residencial' ? 'Imóvel' : 'Veículo';
+  const localInfo = tipo === 'residencial'
+    ? ((r.endereco || r.ambiente) ? `<p>${escapeHtml(r.endereco||'')}${r.ambiente ? ' • '+escapeHtml(r.ambiente):''}</p>` : '')
+    : ((r.modelo || r.placa) ? `<p>${escapeHtml(r.modelo||'')} ${r.placa ? '• '+escapeHtml(r.placa):''}</p>` : '');
   const peliculaInfo = r.pelicula ? `<p>${escapeHtml(r.pelicula)}</p>` : '';
   return `
     <div class="r-inner">
@@ -801,7 +940,7 @@ function buildReciboHTML(r){
       <div class="r-grid">
         <div class="r-box"><h4>Cliente</h4><p>${escapeHtml(nomeCliente)}</p></div>
         <div class="r-box"><h4>Data</h4><p>${fmtDate(r.data)}</p></div>
-        <div class="r-box"><h4>Veículo</h4>${veiculoInfo || '<p>—</p>'}</div>
+        <div class="r-box"><h4>${localLabel}</h4>${localInfo || '<p>—</p>'}</div>
         <div class="r-box"><h4>Película</h4>${peliculaInfo || '<p>—</p>'}</div>
       </div>
       <div class="r-box" style="margin-bottom:12px;"><h4>Serviço Realizado</h4><p style="font-weight:400;font-size:.85rem;">${escapeHtml(r.servico||'')}</p></div>
@@ -822,7 +961,11 @@ function buildReciboPrintHTML(r){
   const cli = CLIENTES.find(c => c.id === r.clienteId);
   const nomeCliente = cli ? cli.nome : 'Cliente';
   const logoImg = CONFIG.logo ? `<img src="${CONFIG.logo}" alt="logo">` : '';
-  const veiculoInfo = (r.modelo || r.placa) ? `${escapeHtml(r.modelo||'')}${r.placa ? ' • '+escapeHtml(r.placa):''}` : '—';
+  const tipo = r.tipoServico || 'automotivo';
+  const localLabel = tipo === 'residencial' ? 'Imóvel' : 'Veículo';
+  const localInfo = tipo === 'residencial'
+    ? ((r.endereco || r.ambiente) ? `${escapeHtml(r.endereco||'')}${r.ambiente ? ' • '+escapeHtml(r.ambiente):''}` : '—')
+    : ((r.modelo || r.placa) ? `${escapeHtml(r.modelo||'')}${r.placa ? ' • '+escapeHtml(r.placa):''}` : '—');
   const peliculaInfo = r.pelicula ? escapeHtml(r.pelicula) : '—';
   const numDoc = String(r.id||'').slice(-6);
   return `
@@ -835,7 +978,7 @@ function buildReciboPrintHTML(r){
         <div class="pdfr-grid">
           <div class="pdfr-box"><h4>Cliente</h4><p>${escapeHtml(nomeCliente)}</p></div>
           <div class="pdfr-box"><h4>Data</h4><p>${fmtDate(r.data)}</p></div>
-          <div class="pdfr-box"><h4>Veículo</h4><p>${veiculoInfo}</p></div>
+          <div class="pdfr-box"><h4>${localLabel}</h4><p>${localInfo}</p></div>
           <div class="pdfr-box"><h4>Película</h4><p>${peliculaInfo}</p></div>
         </div>
         <div class="pdfr-servico"><h4 style="font-size:7pt;text-transform:uppercase;letter-spacing:.6px;color:#8a8a8f;font-weight:700;margin:0 0 1.5mm;">Serviço Realizado</h4><p>${escapeHtml(r.servico||'—')}</p></div>
@@ -950,8 +1093,15 @@ function preencherClienteOrc(){
   document.getElementById('o-cnpj').value = cli.cnpj || '';
   const v = (cli.veiculos||[])[0];
   if (v){
-    document.getElementById('o-modelo').value = v.modelo || '';
-    document.getElementById('o-placa').value = v.placa || '';
+    const tipo = v.tipo === 'residencial' ? 'residencial' : 'automotivo';
+    setTipoServico('o', tipo);
+    if (tipo === 'residencial'){
+      document.getElementById('o-endereco').value = v.endereco || '';
+      document.getElementById('o-ambiente').value = v.ambiente || '';
+    } else {
+      document.getElementById('o-modelo').value = v.modelo || '';
+      document.getElementById('o-placa').value = v.placa || '';
+    }
   }
 }
 
@@ -959,10 +1109,14 @@ function openOrcamentoForm(id){
   document.getElementById('o-id').value = '';
   document.getElementById('orc-form-title').textContent = 'Criar Orçamento';
   populateClienteVincSelect(null);
+  setTipoServico('o','automotivo');
   document.getElementById('o-empresa').value = '';
   document.getElementById('o-cnpj').value = '';
   document.getElementById('o-modelo').value = '';
   document.getElementById('o-placa').value = '';
+  document.getElementById('o-endereco').value = '';
+  document.getElementById('o-ambiente').value = '';
+  document.getElementById('o-area').value = '';
   document.getElementById('o-pelicula').value = '';
   document.getElementById('o-data').value = todayISO();
   document.getElementById('o-validade').value = '30';
@@ -977,10 +1131,14 @@ function openOrcamentoForm(id){
     document.getElementById('o-id').value = o.id;
     document.getElementById('orc-form-title').textContent = 'Editar Orçamento';
     populateClienteVincSelect(o.clienteId);
+    setTipoServico('o', o.tipoServico || 'automotivo');
     document.getElementById('o-empresa').value = o.empresa || '';
     document.getElementById('o-cnpj').value = o.cnpjSolicitante || '';
     document.getElementById('o-modelo').value = o.modelo || '';
     document.getElementById('o-placa').value = o.placa || '';
+    document.getElementById('o-endereco').value = o.endereco || '';
+    document.getElementById('o-ambiente').value = o.ambiente || '';
+    document.getElementById('o-area').value = o.area ?? '';
     document.getElementById('o-pelicula').value = o.pelicula || '';
     document.getElementById('o-data').value = o.data;
     document.getElementById('o-validade').value = o.validade || 30;
@@ -1002,10 +1160,14 @@ async function saveOrcamento(e){
   const existente = id ? ORCAMENTOS.find(x => x.id === parseInt(id)) : null;
   const data = {
     clienteId,
+    tipoServico: document.getElementById('o-tipo').value || 'automotivo',
     empresa: document.getElementById('o-empresa').value,
     cnpjSolicitante: document.getElementById('o-cnpj').value,
     modelo: document.getElementById('o-modelo').value,
     placa: document.getElementById('o-placa').value,
+    endereco: document.getElementById('o-endereco').value,
+    ambiente: document.getElementById('o-ambiente').value,
+    area: document.getElementById('o-area').value ? parseFloat(document.getElementById('o-area').value) : null,
     pelicula: document.getElementById('o-pelicula').value,
     data: document.getElementById('o-data').value,
     validade: parseInt(document.getElementById('o-validade').value) || 30,
@@ -1032,6 +1194,13 @@ function filterOrc(status, el){
   renderOrcamentos(document.querySelector('#view-orcamentos .search-input').value);
 }
 
+function filterOrcTipo(tipo, el){
+  TIPO_FILTER_ORC = tipo;
+  document.querySelectorAll('#filter-orc-tipo .chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderOrcamentos(document.querySelector('#view-orcamentos .search-input').value);
+}
+
 function statusLabel(s){
   return { pendente:'Pendente', aceito:'Aceito', recusado:'Recusado' }[s] || 'Pendente';
 }
@@ -1043,9 +1212,11 @@ function renderOrcamentos(filtro=''){
   const list = document.getElementById('orcamentos-list');
   const f = filtro.trim().toLowerCase();
   let filtrados = ORCAMENTOS.filter(o => {
-    const matchTxt = !f || (o.empresa||'').toLowerCase().includes(f) || (o.placa||'').toLowerCase().includes(f) || (o.modelo||'').toLowerCase().includes(f);
+    const tipo = o.tipoServico || 'automotivo';
+    const matchTxt = !f || (o.empresa||'').toLowerCase().includes(f) || (o.placa||'').toLowerCase().includes(f) || (o.modelo||'').toLowerCase().includes(f) || (o.endereco||'').toLowerCase().includes(f) || (o.ambiente||'').toLowerCase().includes(f);
     const matchStatus = ORC_FILTER === 'all' || (o.status||'pendente') === ORC_FILTER;
-    return matchTxt && matchStatus;
+    const matchTipo = TIPO_FILTER_ORC === 'all' || tipo === TIPO_FILTER_ORC;
+    return matchTxt && matchStatus && matchTipo;
   }).sort((a,b) => b.id - a.id);
 
   if (!filtrados.length){
@@ -1055,12 +1226,14 @@ function renderOrcamentos(filtro=''){
   list.innerHTML = filtrados.map(o => {
     const total = (o.itens||[]).reduce((s,it) => s + (parseFloat(it.valor)||0), 0);
     const status = o.status || 'pendente';
-    return `<div class="list-card blue">
+    const tipo = o.tipoServico || 'automotivo';
+    const resumo = localResumo(tipo==='residencial'?{tipo,endereco:o.endereco,ambiente:o.ambiente}:{tipo,modelo:o.modelo,placa:o.placa});
+    return `<div class="list-card ${tipo==='residencial'?'purple':'blue'}">
       <div class="card-top">
         <span class="card-name">#${o.id} — ${escapeHtml(o.empresa||'')}</span>
         <span class="s-badge ${statusClass(status)}">${statusLabel(status)}</span>
       </div>
-      <div class="card-sub"><i class="fas fa-calendar"></i> ${fmtDate(o.data)} ${o.modelo||o.placa ? '• '+escapeHtml(o.modelo||'')+(o.placa?' '+escapeHtml(o.placa):'') : ''}</div>
+      <div class="card-sub">${tipoTag(tipo)} <i class="fas fa-calendar"></i> ${fmtDate(o.data)} ${resumo ? '• '+escapeHtml(resumo) : ''}</div>
       <div class="card-value">${fmtMoney(total)}</div>
       <div class="action-row">
         <button class="btn-sm btn-blue" onclick="verOrcamento(${o.id})"><i class="fas fa-eye"></i>Ver</button>
@@ -1098,6 +1271,8 @@ async function excluirOrcamento(id){
 function buildOrcamentoHTML(o){
   const total = (o.itens||[]).reduce((s,it) => s + (parseFloat(it.valor)||0), 0);
   const logoImg = CONFIG.logo ? `<img src="${CONFIG.logo}" alt="logo">` : `<div class="orc-empresa-nome">${escapeHtml(CONFIG.nome||'')}</div>`;
+  const tipo = o.tipoServico || 'automotivo';
+  const localLabel = tipo === 'residencial' ? 'Imóvel' : 'Veículo';
   const linhas = (o.itens||[]).map(it => `
     <tr>
       <td>${escapeHtml(it.descricao||'')}</td>
@@ -1107,9 +1282,13 @@ function buildOrcamentoHTML(o){
   return `
     <div class="orc-inner">
       <div class="orc-hdr">${logoImg}<div style="text-align:right;font-size:11px;color:#555;"><strong>${escapeHtml(CONFIG.nome||'')}</strong><br>${escapeHtml(CONFIG.cnpj||'')}</div></div>
-      <div class="orc-intro">Prezado(a) <strong>${escapeHtml(o.empresa||'')}</strong>, apresentamos abaixo o orçamento solicitado para o serviço de aplicação de película automotiva, com base nas especificações informadas.</div>
+      <div class="orc-intro">Prezado(a) <strong>${escapeHtml(o.empresa||'')}</strong>, apresentamos abaixo o orçamento solicitado para o serviço de aplicação de película ${tipo==='residencial'?'residencial':'automotiva'}, com base nas especificações informadas.</div>
       <div class="orc-sol"><p><strong>Solicitante:</strong> ${escapeHtml(o.empresa||'')}</p>${o.cnpjSolicitante ? `<p><strong>CNPJ:</strong> ${escapeHtml(o.cnpjSolicitante)}</p>`:''}</div>
-      ${(o.modelo || o.placa || o.pelicula) ? `<div class="orc-veh">${o.modelo||o.placa?`<p><strong>Veículo:</strong> ${escapeHtml(o.modelo||'')} ${o.placa?'• '+escapeHtml(o.placa):''}</p>`:''}${o.pelicula?`<p><strong>Película:</strong> ${escapeHtml(o.pelicula)}</p>`:''}</div>`:''}
+      ${(o.modelo || o.placa || o.endereco || o.ambiente || o.pelicula) ? `<div class="orc-veh">${
+        tipo==='residencial'
+          ? ((o.endereco||o.ambiente)?`<p><strong>${localLabel}:</strong> ${escapeHtml(o.endereco||'')} ${o.ambiente?'• '+escapeHtml(o.ambiente):''}</p>`:'')
+          : ((o.modelo||o.placa)?`<p><strong>${localLabel}:</strong> ${escapeHtml(o.modelo||'')} ${o.placa?'• '+escapeHtml(o.placa):''}</p>`:'')
+      }${o.pelicula?`<p><strong>Película:</strong> ${escapeHtml(o.pelicula)}</p>`:''}</div>`:''}
       <div class="orc-tbl-wrap">
         <div class="orc-tbl-title">ORÇAMENTO</div>
         <table class="orc-tbl">
@@ -1129,18 +1308,22 @@ function buildOrcamentoPrintHTML(o){
   const total = (o.itens||[]).reduce((s,it) => s + (parseFloat(it.valor)||0), 0);
   const logoImg = CONFIG.logo ? `<img src="${CONFIG.logo}" alt="logo">` : '';
   const numDoc = String(o.id||'').slice(-6);
+  const tipo = o.tipoServico || 'automotivo';
+  const localLabel = tipo === 'residencial' ? 'Imóvel' : 'Veículo';
   const linhas = (o.itens||[]).map(it => `
     <tr>
       <td>${escapeHtml(it.descricao||'')}</td>
       <td style="text-align:center;">${escapeHtml(it.garantia||'—')}</td>
       <td style="text-align:right;font-weight:700;">${fmtMoney(it.valor)}</td>
     </tr>`).join('');
-  const veiculoBox = (o.modelo || o.placa || o.pelicula) ? `
+  const veiculoBox = (o.modelo || o.placa || o.endereco || o.ambiente || o.pelicula) ? `
     <div class="pdfo-infobox">
-      <h4>Veículo</h4>
-      ${(o.modelo||o.placa) ? `<p><strong>Modelo:</strong> ${escapeHtml(o.modelo||'')}${o.placa?' • '+escapeHtml(o.placa):''}</p>`:''}
+      <h4>${localLabel}</h4>
+      ${tipo==='residencial'
+        ? ((o.endereco||o.ambiente) ? `<p><strong>Endereço:</strong> ${escapeHtml(o.endereco||'')}${o.ambiente?' • '+escapeHtml(o.ambiente):''}</p>`:'')
+        : ((o.modelo||o.placa) ? `<p><strong>Modelo:</strong> ${escapeHtml(o.modelo||'')}${o.placa?' • '+escapeHtml(o.placa):''}</p>`:'')}
       ${o.pelicula ? `<p><strong>Película:</strong> ${escapeHtml(o.pelicula)}</p>`:''}
-    </div>` : `<div class="pdfo-infobox"><h4>Veículo</h4><p>—</p></div>`;
+    </div>` : `<div class="pdfo-infobox"><h4>${localLabel}</h4><p>—</p></div>`;
   return `
     <div class="pdfdoc-orc">
       <div class="pdfo-topbar">
@@ -1148,7 +1331,7 @@ function buildOrcamentoPrintHTML(o){
         <div class="pdfo-doctype"><div class="lab">ORÇAMENTO</div><div class="num">Nº ${numDoc}</div><div class="data">${fmtDate(o.data)}</div></div>
       </div>
       <div class="pdfo-body">
-        <div class="pdfo-intro">Prezado(a) <strong>${escapeHtml(o.empresa||'')}</strong>, apresentamos abaixo o orçamento solicitado para o serviço de aplicação de película automotiva, com base nas especificações informadas.</div>
+        <div class="pdfo-intro">Prezado(a) <strong>${escapeHtml(o.empresa||'')}</strong>, apresentamos abaixo o orçamento solicitado para o serviço de aplicação de película ${tipo==='residencial'?'residencial':'automotiva'}, com base nas especificações informadas.</div>
         <div class="pdfo-infogrid">
           <div class="pdfo-infobox"><h4>Solicitante</h4><p><strong>${escapeHtml(o.empresa||'')}</strong></p>${o.cnpjSolicitante ? `<p>CNPJ: ${escapeHtml(o.cnpjSolicitante)}</p>`:''}</div>
           ${veiculoBox}
@@ -1235,20 +1418,47 @@ function addVeiculo(v){
   const container = document.getElementById('veiculos-container');
   const div = document.createElement('div');
   div.className = 'veiculo-row';
+  div.dataset.tipo = 'automotivo';
   div.innerHTML = `
     <button type="button" class="veiculo-rm" onclick="this.closest('.veiculo-row').remove()"><i class="fas fa-times"></i></button>
+    <div class="vr-full" style="margin-bottom:2px;"><span class="tipo-tag automotivo"><i class="fas fa-car"></i>Veículo</span></div>
     <div><label class="form-label" style="font-size:.7rem;">Modelo</label><input type="text" class="form-control vr-modelo" placeholder="Ex: Onix" value="${escapeHtml(v?.modelo||'')}"></div>
     <div><label class="form-label" style="font-size:.7rem;">Placa</label><input type="text" class="form-control vr-placa" placeholder="ABC-1234" value="${escapeHtml(v?.placa||'')}"></div>
     <div class="vr-full"><label class="form-label" style="font-size:.7rem;">Cor</label><input type="text" class="form-control vr-cor" placeholder="Ex: Prata" value="${escapeHtml(v?.cor||'')}"></div>
   `;
   container.appendChild(div);
 }
+function addImovel(v){
+  const container = document.getElementById('veiculos-container');
+  const div = document.createElement('div');
+  div.className = 'veiculo-row';
+  div.dataset.tipo = 'residencial';
+  div.innerHTML = `
+    <button type="button" class="veiculo-rm" onclick="this.closest('.veiculo-row').remove()"><i class="fas fa-times"></i></button>
+    <div class="vr-full" style="margin-bottom:2px;"><span class="tipo-tag residencial"><i class="fas fa-home"></i>Imóvel</span></div>
+    <div class="vr-full"><label class="form-label" style="font-size:.7rem;">Endereço</label><input type="text" class="form-control vr-endereco" placeholder="Ex: Rua das Flores, 123" value="${escapeHtml(v?.endereco||'')}"></div>
+    <div><label class="form-label" style="font-size:.7rem;">Ambiente</label><input type="text" class="form-control vr-ambiente" placeholder="Ex: Sala, Fachada" value="${escapeHtml(v?.ambiente||'')}"></div>
+    <div><label class="form-label" style="font-size:.7rem;">Área (m²)</label><input type="number" step="0.01" min="0" class="form-control vr-area" placeholder="0,00" value="${v?.area ?? ''}"></div>
+  `;
+  container.appendChild(div);
+}
 function coletarVeiculos(){
-  return Array.from(document.querySelectorAll('#veiculos-container .veiculo-row')).map(row => ({
-    modelo: row.querySelector('.vr-modelo').value,
-    placa: row.querySelector('.vr-placa').value,
-    cor: row.querySelector('.vr-cor').value
-  })).filter(v => v.modelo || v.placa);
+  return Array.from(document.querySelectorAll('#veiculos-container .veiculo-row')).map(row => {
+    if (row.dataset.tipo === 'residencial'){
+      return {
+        tipo: 'residencial',
+        endereco: row.querySelector('.vr-endereco').value,
+        ambiente: row.querySelector('.vr-ambiente').value,
+        area: row.querySelector('.vr-area').value ? parseFloat(row.querySelector('.vr-area').value) : null
+      };
+    }
+    return {
+      tipo: 'automotivo',
+      modelo: row.querySelector('.vr-modelo').value,
+      placa: row.querySelector('.vr-placa').value,
+      cor: row.querySelector('.vr-cor').value
+    };
+  }).filter(v => v.tipo === 'residencial' ? (v.endereco || v.ambiente) : (v.modelo || v.placa));
 }
 
 function openClienteForm(id){
@@ -1267,7 +1477,7 @@ function openClienteForm(id){
     document.getElementById('c-nome').value = c.nome || '';
     document.getElementById('c-telefone').value = c.telefone || '';
     document.getElementById('c-cnpj').value = c.cnpj || '';
-    (c.veiculos||[]).forEach(v => addVeiculo(v));
+    (c.veiculos||[]).forEach(v => v.tipo === 'residencial' ? addImovel(v) : addVeiculo(v));
   }
   openSheet('cliente');
 }
@@ -1306,11 +1516,14 @@ function renderClientes(filtro=''){
   list.innerHTML = filtrados.map(c => {
     const nRecibos = RECIBOS.filter(r => r.clienteId === c.id).length;
     const nOrc = ORCAMENTOS.filter(o => o.clienteId === c.id).length;
-    const veiculosChips = (c.veiculos||[]).slice(0,3).map(v => `<span class="hist-veiculo-chip"><i class="fas fa-car"></i>${escapeHtml(v.modelo||'Veículo')} ${v.placa?'• '+escapeHtml(v.placa):''}</span>`).join('');
+    const veiculosChips = (c.veiculos||[]).slice(0,3).map(v => v.tipo === 'residencial'
+      ? `<span class="hist-veiculo-chip" style="background:var(--purple);"><i class="fas fa-home"></i>${escapeHtml(v.endereco||'Imóvel')} ${v.ambiente?'• '+escapeHtml(v.ambiente):''}</span>`
+      : `<span class="hist-veiculo-chip"><i class="fas fa-car"></i>${escapeHtml(v.modelo||'Veículo')} ${v.placa?'• '+escapeHtml(v.placa):''}</span>`
+    ).join('');
     return `<div class="list-card green">
       <div class="card-top"><span class="card-name">${escapeHtml(c.nome)}</span></div>
       <div class="card-sub"><i class="fas fa-phone"></i> ${escapeHtml(c.telefone||'—')}</div>
-      <div style="margin-top:8px;">${veiculosChips || '<span style="font-size:.75rem;color:var(--muted);">Nenhum veículo cadastrado</span>'}</div>
+      <div style="margin-top:8px;">${veiculosChips || '<span style="font-size:.75rem;color:var(--muted);">Nenhum veículo/imóvel cadastrado</span>'}</div>
       <div class="card-sub" style="margin-top:8px;"><strong>${nRecibos}</strong> recibo(s) • <strong>${nOrc}</strong> orçamento(s)</div>
       <div class="action-row">
         <button class="btn-sm btn-green" onclick="verHistoricoCliente(${c.id})"><i class="fas fa-history"></i>Histórico</button>
@@ -1340,7 +1553,10 @@ function verHistoricoCliente(id){
   const recibosCli = RECIBOS.filter(r => r.clienteId === id).sort((a,b) => b.id - a.id);
   const orcCli = ORCAMENTOS.filter(o => o.clienteId === id).sort((a,b) => b.id - a.id);
   const totalRecibos = recibosCli.reduce((s,r) => s + parseFloat(r.valor||0), 0);
-  const veiculosChips = (c.veiculos||[]).map(v => `<span class="hist-veiculo-chip"><i class="fas fa-car"></i>${escapeHtml(v.modelo||'')} ${v.placa?'• '+escapeHtml(v.placa):''}</span>`).join('');
+  const veiculosChips = (c.veiculos||[]).map(v => v.tipo === 'residencial'
+    ? `<span class="hist-veiculo-chip" style="background:var(--purple);"><i class="fas fa-home"></i>${escapeHtml(v.endereco||'')} ${v.ambiente?'• '+escapeHtml(v.ambiente):''}</span>`
+    : `<span class="hist-veiculo-chip"><i class="fas fa-car"></i>${escapeHtml(v.modelo||'')} ${v.placa?'• '+escapeHtml(v.placa):''}</span>`
+  ).join('');
 
   let html = `<div class="hist-info">
     <h3>${escapeHtml(c.nome)}</h3>
@@ -1350,10 +1566,14 @@ function verHistoricoCliente(id){
   </div>`;
 
   html += `<div class="sec-title"><span><i class="fas fa-file-alt"></i>Recibos (${recibosCli.length})</span></div>`;
-  html += recibosCli.length ? recibosCli.map(r => `<div class="hist-item" onclick="closeSheet('hist');verRecibo(${r.id})">
+  html += recibosCli.length ? recibosCli.map(r => {
+    const tipo = r.tipoServico || 'automotivo';
+    const resumo = localResumo(tipo==='residencial'?{tipo,endereco:r.endereco,ambiente:r.ambiente}:{tipo,modelo:r.modelo,placa:r.placa});
+    return `<div class="hist-item ${tipo==='residencial'?'blue':''}" onclick="closeSheet('hist');verRecibo(${r.id})">
       <div class="card-top"><span class="card-name">${fmtDate(r.data)}</span><span class="card-value">${fmtMoney(r.valor)}</span></div>
-      <div class="card-sub">${escapeHtml(r.modelo||'')} ${r.placa?'• '+escapeHtml(r.placa):''}</div>
-    </div>`).join('') : `<p style="font-size:.82rem;color:var(--muted);margin-bottom:12px;">Nenhum recibo registrado.</p>`;
+      <div class="card-sub">${tipoTag(tipo)} ${escapeHtml(resumo||'')}</div>
+    </div>`;
+  }).join('') : `<p style="font-size:.82rem;color:var(--muted);margin-bottom:12px;">Nenhum recibo registrado.</p>`;
 
   html += `<div class="sec-title"><span><i class="fas fa-file-invoice-dollar"></i>Orçamentos (${orcCli.length})</span></div>`;
   html += orcCli.length ? orcCli.map(o => {
@@ -1573,6 +1793,11 @@ function openFinanceiro(){
   const totalRecibos = RECIBOS.reduce((s,r) => s + parseFloat(r.valor||0), 0);
   const ticketMedio = RECIBOS.length ? totalRecibos / RECIBOS.length : 0;
 
+  const totalAuto = RECIBOS.filter(r => (r.tipoServico||'automotivo') === 'automotivo').reduce((s,r) => s + parseFloat(r.valor||0), 0);
+  const totalRes = RECIBOS.filter(r => r.tipoServico === 'residencial').reduce((s,r) => s + parseFloat(r.valor||0), 0);
+  const pctAuto = totalRecibos ? Math.round((totalAuto/totalRecibos)*100) : 0;
+  const pctRes = totalRecibos ? 100 - pctAuto : 0;
+
   const materiaisBaixoEstoque = MATERIAIS.filter(m => (m.estoqueMin||0) > 0 && (m.estoque||0) <= (m.estoqueMin||0));
   const custoInventario = MATERIAIS.reduce((s,m) => s + (m.precoCompra||0)*(m.estoque||0), 0);
   const valorInventarioVenda = MATERIAIS.reduce((s,m) => s + (m.precoVenda||0)*(m.estoque||0), 0);
@@ -1604,6 +1829,11 @@ function openFinanceiro(){
       <div class="fin-card verde"><div class="fin-card-label">Orçamentos aceitos</div><div class="fin-card-value">${fmtMoney(valorAceito)}</div></div>
     </div>
     ${alerta}
+    <div class="sec-title" style="margin-top:14px;"><span><i class="fas fa-layer-group"></i>Receita por segmento</span></div>
+    <div class="fin-split">
+      <div class="fin-split-item"><div class="lab"><i class="fas fa-car" style="color:var(--red);"></i>Automotivo</div><div class="val">${fmtMoney(totalAuto)}</div><div class="fin-split-bar"><div style="width:${pctAuto}%;background:var(--red);"></div></div></div>
+      <div class="fin-split-item"><div class="lab"><i class="fas fa-home" style="color:var(--purple);"></i>Residencial</div><div class="val">${fmtMoney(totalRes)}</div><div class="fin-split-bar"><div style="width:${pctRes}%;background:var(--purple);"></div></div></div>
+    </div>
     <div class="sec-title" style="margin-top:14px;"><span><i class="fas fa-chart-bar"></i>Receita últimos 4 meses</span></div>
     <div class="fin-graph">${barras}</div>
     <div class="fin-proj">
