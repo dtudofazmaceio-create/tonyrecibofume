@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -654,6 +653,10 @@ let CURRENT_VIEW = 'dashboard';
 function fmtMoney(v){
   return parseFloat(v || 0).toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
 }
+function fmtArea(v){
+  if (v === null || v === undefined || v === '') return '';
+  return `${parseFloat(v).toLocaleString('pt-BR', { minimumFractionDigits:2, maximumFractionDigits:2 })} m²`;
+}
 function fmtDate(iso){
   if (!iso) return '';
   const [y,m,d] = iso.split('-');
@@ -687,7 +690,7 @@ function tipoTag(tipo){
 }
 function localResumo(obj){
   if ((obj.tipo||'automotivo') === 'residencial'){
-    const partes = [obj.endereco, obj.ambiente].filter(Boolean);
+    const partes = [obj.endereco, obj.ambiente, obj.area ? fmtArea(obj.area) : null].filter(Boolean);
     return partes.length ? partes.join(' • ') : '';
   }
   const partes = [obj.modelo, obj.placa].filter(Boolean);
@@ -774,7 +777,7 @@ function renderDashboard(){
     const tipo = r.tipoServico || 'automotivo';
     return `<div class="list-card ${tipo==='residencial'?'purple':'red'}" onclick="verRecibo(${r.id})">
       <div class="card-top"><span class="card-name">${escapeHtml(cli ? cli.nome : 'Cliente')}</span><span class="tag" style="background:var(--red-soft);color:var(--red);">${fmtDate(r.data)}</span></div>
-      <div class="card-sub"><i class="fas ${tipoIcon(tipo)}"></i> ${escapeHtml(localResumo(tipo==='residencial'?{tipo,endereco:r.endereco,ambiente:r.ambiente}:{tipo,modelo:r.modelo,placa:r.placa})||'—')}</div>
+      <div class="card-sub"><i class="fas ${tipoIcon(tipo)}"></i> ${escapeHtml(localResumo(tipo==='residencial'?{tipo,endereco:r.endereco,ambiente:r.ambiente,area:r.area}:{tipo,modelo:r.modelo,placa:r.placa})||'—')}</div>
       <div class="card-value">${fmtMoney(r.valor)}</div>
     </div>`;
   }).join('');
@@ -900,7 +903,7 @@ function renderRecibos(filtro=''){
   list.innerHTML = filtrados.map(r => {
     const cli = CLIENTES.find(c => c.id === r.clienteId);
     const tipo = r.tipoServico || 'automotivo';
-    const resumo = localResumo(tipo==='residencial'?{tipo,endereco:r.endereco,ambiente:r.ambiente}:{tipo,modelo:r.modelo,placa:r.placa});
+    const resumo = localResumo(tipo==='residencial'?{tipo,endereco:r.endereco,ambiente:r.ambiente,area:r.area}:{tipo,modelo:r.modelo,placa:r.placa});
     return `<div class="list-card ${tipo==='residencial'?'purple':'red'}">
       <div class="card-top"><span class="card-name">${escapeHtml(cli ? cli.nome : 'Cliente removido')}</span><span class="tag" style="background:var(--red-soft);color:var(--red);">${fmtDate(r.data)}</span></div>
       <div class="card-sub">${tipoTag(tipo)} <i class="fas ${tipoIcon(tipo)}"></i> ${escapeHtml(resumo||'—')} ${r.pelicula ? '• '+escapeHtml(r.pelicula):''}</div>
@@ -930,7 +933,7 @@ function buildReciboHTML(r){
   const tipo = r.tipoServico || 'automotivo';
   const localLabel = tipo === 'residencial' ? 'Imóvel' : 'Veículo';
   const localInfo = tipo === 'residencial'
-    ? ((r.endereco || r.ambiente) ? `<p>${escapeHtml(r.endereco||'')}${r.ambiente ? ' • '+escapeHtml(r.ambiente):''}</p>` : '')
+    ? ((r.endereco || r.ambiente || r.area) ? `<p>${escapeHtml(r.endereco||'')}${r.ambiente ? ' • '+escapeHtml(r.ambiente):''}${r.area ? ' • '+fmtArea(r.area):''}</p>` : '')
     : ((r.modelo || r.placa) ? `<p>${escapeHtml(r.modelo||'')} ${r.placa ? '• '+escapeHtml(r.placa):''}</p>` : '');
   const peliculaInfo = r.pelicula ? `<p>${escapeHtml(r.pelicula)}</p>` : '';
   return `
@@ -964,7 +967,7 @@ function buildReciboPrintHTML(r){
   const tipo = r.tipoServico || 'automotivo';
   const localLabel = tipo === 'residencial' ? 'Imóvel' : 'Veículo';
   const localInfo = tipo === 'residencial'
-    ? ((r.endereco || r.ambiente) ? `${escapeHtml(r.endereco||'')}${r.ambiente ? ' • '+escapeHtml(r.ambiente):''}` : '—')
+    ? ((r.endereco || r.ambiente || r.area) ? `${escapeHtml(r.endereco||'')}${r.ambiente ? ' • '+escapeHtml(r.ambiente):''}${r.area ? ' • '+fmtArea(r.area):''}` : '—')
     : ((r.modelo || r.placa) ? `${escapeHtml(r.modelo||'')}${r.placa ? ' • '+escapeHtml(r.placa):''}` : '—');
   const peliculaInfo = r.pelicula ? escapeHtml(r.pelicula) : '—';
   const numDoc = String(r.id||'').slice(-6);
@@ -1227,7 +1230,7 @@ function renderOrcamentos(filtro=''){
     const total = (o.itens||[]).reduce((s,it) => s + (parseFloat(it.valor)||0), 0);
     const status = o.status || 'pendente';
     const tipo = o.tipoServico || 'automotivo';
-    const resumo = localResumo(tipo==='residencial'?{tipo,endereco:o.endereco,ambiente:o.ambiente}:{tipo,modelo:o.modelo,placa:o.placa});
+    const resumo = localResumo(tipo==='residencial'?{tipo,endereco:o.endereco,ambiente:o.ambiente,area:o.area}:{tipo,modelo:o.modelo,placa:o.placa});
     return `<div class="list-card ${tipo==='residencial'?'purple':'blue'}">
       <div class="card-top">
         <span class="card-name">#${o.id} — ${escapeHtml(o.empresa||'')}</span>
@@ -1284,11 +1287,11 @@ function buildOrcamentoHTML(o){
       <div class="orc-hdr">${logoImg}<div style="text-align:right;font-size:11px;color:#555;"><strong>${escapeHtml(CONFIG.nome||'')}</strong><br>${escapeHtml(CONFIG.cnpj||'')}</div></div>
       <div class="orc-intro">Prezado(a) <strong>${escapeHtml(o.empresa||'')}</strong>, apresentamos abaixo o orçamento solicitado para o serviço de aplicação de película ${tipo==='residencial'?'residencial':'automotiva'}, com base nas especificações informadas.</div>
       <div class="orc-sol"><p><strong>Solicitante:</strong> ${escapeHtml(o.empresa||'')}</p>${o.cnpjSolicitante ? `<p><strong>CNPJ:</strong> ${escapeHtml(o.cnpjSolicitante)}</p>`:''}</div>
-      ${(o.modelo || o.placa || o.endereco || o.ambiente || o.pelicula) ? `<div class="orc-veh">${
+      ${(o.modelo || o.placa || o.endereco || o.ambiente || o.area || o.pelicula) ? `<div class="orc-veh">${
         tipo==='residencial'
           ? ((o.endereco||o.ambiente)?`<p><strong>${localLabel}:</strong> ${escapeHtml(o.endereco||'')} ${o.ambiente?'• '+escapeHtml(o.ambiente):''}</p>`:'')
           : ((o.modelo||o.placa)?`<p><strong>${localLabel}:</strong> ${escapeHtml(o.modelo||'')} ${o.placa?'• '+escapeHtml(o.placa):''}</p>`:'')
-      }${o.pelicula?`<p><strong>Película:</strong> ${escapeHtml(o.pelicula)}</p>`:''}</div>`:''}
+      }${tipo==='residencial' && o.area?`<p><strong>Área:</strong> ${fmtArea(o.area)}</p>`:''}${o.pelicula?`<p><strong>Película:</strong> ${escapeHtml(o.pelicula)}</p>`:''}</div>`:''}
       <div class="orc-tbl-wrap">
         <div class="orc-tbl-title">ORÇAMENTO</div>
         <table class="orc-tbl">
@@ -1316,12 +1319,13 @@ function buildOrcamentoPrintHTML(o){
       <td style="text-align:center;">${escapeHtml(it.garantia||'—')}</td>
       <td style="text-align:right;font-weight:700;">${fmtMoney(it.valor)}</td>
     </tr>`).join('');
-  const veiculoBox = (o.modelo || o.placa || o.endereco || o.ambiente || o.pelicula) ? `
+  const veiculoBox = (o.modelo || o.placa || o.endereco || o.ambiente || o.area || o.pelicula) ? `
     <div class="pdfo-infobox">
       <h4>${localLabel}</h4>
       ${tipo==='residencial'
         ? ((o.endereco||o.ambiente) ? `<p><strong>Endereço:</strong> ${escapeHtml(o.endereco||'')}${o.ambiente?' • '+escapeHtml(o.ambiente):''}</p>`:'')
         : ((o.modelo||o.placa) ? `<p><strong>Modelo:</strong> ${escapeHtml(o.modelo||'')}${o.placa?' • '+escapeHtml(o.placa):''}</p>`:'')}
+      ${tipo==='residencial' && o.area ? `<p><strong>Área:</strong> ${fmtArea(o.area)}</p>`:''}
       ${o.pelicula ? `<p><strong>Película:</strong> ${escapeHtml(o.pelicula)}</p>`:''}
     </div>` : `<div class="pdfo-infobox"><h4>${localLabel}</h4><p>—</p></div>`;
   return `
@@ -1568,7 +1572,7 @@ function verHistoricoCliente(id){
   html += `<div class="sec-title"><span><i class="fas fa-file-alt"></i>Recibos (${recibosCli.length})</span></div>`;
   html += recibosCli.length ? recibosCli.map(r => {
     const tipo = r.tipoServico || 'automotivo';
-    const resumo = localResumo(tipo==='residencial'?{tipo,endereco:r.endereco,ambiente:r.ambiente}:{tipo,modelo:r.modelo,placa:r.placa});
+    const resumo = localResumo(tipo==='residencial'?{tipo,endereco:r.endereco,ambiente:r.ambiente,area:r.area}:{tipo,modelo:r.modelo,placa:r.placa});
     return `<div class="hist-item ${tipo==='residencial'?'blue':''}" onclick="closeSheet('hist');verRecibo(${r.id})">
       <div class="card-top"><span class="card-name">${fmtDate(r.data)}</span><span class="card-value">${fmtMoney(r.valor)}</span></div>
       <div class="card-sub">${tipoTag(tipo)} ${escapeHtml(resumo||'')}</div>
